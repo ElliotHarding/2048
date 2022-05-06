@@ -420,6 +420,28 @@ int gameStateScore(QVector<QVector<int>> map)
     return score;
 }
 
+namespace MovementOptions
+{
+const QList<Vector2> PossibleMoveDirections = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
+}
+
+Vector2 getBestDirection(const QVector<QVector<int>>& map)
+{
+    Vector2 chosenDirection = MovementOptions::PossibleMoveDirections[0];
+    int score = 0;
+    for(const Vector2& direction : MovementOptions::PossibleMoveDirections)
+    {
+        QVector<QVector<int>> movedMap = mapMove(map, direction);
+        int mapScore = map != movedMap ? gameStateScore(movedMap) : 0;
+        if(mapScore > score)
+        {
+            score = mapScore;
+            chosenDirection = direction;
+        }
+    }
+    return chosenDirection;
+}
+
 void DLG_Home::onAiThink()
 {
     m_blocksMutex.lock();
@@ -446,22 +468,10 @@ void DLG_Home::onAiThink()
         map[indexX][indexY] = pBlock->value();
     }
 
-    QList<Vector2> directions = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
-    Vector2 chosenDirection = directions[0];
-    int score = 0;
-    for(const Vector2& direction : directions)
-    {
-        QVector<QVector<int>> movedMap = mapMove(map, direction);
-        int mapScore = map != movedMap ? gameStateScore(movedMap) : 0;
-        if(mapScore > score)
-        {
-            score = mapScore;
-            chosenDirection = direction;
-        }
-    }
+    const Vector2 bestDirection = getBestDirection(map);
 
     m_blocksMutex.unlock();
-    applyVelocity(chosenDirection);
+    applyVelocity(bestDirection);
 }
 
 bool DLG_Home::trySpawnNewBlock()
