@@ -1,11 +1,7 @@
 #include "dlg_home.h"
 #include "ui_dlg_home.h"
 
-/*#include <QRandomGenerator>
-    int randomNumber = QRandomGenerator::global()->generateDouble() * 1;
-    m_value = randomNumber == 0 ? 2 : 4;
-*/
-
+#include <QRandomGenerator>
 #include <QPainter>
 #include <QTimer>
 #include <QKeyEvent>
@@ -16,7 +12,8 @@ namespace Constants
 const int UpdateFrequency = 1;
 
 const int BlockSize = 30;
-const QRect BoardGeometry = QRect(0, 0, BlockSize * 3, BlockSize * 3);
+const int MaxBlocksPerRow = 3;
+const QRect BoardGeometry = QRect(0, 0, BlockSize * MaxBlocksPerRow, BlockSize * MaxBlocksPerRow);
 
 const QRect DrawBlockRect(0, 0, Constants::BlockSize, Constants::BlockSize);
 
@@ -27,7 +24,6 @@ const QMap<int, QColor> BlockColors = {
 
 const QFont NumberTextFont = QFont("Helvetica [Cronyx]", 10, QFont::Normal);
 const QFontMetrics NumberTextFontMetrics(NumberTextFont);
-const float NumberTextHeightOffset = NumberTextFontMetrics.height()/4;
 const QColor NumberTextCol = Qt::white;
 }
 
@@ -77,6 +73,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                     pBlock->setVelocity(Vector2(0, -1));
                 }
             }
+            m_bAcceptInput = false;
         }
         else if(event->key() == Qt::Key_Down)
         {
@@ -87,6 +84,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                     pBlock->setVelocity(Vector2(0, 1));
                 }
             }
+            m_bAcceptInput = false;
         }
         else if(event->key() == Qt::Key_Right)
         {
@@ -97,6 +95,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                     pBlock->setVelocity(Vector2(1, 0));
                 }
             }
+            m_bAcceptInput = false;
         }
         else if(event->key() == Qt::Key_Left)
         {
@@ -107,6 +106,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                     pBlock->setVelocity(Vector2(-1, 0));
                 }
             }
+            m_bAcceptInput = false;
         }
     }
 }
@@ -122,8 +122,23 @@ void DLG_Home::onUpdate()
         anyMoved = moved | anyMoved;
     }
 
-    //If no blocks moved set accept input for new movement
-    m_bAcceptInput = !anyMoved;
+    if(!m_bAcceptInput && !anyMoved)
+    {
+        if(!trySpawnNewBlock())
+        {
+            //todo - Game over...
+        }
+        else
+        {
+            update();
+            m_bAcceptInput = true;
+        }
+
+        for(Block* pBlock : m_blocks)
+        {
+            qDebug() << pBlock->geometry();
+        }
+    }
 
     if(anyMoved)
     {
@@ -134,6 +149,50 @@ void DLG_Home::onUpdate()
         }
         update();
     }
+}
+
+bool DLG_Home::trySpawnNewBlock()
+{
+    //Find empty spaces
+    QVector<QPoint> emptySpaces;
+    for(int x = 0; x < Constants::BlockSize * Constants::MaxBlocksPerRow; x+=Constants::BlockSize)
+    {
+        for(int y = 0; y < Constants::BlockSize * Constants::MaxBlocksPerRow; y+=Constants::BlockSize)
+        {
+            bool bLocationTaken = false;
+            for(Block* pBlock : m_blocks)
+            {
+                if(pBlock->geometry().contains(QPoint(x+2,y+2)))
+                {
+                    bLocationTaken = true;
+                    break;
+                }
+            }
+
+            if(!bLocationTaken)
+            {
+                emptySpaces.push_back(QPoint(x,y));
+            }
+        }
+    }
+
+    //If cant find any empty spaces
+    if(emptySpaces.empty())
+    {
+        return false;
+    }
+
+    const int randomPosition = QRandomGenerator::global()->generateDouble() * emptySpaces.size() - 1;
+    const QPoint spawnPos = emptySpaces[randomPosition];
+
+    const int randomStartOption = QRandomGenerator::global()->generateDouble() * 1;
+    const int startValue = randomStartOption == 0 ? 2 : 4;
+
+    Block* pNewBlock = new Block(this, startValue, spawnPos);
+    m_blocks.push_back(pNewBlock);
+    pNewBlock->show();
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +213,7 @@ void Block::paintEvent(QPaintEvent*)
 
     const float textWidth = Constants::NumberTextFontMetrics.horizontalAdvance(QString::number(m_value));
 
-    painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + Constants::NumberTextHeightOffset), QString::number(m_value));
+    painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + Constants::NumberTextFontMetrics.height()/4), QString::number(m_value));
 }
 
 int Block::value() const

@@ -57,6 +57,8 @@ private slots:
 private:
     Ui::DLG_Home *ui;
 
+    bool trySpawnNewBlock();
+
     bool m_bAcceptInput = true;
 
     QVector<Block*> m_blocks;
