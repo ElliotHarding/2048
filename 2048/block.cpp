@@ -74,6 +74,30 @@ void Block::setPosition(const QPoint& position)
     setGeometry(position.x(), position.y(), Constants::BlockSize, Constants::BlockSize);
 }
 
+void Block::onCollideWithHitbox(const QPoint &correctPosition)
+{
+    setVelocity(Vector2(0,0));
+    setPosition(correctPosition);
+}
+
+void Block::onFoundMergeBlock(Block* pBlock)
+{
+    //Check if already found block to merge with
+    if(m_pFoundMergeBlock == nullptr)
+    {
+        //Set block to merge with
+        m_pFoundMergeBlock = pBlock;
+    }
+
+    //Found another possible block to merge with
+    //This means can merge with original block - since started going past it
+    else if(m_pFoundMergeBlock != pBlock)
+    {
+        //Set velocity to 0 which triggers merge
+        m_velocity = Vector2(0,0);
+    }
+}
+
 //Returns true if the position changed
 bool Block::updatePosition()
 {
@@ -85,12 +109,12 @@ bool Block::updatePosition()
     return false;
 }
 
-void Block::setVelocity(Vector2 vel)
+void Block::setVelocity(const Vector2& vel)
 {
     m_velocity = vel;
 }
 
-Vector2 Block::velocity()
+Vector2 Block::velocity() const
 {
     return m_velocity;
 }
@@ -114,8 +138,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     {
         if(geometry().right() > bounds.right())
         {
-            m_velocity = Vector2(0,0);
-            setPosition(QPoint(bounds.right() - Constants::BlockSize, geometry().y()));
+            onCollideWithHitbox(QPoint(bounds.right() - Constants::BlockSize, geometry().y()));
         }
         else
         {
@@ -126,22 +149,11 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        //Set merge block
-                        if(m_pDeletingBlock == nullptr)
-                        {
-                            m_pDeletingBlock = pBlock;
-                        }
-                        //If found another block other than one to merge to
-                        else if(m_pDeletingBlock != pBlock)
-                        {
-                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
-                            m_velocity = Vector2(0,0);
-                        }
+                        onFoundMergeBlock(pBlock);
                     }
                     else
                     {
-                        m_velocity = Vector2(0,0);
-                        setPosition(QPoint(roundToMultiple(pBlockRect.left() - Constants::BlockSize, Constants::BlockSize), geometry().y()));
+                        onCollideWithHitbox(QPoint(roundToMultiple(pBlockRect.left() - Constants::BlockSize, Constants::BlockSize), geometry().y()));
                     }
                     break;
                 }
@@ -152,8 +164,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     {
         if(geometry().left() < bounds.left())
         {
-            m_velocity = Vector2(0,0);
-            setPosition(QPoint(bounds.left(), geometry().y()));
+            onCollideWithHitbox(QPoint(bounds.left(), geometry().y()));
         }
         else
         {
@@ -164,22 +175,11 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        //Set merge block
-                        if(m_pDeletingBlock == nullptr)
-                        {
-                            m_pDeletingBlock = pBlock;
-                        }
-                        //If found another block other than one to merge to
-                        else if(m_pDeletingBlock != pBlock)
-                        {
-                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
-                            m_velocity = Vector2(0,0);
-                        }
+                        onFoundMergeBlock(pBlock);
                     }
                     else
                     {
-                        m_velocity = Vector2(0,0);
-                        setPosition(QPoint(roundToMultiple(pBlockRect.right(), Constants::BlockSize), geometry().y()));
+                        onCollideWithHitbox(QPoint(roundToMultiple(pBlockRect.right(), Constants::BlockSize), geometry().y()));
                     }
                     break;
                 }
@@ -191,8 +191,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     {
         if(geometry().bottom() > bounds.bottom())
         {
-            m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize));
+            onCollideWithHitbox(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize));
         }
         else
         {
@@ -203,22 +202,11 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        //Set merge block
-                        if(m_pDeletingBlock == nullptr)
-                        {
-                            m_pDeletingBlock = pBlock;
-                        }
-                        //If found another block other than one to merge to
-                        else if(m_pDeletingBlock != pBlock)
-                        {
-                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
-                            m_velocity = Vector2(0,0);
-                        }
+                        onFoundMergeBlock(pBlock);
                     }
                     else
                     {
-                        m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() - Constants::BlockSize, Constants::BlockSize)));
+                        onCollideWithHitbox(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() - Constants::BlockSize, Constants::BlockSize)));
                     }
                     break;
                 }
@@ -229,8 +217,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     {
         if(geometry().top() < bounds.top())
         {
-            m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), bounds.top()));
+            onCollideWithHitbox(QPoint(geometry().x(), bounds.top()));
         }
         else
         {
@@ -241,22 +228,11 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        //Set merge block
-                        if(m_pDeletingBlock == nullptr)
-                        {
-                            m_pDeletingBlock = pBlock;
-                        }
-                        //If found another block other than one to merge to
-                        else if(m_pDeletingBlock != pBlock)
-                        {
-                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
-                            m_velocity = Vector2(0,0);
-                        }
+                        onFoundMergeBlock(pBlock);
                     }
                     else
                     {
-                        m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() + Constants::BlockSize, Constants::BlockSize)));
+                        onCollideWithHitbox(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() + Constants::BlockSize, Constants::BlockSize)));
                     }
                     break;
                 }
@@ -266,9 +242,9 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 
     //If block no longer moving & a merge was found. Peform merge
     // (delete this block and double merge blocks value)
-    if(m_pDeletingBlock && m_velocity == Vector2(0,0))
+    if(m_pFoundMergeBlock && m_velocity == Vector2(0,0))
     {
-        m_pDeletingBlock->setValue(m_value + m_value);
+        m_pFoundMergeBlock->setValue(m_value + m_value);
         blocks.removeOne(this);
         delete this;
 

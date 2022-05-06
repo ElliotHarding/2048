@@ -17,8 +17,8 @@ public:
     void setValue(const int& value);
 
     ///Movement
-    void setVelocity(Vector2 vel);
-    Vector2 velocity();
+    void setVelocity(const Vector2& vel);
+    Vector2 velocity() const;
     bool updatePosition();//Returns true if the position changed
 
     //Enforces hitboxes & checks for & performs block merge
@@ -30,10 +30,14 @@ protected:
 private:
     void setPosition(const QPoint& position);
 
+    void onCollideWithHitbox(const QPoint& correctPosition);
+
+    void onFoundMergeBlock(Block* pBlock);
+
     ///Merging brother block
     /// - Set when found a block to merge with
     /// - Waits for this blocks velocity to stop before merging
-    Block* m_pDeletingBlock = nullptr;
+    Block* m_pFoundMergeBlock = nullptr;
 
     ///Text value
     int m_value;
