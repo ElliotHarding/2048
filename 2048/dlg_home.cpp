@@ -27,6 +27,7 @@ const QMap<int, QColor> BlockColors = {
 
 const QFont NumberTextFont = QFont("Helvetica [Cronyx]", 10, QFont::Normal);
 const QFontMetrics NumberTextFontMetrics(NumberTextFont);
+const float NumberTextHeightOffset = NumberTextFontMetrics.height()/4;
 const QColor NumberTextCol = Qt::white;
 }
 
@@ -152,9 +153,8 @@ void Block::paintEvent(QPaintEvent*)
     painter.setFont(Constants::NumberTextFont);
 
     const float textWidth = Constants::NumberTextFontMetrics.horizontalAdvance(QString::number(m_value));
-    const float textHeight = Constants::NumberTextFontMetrics.height();
 
-    painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + textHeight/4), QString::number(m_value));
+    painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + Constants::NumberTextHeightOffset), QString::number(m_value));
 }
 
 int Block::value() const
