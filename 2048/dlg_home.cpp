@@ -187,93 +187,6 @@ bool withinRangeInclusive(const int& value, const int& min, const int& max)
     return value >= min && value <= max;
 }
 
-namespace ScoreWeights
-{
-const int ScoreWeightHighTopLeft = 30; //Reward % for having highest number in top left slot
-const int ScoreWeightHighNumbersClose = 20; //Reward % for having high value blocks next to eachother
-const int ScoreWeightHighestNumber = 50; //Reward % for having the highest number
-}
-
-
-int gameStateScore(QVector<QVector<int>> map)
-{
-    int score = 0;
-
-    QList<int> blockValues;
-    int highestNumber = 0;
-    int highestNumberX = 0;
-    int highestNumberY = 0;
-    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
-    {
-        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
-        {
-            blockValues.push_back(map[x][y]);
-            if(map[x][y] > highestNumber)
-            {
-                highestNumber = map[x][y];
-                highestNumberX = x;
-                highestNumberY = y;
-            }
-        }
-    }
-    std::sort(blockValues.begin(), blockValues.end());
-
-    //Highest number in top left
-    if(map[0][0] == highestNumber)
-    {
-        score += 1 * ScoreWeights::ScoreWeightHighTopLeft;
-    }
-    else if(map[0][1] == highestNumber || map[1][0] == highestNumber)
-    {
-        score += 0.6 * ScoreWeights::ScoreWeightHighTopLeft;
-    }
-    else if(map[1][1] == highestNumber || map[2][0] == highestNumber || map[0][2] == highestNumber)
-    {
-        score += 0.3 * ScoreWeights::ScoreWeightHighTopLeft;
-    }
-
-    //Highest number created
-    score += (highestNumber/2048) * ScoreWeights::ScoreWeightHighestNumber;
-
-    //Find second & third highest numbers
-    const int secondHighestNumber = blockValues[blockValues.size()-2];
-    int secondHighestNumberX = 0;
-    int secondHighestNumberY = 0;
-    const int thirdHighestNumber = blockValues[blockValues.size()-3];
-    int thirdHighestNumberX = 0;
-    int thirdHighestNumberY = 0;
-    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
-    {
-        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
-        {
-            if(map[x][y] == secondHighestNumber)
-            {
-                secondHighestNumberX = x;
-                secondHighestNumberY = y;
-            }
-            else if(map[x][y] == thirdHighestNumber)
-            {
-                thirdHighestNumberX = x;
-                thirdHighestNumberY = y;
-            }
-        }
-    }
-
-    //High numbers close to highest number
-    if(secondHighestNumberX > highestNumberX - 2 && secondHighestNumberX < highestNumberX + 2 &&
-       secondHighestNumberY > highestNumberY - 2 && secondHighestNumberY < highestNumberY + 2)
-    {
-        score += 1 * ScoreWeights::ScoreWeightHighNumbersClose;
-    }
-    else if(thirdHighestNumberX > highestNumberX - 2 && thirdHighestNumberX < highestNumberX + 2 &&
-            thirdHighestNumberY > highestNumberY - 2 && thirdHighestNumberY < highestNumberY + 2)
-    {
-        score += 0.6 * ScoreWeights::ScoreWeightHighNumbersClose;
-    }
-
-    return score;
-}
-
 QVector<QVector<int>> mapMove(QVector<QVector<int>> map, const Vector2& direction)
 {
     if(direction.x() > 0)
@@ -405,6 +318,7 @@ QVector<QVector<int>> mapMove(QVector<QVector<int>> map, const Vector2& directio
         }
     }
 
+    /*
     qDebug() << "---------------";
     for(int y = 0; y < map[0].size(); y++)
     {
@@ -415,9 +329,95 @@ QVector<QVector<int>> mapMove(QVector<QVector<int>> map, const Vector2& directio
         }
         qDebug() << colStr;
     }
-    qDebug() << "---------------";
+    qDebug() << "---------------";*/
 
     return map;
+}
+
+namespace ScoreWeights
+{
+const int ScoreWeightHighTopLeft = 30; //Reward % for having highest number in top left slot
+const int ScoreWeightHighNumbersClose = 20; //Reward % for having high value blocks next to eachother
+const int ScoreWeightHighestNumber = 50; //Reward % for having the highest number
+}
+
+int gameStateScore(QVector<QVector<int>> map)
+{
+    int score = 0;
+
+    QList<int> blockValues;
+    int highestNumber = 0;
+    int highestNumberX = 0;
+    int highestNumberY = 0;
+    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+    {
+        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+        {
+            blockValues.push_back(map[x][y]);
+            if(map[x][y] > highestNumber)
+            {
+                highestNumber = map[x][y];
+                highestNumberX = x;
+                highestNumberY = y;
+            }
+        }
+    }
+    std::sort(blockValues.begin(), blockValues.end());
+
+    //Highest number in top left
+    if(map[0][0] == highestNumber)
+    {
+        score += 1 * ScoreWeights::ScoreWeightHighTopLeft;
+    }
+    else if(map[0][1] == highestNumber || map[1][0] == highestNumber)
+    {
+        score += 0.6 * ScoreWeights::ScoreWeightHighTopLeft;
+    }
+    else if(map[1][1] == highestNumber || map[2][0] == highestNumber || map[0][2] == highestNumber)
+    {
+        score += 0.3 * ScoreWeights::ScoreWeightHighTopLeft;
+    }
+
+    //Highest number created
+    score += (highestNumber/2048) * ScoreWeights::ScoreWeightHighestNumber;
+
+    //Find second & third highest numbers
+    const int secondHighestNumber = blockValues[blockValues.size()-2];
+    int secondHighestNumberX = 0;
+    int secondHighestNumberY = 0;
+    const int thirdHighestNumber = blockValues[blockValues.size()-3];
+    int thirdHighestNumberX = 0;
+    int thirdHighestNumberY = 0;
+    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+    {
+        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+        {
+            if(map[x][y] == secondHighestNumber)
+            {
+                secondHighestNumberX = x;
+                secondHighestNumberY = y;
+            }
+            else if(map[x][y] == thirdHighestNumber)
+            {
+                thirdHighestNumberX = x;
+                thirdHighestNumberY = y;
+            }
+        }
+    }
+
+    //High numbers close to highest number
+    if(secondHighestNumberX > highestNumberX - 2 && secondHighestNumberX < highestNumberX + 2 &&
+       secondHighestNumberY > highestNumberY - 2 && secondHighestNumberY < highestNumberY + 2)
+    {
+        score += 1 * ScoreWeights::ScoreWeightHighNumbersClose;
+    }
+    else if(thirdHighestNumberX > highestNumberX - 2 && thirdHighestNumberX < highestNumberX + 2 &&
+            thirdHighestNumberY > highestNumberY - 2 && thirdHighestNumberY < highestNumberY + 2)
+    {
+        score += 0.6 * ScoreWeights::ScoreWeightHighNumbersClose;
+    }
+
+    return score;
 }
 
 void DLG_Home::onAiThink()
