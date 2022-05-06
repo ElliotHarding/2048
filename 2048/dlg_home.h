@@ -25,6 +25,9 @@ private slots:
     ///Game loop function
     void onUpdate();
 
+    ///Ai loop function
+    void onAiThink();
+
     ///UI slots
     void on_btn_restart_clicked();
 
@@ -56,5 +59,6 @@ private:
 
     ///Game loop timer
     QTimer* m_pUpdateTimer;
+    QTimer* m_pAiTimer;
 };
 #endif // DLG_HOME_H

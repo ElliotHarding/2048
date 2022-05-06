@@ -25,6 +25,11 @@ DLG_Home::DLG_Home(QWidget *parent)
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
     m_pUpdateTimer->setTimerType(Qt::PreciseTimer);
     m_pUpdateTimer->start(Constants::GameUpdateFrequency);
+
+    m_pAiTimer = new QTimer(this);
+    connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));
+    m_pAiTimer->setTimerType(Qt::PreciseTimer);
+    m_pAiTimer->start(Constants::AiThinkFrequency);
 }
 
 DLG_Home::~DLG_Home()
@@ -35,6 +40,9 @@ DLG_Home::~DLG_Home()
 
     m_pUpdateTimer->stop();
     delete m_pUpdateTimer;
+
+    m_pAiTimer->stop();
+    delete m_pAiTimer;
 
     for(Block* pBlock : m_blocks)
     {
@@ -156,93 +164,104 @@ void DLG_Home::onUpdate()
             newPositions.push_back(pBlock->geometry().topLeft());
         }
 
-        if(m_blocksPositionsBeforeInput != newPositions && !trySpawnNewBlock())
+        //If board changed after input then can try spawn a new block
+        if(m_blocksPositionsBeforeInput != newPositions)
         {
-            //todo - Game over...
+            if(!trySpawnNewBlock())
+            {
+                //todo - Game over...
+            }
         }
         else
         {
             m_currentScore += 2;
-            updateScores();
-
-            m_bAcceptInput = true;
-
-            update();
-            QThread::sleep(4);
-
-            //Todo generate map
-            int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRow] = {0};
-            for(Block* pBlock : m_blocks)
-            {
-                const int indexX = (pBlock->geometry().x() - Constants::BoardGeometry.x())/Constants::BlockSize;
-                const int indexY = (pBlock->geometry().y() - Constants::BoardGeometry.y())/Constants::BlockSize;
-
-                map[indexX][indexY] = pBlock->value();
-            }
-
-            qDebug() << "---------------";
-            for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
-            {
-                QString colStr = "";
-                for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
-                {
-                    colStr += QString::number(map[x][y]) + " ";
-                }
-                qDebug() << colStr;
-            }
-            qDebug() << "---------------";
-
-            Qt::Key moveDir = Qt::Key_0;
-
-            //Todo make decision
-            for(int y = 1; y < Constants::MaxBlocksPerCol-1; y++)
-            {
-                for(int x = 1; x < Constants::MaxBlocksPerRow-1; x++)
-                {
-                    if(map[x][y] != 0)
-                    {
-                        if(map[x][y] == map[x][y+1])
-                        {
-                            moveDir = Qt::Key_Up;
-                            break;
-                        }
-                        else if(map[x][y] == map[x][y-1])
-                        {
-                            moveDir = Qt::Key_Up;
-                            break;
-                        }
-                        else if(map[x][y] == map[x+1][y])
-                        {
-                            moveDir = Qt::Key_Right;
-                            break;
-                        }
-                        else if(map[x][y] == map[x-1][y])
-                        {
-                            moveDir = Qt::Key_Right;
-                            break;
-                        }
-                    }
-                }
-                if(moveDir != Qt::Key_0)
-                    break;
-            }
-
-            if(moveDir == Qt::Key_0)
-            {
-                const int random = QRandomGenerator::global()->generateDouble() * 4;
-                moveDir = random == 0 ? Qt::Key_Up :
-                                        random == 1 ? Qt::Key_Down :
-                                                      random == 2 ? Qt::Key_Left :
-                                                                    Qt::Key_Right;
-            }
-
-            m_blocksMutex.unlock();
-            move(moveDir);
-            return;
+            updateScores();            
         }
+
+        m_bAcceptInput = true;
     }
 
     m_blocksMutex.unlock();
+}
+
+void DLG_Home::onAiThink()
+{
+    m_blocksMutex.lock();
+    if(!m_bAcceptInput)
+    {
+        m_blocksMutex.unlock();
+        return;
+    }
+
+    //Todo generate map
+    int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRow] = {0};
+    for(Block* pBlock : m_blocks)
+    {
+        const int indexX = (pBlock->geometry().x() - Constants::BoardGeometry.x())/Constants::BlockSize;
+        const int indexY = (pBlock->geometry().y() - Constants::BoardGeometry.y())/Constants::BlockSize;
+
+        map[indexX][indexY] = pBlock->value();
+    }
+
+    qDebug() << "---------------";
+    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+    {
+        QString colStr = "";
+        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+        {
+            colStr += QString::number(map[x][y]) + " ";
+        }
+        qDebug() << colStr;
+    }
+    qDebug() << "---------------";
+
+    Qt::Key moveDir = Qt::Key_0;
+
+    //Todo make decision
+    for(int y = 1; y < Constants::MaxBlocksPerCol-1; y++)
+    {
+        for(int x = 1; x < Constants::MaxBlocksPerRow-1; x++)
+        {
+            if(map[x][y] != 0)
+            {
+                if(map[x][y] == map[x][y+1])
+                {
+                    moveDir = Qt::Key_Up;
+                    break;
+                }
+                else if(map[x][y] == map[x][y-1])
+                {
+                    moveDir = Qt::Key_Up;
+                    break;
+                }
+                else if(map[x][y] == map[x+1][y])
+                {
+                    moveDir = Qt::Key_Right;
+                    break;
+                }
+                else if(map[x][y] == map[x-1][y])
+                {
+                    moveDir = Qt::Key_Right;
+                    break;
+                }
+            }
+        }
+        if(moveDir != Qt::Key_0)
+            break;
+    }
+
+    if(moveDir == Qt::Key_0)
+    {
+        const int random = QRandomGenerator::global()->generateDouble() * 4;
+        moveDir = random == 0 ? Qt::Key_Up :
+                                random == 1 ? Qt::Key_Down :
+                                              random == 2 ? Qt::Key_Left :
+                                                            Qt::Key_Right;
+    }
+
+    m_blocksMutex.unlock();
+    move(moveDir);
+    return;
 }
 
 bool DLG_Home::trySpawnNewBlock()

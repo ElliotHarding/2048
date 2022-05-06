@@ -13,6 +13,7 @@ namespace Constants
 ///Speed & movement
 const int GameUpdateFrequency = 1;
 const int BlockMovementSpeed = 3;
+const int AiThinkFrequency = 1000;
 
 ///Visual block settings
 const int BlockPopTimeMs = 100; //Block pops bigger when merging or spawning
