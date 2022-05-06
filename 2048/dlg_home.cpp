@@ -14,7 +14,7 @@ const int UpdateFrequency = 1;
 const int BlockSize = 100;
 const int MaxBlocksPerRow = 4;
 const int MaxBlocksPerCol = 4;
-const QRect BoardGeometry = QRect(0, 0, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
+const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
 
 const QRect DrawBlockRect(5, 5, Constants::BlockSize-10, Constants::BlockSize-10);
 
