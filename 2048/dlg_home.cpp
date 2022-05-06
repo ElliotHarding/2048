@@ -7,20 +7,30 @@
 #include <QKeyEvent>
 #include <QDebug>
 
+/* Future plans:
+
+- Block object recycle system (stop creating block memory for each spawned)
+- AI to play the game
+*/
+
 namespace Constants
 {
-const int UpdateFrequency = 1;
-const int BlockSpeed = 3;
+///Speed & movement
+const int GameUpdateFrequency = 1;
+const int BlockMovementSpeed = 3;
 
-const int BlockPopTime = 100;
-
+///Visual block settings
+const int BlockPopTimeMs = 100; //Block pops bigger when merging or spawning
 const int BlockSize = 100;
-const int MaxBlocksPerRow = 4;
-const int MaxBlocksPerCol = 4;
-const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
+const int BlockDrawMargin = 5;
+const int BlockRectRadius = 10;
+const QRect BlockDrawRect(BlockDrawMargin, BlockDrawMargin, Constants::BlockSize-BlockDrawMargin*2, Constants::BlockSize-BlockDrawMargin*2);
+const QRect BlockDrawRectPopping(0, 0, Constants::BlockSize, Constants::BlockSize);
 
-const QRect DrawBlockRect(5, 5, Constants::BlockSize-10, Constants::BlockSize-10);
-
+///Visual block settings (text and colors)
+const QFont BlockTextFont = QFont("Helvetica [Cronyx]", 10, QFont::Normal);
+const QFontMetrics BlockTextFontMetrics(BlockTextFont);
+const QColor BlockTextColor = Qt::black;
 const QMap<int, QColor> BlockColors = {
     {2, QColor(238, 228, 218)},
     {4, QColor(237, 224, 200)},
@@ -35,9 +45,11 @@ const QMap<int, QColor> BlockColors = {
     {2048, QColor(237, 194, 46)},
 };
 
-const QFont NumberTextFont = QFont("Helvetica [Cronyx]", 10, QFont::Normal);
-const QFontMetrics NumberTextFontMetrics(NumberTextFont);
-const QColor NumberTextCol = Qt::black;
+///Board settings
+const int MaxBlocksPerRow = 4;
+const int MaxBlocksPerCol = 4;
+const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,10 +63,11 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     reset();
 
+    //Start game loop - runs forever
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
     m_pUpdateTimer->setTimerType(Qt::PreciseTimer);
-    m_pUpdateTimer->start(Constants::UpdateFrequency);
+    m_pUpdateTimer->start(Constants::GameUpdateFrequency);
 }
 
 DLG_Home::~DLG_Home()
@@ -62,27 +75,33 @@ DLG_Home::~DLG_Home()
     delete ui;
 
     m_blocksMutex.lock();
+
+    m_pUpdateTimer->stop();
+    delete m_pUpdateTimer;
+
     for(Block* pBlock : m_blocks)
     {
         delete pBlock;
-        pBlock = nullptr;
     }
     m_blocks.clear();
     m_blocksMutex.unlock();
 }
 
+//Reset game
 void DLG_Home::reset()
 {
     m_blocksMutex.lock();
 
+    //Remove previous blocks
+    // todo : object recycle system to stop creating new memory each time
     for(Block* pBlock : m_blocks)
     {
         delete pBlock;
-        pBlock = nullptr;
     }
     m_blocks.clear();
 
-    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft() + QPoint(0,0)));
+    //Initial game board contains one block
+    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft()));
 
     m_bAcceptInput = true;
 
@@ -107,7 +126,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().top() > Constants::BoardGeometry.top() - 1)
                 {
-                    pBlock->setVelocity(Vector2(0, -Constants::BlockSpeed));
+                    pBlock->setVelocity(Vector2(0, -Constants::BlockMovementSpeed));
                 }
             }
             m_bAcceptInput = false;
@@ -124,7 +143,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().bottom() < Constants::BoardGeometry.bottom() + 1)
                 {
-                    pBlock->setVelocity(Vector2(0, Constants::BlockSpeed));
+                    pBlock->setVelocity(Vector2(0, Constants::BlockMovementSpeed));
                 }
             }
             m_bAcceptInput = false;
@@ -141,7 +160,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().right() < Constants::BoardGeometry.right() + 1)
                 {
-                    pBlock->setVelocity(Vector2(Constants::BlockSpeed, 0));
+                    pBlock->setVelocity(Vector2(Constants::BlockMovementSpeed, 0));
                 }
             }
             m_bAcceptInput = false;
@@ -158,7 +177,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().left() > Constants::BoardGeometry.left() - 1)
                 {
-                    pBlock->setVelocity(Vector2(-Constants::BlockSpeed, 0));
+                    pBlock->setVelocity(Vector2(-Constants::BlockMovementSpeed, 0));
                 }
             }
             m_bAcceptInput = false;
@@ -273,8 +292,12 @@ void DLG_Home::updateScores()
 ///
 Block::Block(QWidget* parent, const int& value, const QPoint& position) : QWidget(parent)
 {
+    //Block pops bigger when merging or spawning (for certain time)
     m_pPoppingTimer = new QTimer(this);
     connect(m_pPoppingTimer, SIGNAL(timeout()), this, SLOT(onEndPopping()));
+
+    //Set inital values
+    // - will be moved to seperate function when object recycling is done
     setValue(value);
     setPosition(position);
     show();
@@ -291,23 +314,19 @@ void Block::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
+    //Paint block rectangle (fill entire geometry if m_bIsPopping)
+    // Block pops bigger when merging or spawning
     QPainterPath path;
-    if(m_bIsPopping)
-    {
-        path.addRoundedRect(QRect(0, 0, Constants::BlockSize, Constants::BlockSize), 10, 10);
-    }
-    else
-    {
-        path.addRoundedRect(Constants::DrawBlockRect, 10, 10);
-    }
+    path.addRoundedRect(m_bIsPopping ? Constants::BlockDrawRectPopping : Constants::BlockDrawRect, Constants::BlockRectRadius, Constants::BlockRectRadius);
     painter.fillPath(path, m_col);
 
-    painter.setPen(Constants::NumberTextCol);
-    painter.setFont(Constants::NumberTextFont);
+    //Prep value text drawing
+    painter.setPen(Constants::BlockTextColor);
+    painter.setFont(Constants::BlockTextFont);
+    const float textWidth = Constants::BlockTextFontMetrics.horizontalAdvance(QString::number(m_value));
 
-    const float textWidth = Constants::NumberTextFontMetrics.horizontalAdvance(QString::number(m_value));
-
-    painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + Constants::NumberTextFontMetrics.height()/4), QString::number(m_value));
+    //Draw value text
+    painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + Constants::BlockTextFontMetrics.height()/4), QString::number(m_value));
 }
 
 void Block::onEndPopping()
@@ -326,8 +345,11 @@ void Block::setValue(const int &value)
 {
     m_value = value;
     m_col = Constants::BlockColors[m_value];
+
+    //Block pops bigger when merging or spawning
+    //Set timer for ammount of time block is drawn as "popped"
     m_bIsPopping = true;
-    m_pPoppingTimer->start(Constants::BlockPopTime);
+    m_pPoppingTimer->start(Constants::BlockPopTimeMs);
     update();
 }
 
@@ -336,6 +358,7 @@ void Block::setPosition(const QPoint& position)
     setGeometry(position.x(), position.y(), Constants::BlockSize, Constants::BlockSize);
 }
 
+//Returns true if the position changed
 bool Block::updatePosition()
 {
     if(m_velocity.x() != 0 || m_velocity.y() != 0)
@@ -368,7 +391,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     // - Check the block is in bounds (only considoring bounds in velocity direction)
     //   - If not in bounds push it back into bounds and stop its velocity
     // - Otherwise check if block collides (intersects) with any other blocks
-    //   - If collides with same m_value block; plan to remove due to merge
+    //   - If collides with same m_value block: prepare a merge (by settings m_pDeletingBlock) which will delete this block
     //   - If collides with othr m_value block; stop velocity and set flush against other block.
 
     if(m_velocity.x() > 0)

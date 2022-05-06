@@ -21,7 +21,7 @@ public:
     int value() const;
     void setValue(const int& value);
 
-    bool updatePosition();
+    bool updatePosition();//Returns true if the position changed
 
     void setVelocity(Vector2 vel);
     Vector2 velocity();
@@ -42,6 +42,9 @@ private:
     int m_value;
     QColor m_col;
     Vector2 m_velocity;
+
+    ///Block popping stuff
+    /// - Block pops bigger when merging or spawning
     bool m_bIsPopping = false;
     QTimer* m_pPoppingTimer;
 };
