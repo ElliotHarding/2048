@@ -71,50 +71,55 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
 {
     if(m_bAcceptInput)
     {
-        //Get velocity applied by arrow keys
-        Vector2 appliedVelocity;
-        if(event->key() == Qt::Key_Up)
-        {
-            appliedVelocity = Vector2(0, -Constants::BlockMovementSpeed);
-        }
-        else if(event->key() == Qt::Key_Down)
-        {
-            appliedVelocity = Vector2(0, Constants::BlockMovementSpeed);
-        }
-        else if(event->key() == Qt::Key_Right)
-        {
-            appliedVelocity = Vector2(Constants::BlockMovementSpeed, 0);
-        }
-        else if(event->key() == Qt::Key_Left)
-        {
-            appliedVelocity = Vector2(-Constants::BlockMovementSpeed, 0);
-        }
-        else
-        {
-            return;
-        }
-
-        m_blocksMutex.lock();
-
-        //Log block positions before they're changed by applied velocity
-        m_blocksPositionsBeforeInput.clear();
-
-        //Apply velocity to all blocks
-        for(Block* pBlock : m_blocks)
-        {
-            m_blocksPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
-
-            if(Constants::BoardGeometry.contains(pBlock->geometry().topLeft() + QPoint(appliedVelocity.x()/Constants::BlockMovementSpeed, appliedVelocity.y()/Constants::BlockMovementSpeed)))
-            {
-                pBlock->setVelocity(appliedVelocity);
-            }
-        }
-
-        //Block input (adding extra velocities) until things have moved where they need to go
-        m_bAcceptInput = false;
-
-        m_blocksMutex.unlock();
+        move((Qt::Key)event->key());
     }
+}
+
+void DLG_Home::move(Qt::Key dirKey)
+{
+    //Get velocity applied by arrow keys
+    Vector2 appliedVelocity;
+    if(dirKey == Qt::Key_Up)
+    {
+        appliedVelocity = Vector2(0, -Constants::BlockMovementSpeed);
+    }
+    else if(dirKey == Qt::Key_Down)
+    {
+        appliedVelocity = Vector2(0, Constants::BlockMovementSpeed);
+    }
+    else if(dirKey == Qt::Key_Right)
+    {
+        appliedVelocity = Vector2(Constants::BlockMovementSpeed, 0);
+    }
+    else if(dirKey == Qt::Key_Left)
+    {
+        appliedVelocity = Vector2(-Constants::BlockMovementSpeed, 0);
+    }
+    else
+    {
+        return;
+    }
+
+    m_blocksMutex.lock();
+
+    //Log block positions before they're changed by applied velocity
+    m_blocksPositionsBeforeInput.clear();
+
+    //Apply velocity to all blocks
+    for(Block* pBlock : m_blocks)
+    {
+        m_blocksPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
+
+        if(Constants::BoardGeometry.contains(pBlock->geometry().topLeft() + QPoint(appliedVelocity.x()/Constants::BlockMovementSpeed, appliedVelocity.y()/Constants::BlockMovementSpeed)))
+        {
+            pBlock->setVelocity(appliedVelocity);
+        }
+    }
+
+    //Block input (adding extra velocities) until things have moved where they need to go
+    m_bAcceptInput = false;
+
+    m_blocksMutex.unlock();
 }
 
 void DLG_Home::onUpdate()
@@ -183,7 +188,50 @@ void DLG_Home::onUpdate()
             }
             qDebug() << "---------------";
 
+            Qt::Key moveDir = Qt::Key_0;
+
             //Todo make decision
+            for(int y = 1; y < Constants::MaxBlocksPerCol-1; y++)
+            {
+                for(int x = 1; x < Constants::MaxBlocksPerRow-1; x++)
+                {
+                    if(map[x][y] == map[x][y+1])
+                    {
+                        moveDir = Qt::Key_Up;
+                        break;
+                    }
+                    else if(map[x][y] == map[x][y-1])
+                    {
+                        moveDir = Qt::Key_Up;
+                        break;
+                    }
+                    else if(map[x][y] == map[x+1][y])
+                    {
+                        moveDir = Qt::Key_Right;
+                        break;
+                    }
+                    else if(map[x][y] == map[x-1][y])
+                    {
+                        moveDir = Qt::Key_Right;
+                        break;
+                    }
+                }
+                if(moveDir != Qt::Key_0)
+                    break;
+            }
+
+            if(moveDir == Qt::Key_0)
+            {
+                const int random = QRandomGenerator::global()->generateDouble() * 4;
+                moveDir = random == 0 ? Qt::Key_Up :
+                                        random == 1 ? Qt::Key_Down :
+                                                      random == 2 ? Qt::Key_Left :
+                                                                    Qt::Key_Right;
+            }
+
+            m_blocksMutex.unlock();
+            move(moveDir);
+            return;
         }
     }
 
@@ -224,7 +272,7 @@ bool DLG_Home::trySpawnNewBlock()
     const int randomPosition = QRandomGenerator::global()->generateDouble() * emptySpaces.size() - 1;
     const QPoint spawnPos = emptySpaces[randomPosition];
 
-    const int randomStartOption = QRandomGenerator::global()->generateDouble() * 1;
+    const int randomStartOption = QRandomGenerator::global()->generateDouble() * 2;
     const int startValue = randomStartOption == 0 ? 2 : 4;
 
     m_blocks.push_back(new Block(this, startValue, spawnPos));

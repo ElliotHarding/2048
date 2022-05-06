@@ -34,6 +34,9 @@ private:
     ///Resets game
     void reset();
 
+    ///Make a move human + AI
+    void move(Qt::Key dirKey);
+
     ///Block generation
     /// - returns true if succeeded in generating block (board could be full)
     bool trySpawnNewBlock();
