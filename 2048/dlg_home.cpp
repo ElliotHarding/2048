@@ -12,8 +12,9 @@ namespace Constants
 const int UpdateFrequency = 1;
 
 const int BlockSize = 30;
-const int MaxBlocksPerRow = 3;
-const QRect BoardGeometry = QRect(0, 0, BlockSize * MaxBlocksPerRow, BlockSize * MaxBlocksPerRow);
+const int MaxBlocksPerRow = 4;
+const int MaxBlocksPerCol = 4;
+const QRect BoardGeometry = QRect(0, 0, BlockSize * MaxBlocksPerRow, BlockSize * MaxBlocksPerCol);
 
 const QRect DrawBlockRect(0, 0, Constants::BlockSize, Constants::BlockSize);
 
@@ -140,7 +141,7 @@ void DLG_Home::onUpdate()
         //If some blocks moved, check they're in correct bounds
         for(Block* pBlock : m_blocks)
         {
-            pBlock->checkBoundaries(QRect(0,0,120,120), m_blocks);
+            pBlock->checkBoundaries(Constants::BoardGeometry, m_blocks);
         }
         update();
     }
@@ -152,7 +153,7 @@ bool DLG_Home::trySpawnNewBlock()
     QVector<QPoint> emptySpaces;
     for(int x = 0; x < Constants::BlockSize * Constants::MaxBlocksPerRow; x+=Constants::BlockSize)
     {
-        for(int y = 0; y < Constants::BlockSize * Constants::MaxBlocksPerRow; y+=Constants::BlockSize)
+        for(int y = 0; y < Constants::BlockSize * Constants::MaxBlocksPerCol; y+=Constants::BlockSize)
         {
             bool bLocationTaken = false;
             for(Block* pBlock : m_blocks)
