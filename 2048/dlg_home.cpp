@@ -183,10 +183,7 @@ bool DLG_Home::trySpawnNewBlock()
     const int randomStartOption = QRandomGenerator::global()->generateDouble() * 1;
     const int startValue = randomStartOption == 0 ? 2 : 4;
 
-    Block* pNewBlock = new Block(this, startValue, spawnPos);
-    m_blocks.push_back(pNewBlock);
-    pNewBlock->show();
-    pNewBlock = nullptr;
+    m_blocks.push_back(new Block(this, startValue, spawnPos));
 
     return true;
 }
@@ -198,6 +195,7 @@ Block::Block(QWidget* parent, const int& value, const QPoint& position) : QWidge
 {
     setValue(value);
     setPosition(position);
+    show();
 }
 
 void Block::paintEvent(QPaintEvent*)
