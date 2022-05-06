@@ -42,12 +42,11 @@ const QColor NumberTextCol = Qt::white;
 ///
 DLG_Home::DLG_Home(QWidget *parent)
     : QMainWindow(parent),
-      ui(new Ui::DLG_Home),
-      m_bAcceptInput(true)
+      ui(new Ui::DLG_Home)
 {
     ui->setupUi(this);
 
-    m_blocks.push_back(new Block(this, 2, QPoint(0,0)));
+    reset();
 
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
@@ -66,6 +65,27 @@ DLG_Home::~DLG_Home()
     }
     m_blocks.clear();
     m_blocksMutex.unlock();
+}
+
+void DLG_Home::reset()
+{
+    m_blocksMutex.lock();
+
+    for(Block* pBlock : m_blocks)
+    {
+        delete pBlock;
+        pBlock = nullptr;
+    }
+    m_blocks.clear();
+
+    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft() + QPoint(0,0)));
+
+    m_bAcceptInput = true;
+
+    m_blocksMutex.unlock();
+
+    m_currentScore = 0;
+    updateScores();
 }
 
 void DLG_Home::keyPressEvent(QKeyEvent *event)
@@ -182,6 +202,9 @@ void DLG_Home::onUpdate()
         }
         else
         {
+            m_currentScore += 2;
+            updateScores();
+
             m_bAcceptInput = true;
         }
     }
@@ -200,7 +223,7 @@ bool DLG_Home::trySpawnNewBlock()
             bool bLocationTaken = false;
             for(Block* pBlock : m_blocks)
             {
-                if(pBlock->geometry().contains(QPoint(x+2,y+2)))
+                if(pBlock->geometry().contains(Constants::BoardGeometry.topLeft() + QPoint(x+2,y+2)))
                 {
                     bLocationTaken = true;
                     break;
@@ -209,7 +232,7 @@ bool DLG_Home::trySpawnNewBlock()
 
             if(!bLocationTaken)
             {
-                emptySpaces.push_back(QPoint(x,y));
+                emptySpaces.push_back(Constants::BoardGeometry.topLeft() + QPoint(x,y));
             }
         }
     }
@@ -229,6 +252,16 @@ bool DLG_Home::trySpawnNewBlock()
     m_blocks.push_back(new Block(this, startValue, spawnPos));
 
     return true;
+}
+
+void DLG_Home::updateScores()
+{
+    ui->lblScoreValue->setText(QString::number(m_currentScore));
+    if(m_currentScore > m_highScore)
+    {
+        m_highScore = m_currentScore;
+        ui->lblHighScoreValue->setText(QString::number(m_highScore));
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -443,4 +476,9 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 
     return false;
     //Could loop checking if intersets now repositioned...
+}
+
+void DLG_Home::on_btn_restart_clicked()
+{
+    reset();
 }

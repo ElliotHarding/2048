@@ -53,9 +53,12 @@ protected:
 
 private slots:
     void onUpdate();
+    void on_btn_restart_clicked();
 
 private:
     Ui::DLG_Home *ui;
+
+    void reset();
 
     bool trySpawnNewBlock();
 
@@ -64,6 +67,10 @@ private:
     QVector<Block*> m_blocks;
     QMutex m_blocksMutex;
     QVector<QPoint> m_blockPositionsBeforeInput;
+
+    int m_currentScore = 0;
+    int m_highScore = 0;
+    void updateScores();
 
     QTimer* m_pUpdateTimer;
 };
