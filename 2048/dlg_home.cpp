@@ -11,16 +11,25 @@ namespace Constants
 {
 const int UpdateFrequency = 1;
 
-const int BlockSize = 30;
+const int BlockSize = 100;
 const int MaxBlocksPerRow = 4;
 const int MaxBlocksPerCol = 4;
-const QRect BoardGeometry = QRect(0, 0, BlockSize * MaxBlocksPerRow, BlockSize * MaxBlocksPerCol);
+const QRect BoardGeometry = QRect(0, 0, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
 
-const QRect DrawBlockRect(0, 0, Constants::BlockSize, Constants::BlockSize);
+const QRect DrawBlockRect(5, 5, Constants::BlockSize-10, Constants::BlockSize-10);
 
 const QMap<int, QColor> BlockColors = {
-    {2, Qt::red},
-    {4, Qt::blue}
+    {2, QColor(238, 228, 218)},
+    {4, QColor(237, 224, 200)},
+    {8, QColor(242, 177, 121)},
+    {16, QColor(245, 149, 99)},
+    {32, QColor(246, 124, 95)},
+    {64, QColor(246, 94, 59)},
+    {128, QColor(237, 207, 114)},
+    {256, QColor(237, 204, 97)},
+    {512, QColor(237, 200, 80)},
+    {1024, QColor(237, 197, 63)},
+    {2048, QColor(237, 194, 46)},
 };
 
 const QFont NumberTextFont = QFont("Helvetica [Cronyx]", 10, QFont::Normal);
@@ -39,10 +48,10 @@ DLG_Home::DLG_Home(QWidget *parent)
     ui->setupUi(this);
 
     m_blocks.push_back(new Block(this, 2, QPoint(0,0)));
+    m_blocks.push_back(new Block(this, 2, QPoint(0,Constants::BlockSize)));
     m_blocks.push_back(new Block(this, 4, QPoint(Constants::BlockSize,0)));
     m_blocks.push_back(new Block(this, 2, QPoint(Constants::BlockSize*2,0)));
-    m_blocks.push_back(new Block(this, 4, QPoint(0,Constants::BlockSize)));
-    m_blocks.push_back(new Block(this, 2, QPoint(0,Constants::BlockSize*2)));
+    m_blocks.push_back(new Block(this, 4, QPoint(0,Constants::BlockSize*2)));
 
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
@@ -114,6 +123,8 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
 
 void DLG_Home::onUpdate()
 {
+    QVector<QPoint> oldPositions;
+    QVector<QPoint> newPositions;
 
     //Update positions, check if any moved
     bool anyMoved = false;
@@ -121,19 +132,7 @@ void DLG_Home::onUpdate()
     {
         const bool moved = pBlock->updatePosition();
         anyMoved = moved | anyMoved;
-    }
-
-    if(!m_bAcceptInput && !anyMoved)
-    {
-        if(!trySpawnNewBlock())
-        {
-            //todo - Game over...
-        }
-        else
-        {
-            update();
-            m_bAcceptInput = true;
-        }
+        oldPositions.push_back(pBlock->geometry().topLeft());
     }
 
     if(anyMoved)
@@ -141,9 +140,32 @@ void DLG_Home::onUpdate()
         //If some blocks moved, check they're in correct bounds
         for(Block* pBlock : m_blocks)
         {
-            pBlock->checkBoundaries(Constants::BoardGeometry, m_blocks);
+            if(pBlock->checkBoundaries(Constants::BoardGeometry, m_blocks))
+            {
+                break;
+            }
         }
         update();
+
+        for(Block* pBlock : m_blocks)
+        {
+            newPositions.push_back(pBlock->geometry().topLeft());
+        }
+
+        m_bSomethingMovedSinceLastInput = m_bSomethingMovedSinceLastInput | (oldPositions != newPositions);
+    }
+
+    if(!m_bAcceptInput && !anyMoved)
+    {
+        if(m_bSomethingMovedSinceLastInput && !trySpawnNewBlock())
+        {
+            //todo - Game over...
+        }
+        else
+        {
+            m_bSomethingMovedSinceLastInput = false;
+            m_bAcceptInput = true;
+        }
     }
 }
 
@@ -202,7 +224,12 @@ Block::Block(QWidget* parent, const int& value, const QPoint& position) : QWidge
 void Block::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.fillRect(Constants::DrawBlockRect, m_col);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath path;
+    path.addRoundedRect(Constants::DrawBlockRect, 10, 10);
+    painter.fillPath(path, m_col);
+
     painter.setPen(Constants::NumberTextCol);
     painter.setFont(Constants::NumberTextFont);
 
@@ -247,7 +274,8 @@ Vector2 Block::velocity()
     return m_velocity;
 }
 
-void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
+//Enforces hitboxes & checks for & performs block merge
+bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 {
     //If the block has a velocity:
     // - Check the block is in bounds (only considoring bounds in velocity direction)
@@ -261,7 +289,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().right() > bounds.right())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(bounds.right() - Constants::BlockSize + 1, geometry().y()));
+            setPosition(QPoint(bounds.right() - Constants::BlockSize, geometry().y()));
         }
         else
         {
@@ -278,8 +306,8 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     {
                         m_velocity = Vector2(0,0);
                         setPosition(QPoint(pBlockRect.left() - Constants::BlockSize, geometry().y()));
-                        break;
                     }
+                    break;
                 }
             }
         }
@@ -305,9 +333,9 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(pBlockRect.right() + 1, geometry().y()));
-                        break;
+                        setPosition(QPoint(pBlockRect.right(), geometry().y()));
                     }
+                    break;
                 }
             }
         }
@@ -318,7 +346,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().bottom() > bounds.bottom())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize + 1));
+            setPosition(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize));
         }
         else
         {
@@ -334,9 +362,9 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), pBlockRect.top() - Constants::BlockSize));
-                        break;
+                        setPosition(QPoint(geometry().x(), pBlockRect.y() - Constants::BlockSize));
                     }
+                    break;
                 }
             }
         }
@@ -362,20 +390,32 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), pBlockRect.bottom() + 1));
-                        break;
+                        setPosition(QPoint(geometry().x(), pBlockRect.y() + Constants::BlockSize));
                     }
+                    break;
                 }
             }
         }
     }
 
+    //If block no longer moving & a merge was found. Peform merge
+    // (delete this block and double merge blocks value)
     if(m_pDeletingBlock && m_velocity == Vector2(0,0))
     {
         m_pDeletingBlock->setValue(m_value + m_value);
         blocks.removeOne(this);
         delete this;
+
+        for(Block* pBlock : blocks)
+        {
+            if(pBlock->checkBoundaries(bounds, blocks))
+            {
+                return true;
+            }
+        }
+        return true;
     }
 
+    return false;
     //Could loop checking if intersets now repositioned...
 }

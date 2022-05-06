@@ -24,7 +24,8 @@ public:
     void setVelocity(Vector2 vel);
     Vector2 velocity();
 
-    void checkBoundaries(QRect bounds, QVector<Block*>& blocks);
+    //Enforces hitboxes & checks for & performs block merge
+    bool checkBoundaries(QRect bounds, QVector<Block*>& blocks);
 
 protected:
     void paintEvent(QPaintEvent* paintEvent) override;
@@ -58,6 +59,8 @@ private:
     bool trySpawnNewBlock();
 
     bool m_bAcceptInput = true;
+
+    bool m_bSomethingMovedSinceLastInput = false;
 
     QVector<Block*> m_blocks;
 
