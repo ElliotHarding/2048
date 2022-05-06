@@ -314,7 +314,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().right() > bounds.right())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(bounds.right() - Constants::BlockSize, geometry().y()));
+            setPosition(QPoint(roundToMultiple(bounds.right() - Constants::BlockSize, Constants::BlockSize), roundToMultiple(geometry().y(), Constants::BlockSize)));
         }
         else
         {
@@ -330,7 +330,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(roundToMultiple(pBlockRect.left() - Constants::BlockSize, Constants::BlockSize), geometry().y()));
+                        setPosition(QPoint(roundToMultiple(pBlockRect.left() - Constants::BlockSize, Constants::BlockSize), roundToMultiple(geometry().y(), Constants::BlockSize)));
                     }
                     break;
                 }
@@ -342,7 +342,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().left() < bounds.left())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(bounds.left(), geometry().y()));
+            setPosition(QPoint(roundToMultiple(bounds.left(), Constants::BlockSize), roundToMultiple(geometry().y(), Constants::BlockSize)));
         }
         else
         {
@@ -358,7 +358,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(roundToMultiple(pBlockRect.right(), Constants::BlockSize), geometry().y()));
+                        setPosition(QPoint(roundToMultiple(pBlockRect.right(), Constants::BlockSize), roundToMultiple(geometry().y(), Constants::BlockSize)));
                     }
                     break;
                 }
@@ -371,7 +371,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().bottom() > bounds.bottom())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize));
+            setPosition(QPoint(roundToMultiple(geometry().x(), Constants::BlockSize), roundToMultiple(bounds.bottom() - Constants::BlockSize, Constants::BlockSize)));
         }
         else
         {
@@ -387,7 +387,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() - Constants::BlockSize, Constants::BlockSize)));
+                        setPosition(QPoint(roundToMultiple(geometry().x(), Constants::BlockSize), roundToMultiple(pBlockRect.y() - Constants::BlockSize, Constants::BlockSize)));
                     }
                     break;
                 }
@@ -399,7 +399,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().top() < bounds.top())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), bounds.top()));
+            setPosition(QPoint(roundToMultiple(geometry().x(), Constants::BlockSize), roundToMultiple(bounds.top(), Constants::BlockSize)));
         }
         else
         {
@@ -415,7 +415,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() + Constants::BlockSize, Constants::BlockSize)));
+                        setPosition(QPoint(roundToMultiple(geometry().x(), Constants::BlockSize), roundToMultiple(pBlockRect.y() + Constants::BlockSize, Constants::BlockSize)));
                     }
                     break;
                 }
