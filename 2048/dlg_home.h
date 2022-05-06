@@ -9,7 +9,7 @@ QT_END_NAMESPACE
 
 typedef QPointF Vector2;
 
-class Block : QWidget
+class Block : public QWidget
 {
     Q_OBJECT
 
@@ -18,8 +18,6 @@ public:
 
     int value() const;
     void setValue(const int& value);
-
-    QRect geometry() const;
 
     bool updatePosition();
 

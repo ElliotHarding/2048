@@ -133,11 +133,6 @@ void DLG_Home::onUpdate()
             update();
             m_bAcceptInput = true;
         }
-
-        for(Block* pBlock : m_blocks)
-        {
-            qDebug() << pBlock->geometry();
-        }
     }
 
     if(anyMoved)
@@ -191,6 +186,7 @@ bool DLG_Home::trySpawnNewBlock()
     Block* pNewBlock = new Block(this, startValue, spawnPos);
     m_blocks.push_back(pNewBlock);
     pNewBlock->show();
+    pNewBlock = nullptr;
 
     return true;
 }
@@ -225,11 +221,6 @@ void Block::setValue(const int &value)
 {
     m_value = value;
     m_col = Constants::BlockColors[m_value];
-}
-
-QRect Block::geometry() const
-{
-    return QWidget::geometry();
 }
 
 void Block::setPosition(const QPoint& position)
