@@ -448,13 +448,6 @@ void DLG_Home::onAiThink()
         direction = Vector2(0, -1);
     }
 
-    score2 = gameStateScore(mapMove(map, Vector2(0, -1)));
-    if(score2 > score)
-    {
-        score = score2;
-        direction = Vector2(0, -1);
-    }
-
     score2 = gameStateScore(mapMove(map, Vector2(1, 0)));
     if(score2 > score)
     {
@@ -468,73 +461,8 @@ void DLG_Home::onAiThink()
         direction = Vector2(1, 0);
     }
 
-
     m_blocksMutex.unlock();
     applyVelocity(direction);
-
-    /*
-    qDebug() << "---------------";
-    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
-    {
-        QString colStr = "";
-        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
-        {
-            colStr += QString::number(map[x][y]) + " ";
-        }
-        qDebug() << colStr;
-    }
-    qDebug() << "---------------";
-    */
-
-    //Qt::Key moveDir = Qt::Key_0;
-
-    //Todo make decision
-    /*
-    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
-    {
-        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
-        {
-            if(map[x][y] != 0)
-            {
-                if(withinRangeInclusive(y+1, 0, Constants::MaxBlocksPerCol-1) && map[x][y] == map[x][y+1])
-                {
-                    moveDir = Qt::Key_Up;
-                    break;
-                }
-                else if(withinRangeInclusive(y-1, 0, Constants::MaxBlocksPerCol-1) && map[x][y] == map[x][y-1])
-                {
-                    moveDir = Qt::Key_Up;
-                    break;
-                }
-                else if(withinRangeInclusive(x+1, 0, Constants::MaxBlocksPerRow-1) && map[x][y] == map[x+1][y])
-                {
-                    moveDir = Qt::Key_Right;
-                    break;
-                }
-                else if(withinRangeInclusive(x-1, 0, Constants::MaxBlocksPerRow-1) && map[x][y] == map[x-1][y])
-                {
-                    moveDir = Qt::Key_Right;
-                    break;
-                }
-            }
-        }
-        if(moveDir != Qt::Key_0)
-            break;
-    }
-
-    if(moveDir == Qt::Key_0)
-    {
-        const int random = QRandomGenerator::global()->generateDouble() * 4;
-        moveDir = random == 0 ? Qt::Key_Up :
-                                random == 1 ? Qt::Key_Down :
-                                              random == 2 ? Qt::Key_Left :
-                                                            Qt::Key_Right;
-    }
-    else
-    {
-        static int counter = 0;
-        qDebug() << "Intentional move " << counter++;
-    }*/
 }
 
 bool DLG_Home::trySpawnNewBlock()
