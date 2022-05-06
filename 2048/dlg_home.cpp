@@ -34,7 +34,7 @@ const QMap<int, QColor> BlockColors = {
 
 const QFont NumberTextFont = QFont("Helvetica [Cronyx]", 10, QFont::Normal);
 const QFontMetrics NumberTextFontMetrics(NumberTextFont);
-const QColor NumberTextCol = Qt::white;
+const QColor NumberTextCol = Qt::black;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
