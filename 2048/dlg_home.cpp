@@ -276,7 +276,28 @@ int gameStateScore(QVector<QVector<int>> map)
 
 QVector<QVector<int>> mapMove(QVector<QVector<int>> map, Vector2 direction)
 {
-    return {0};
+    if(direction.x() > 0)
+    {
+        for(int x = map.size()-1; x > -1; x++)
+        {
+            for(int y = 0; y < map[0].size(); y++)
+            {
+
+            }
+        }
+    }
+    else if(direction.x() < 0)
+    {
+
+    }
+    else if(direction.y() > 0)
+    {
+
+    }
+    else if(direction.y() < 0)
+    {
+
+    }
 }
 
 void DLG_Home::onAiThink()
