@@ -358,7 +358,17 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_pDeletingBlock = pBlock;
+                        //Set merge block
+                        if(m_pDeletingBlock == nullptr)
+                        {
+                            m_pDeletingBlock = pBlock;
+                        }
+                        //If found another block other than one to merge to
+                        else if(m_pDeletingBlock != pBlock)
+                        {
+                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
+                            m_velocity = Vector2(0,0);
+                        }
                     }
                     else
                     {
@@ -386,7 +396,17 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_pDeletingBlock = pBlock;
+                        //Set merge block
+                        if(m_pDeletingBlock == nullptr)
+                        {
+                            m_pDeletingBlock = pBlock;
+                        }
+                        //If found another block other than one to merge to
+                        else if(m_pDeletingBlock != pBlock)
+                        {
+                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
+                            m_velocity = Vector2(0,0);
+                        }
                     }
                     else
                     {
@@ -415,7 +435,17 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_pDeletingBlock = pBlock;
+                        //Set merge block
+                        if(m_pDeletingBlock == nullptr)
+                        {
+                            m_pDeletingBlock = pBlock;
+                        }
+                        //If found another block other than one to merge to
+                        else if(m_pDeletingBlock != pBlock)
+                        {
+                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
+                            m_velocity = Vector2(0,0);
+                        }
                     }
                     else
                     {
@@ -443,7 +473,17 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_pDeletingBlock = pBlock;
+                        //Set merge block
+                        if(m_pDeletingBlock == nullptr)
+                        {
+                            m_pDeletingBlock = pBlock;
+                        }
+                        //If found another block other than one to merge to
+                        else if(m_pDeletingBlock != pBlock)
+                        {
+                            //Set velocity to 0 which triggers merge to m_pDeletingBlock
+                            m_velocity = Vector2(0,0);
+                        }
                     }
                     else
                     {
