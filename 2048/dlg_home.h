@@ -44,7 +44,7 @@ private:
     ///Block info
     QVector<Block*> m_blocks;
     QMutex m_blocksMutex;
-    QVector<QPoint> m_blockPositionsBeforeInput;
+    QVector<QPoint> m_blocksPositionsBeforeInput;
 
     ///Score and highscore
     int m_currentScore;
