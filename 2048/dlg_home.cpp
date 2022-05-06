@@ -261,7 +261,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().right() > bounds.right())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(bounds.right() - Constants::BlockSize, geometry().y()));
+            setPosition(QPoint(bounds.right() - Constants::BlockSize + 1, geometry().y()));
         }
         else
         {
@@ -318,7 +318,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         if(geometry().bottom() > bounds.bottom())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize));
+            setPosition(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize + 1));
         }
         else
         {
