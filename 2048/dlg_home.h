@@ -17,8 +17,6 @@ class Block : public QWidget
 public:
     Block(QWidget *parent, const int& value, const QPoint& position);
 
-        QRect TESTRECT;
-
     int value() const;
     void setValue(const int& value);
 

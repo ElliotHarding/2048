@@ -157,7 +157,6 @@ void DLG_Home::onUpdate()
     {
         const bool moved = pBlock->updatePosition();
         anyMoved = moved | anyMoved;        
-        pBlock->TESTRECT = pBlock->geometry();
     }
 
     if(anyMoved)
@@ -313,11 +312,6 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     // - Otherwise check if block collides (intersects) with any other blocks
     //   - If collides with same m_value block; plan to remove due to merge
     //   - If collides with othr m_value block; stop velocity and set flush against other block.
-
-    for(Block* b : blocks)
-    {
-        b->TESTRECT = b->geometry();
-    }
 
     if(m_velocity.x() > 0)
     {
