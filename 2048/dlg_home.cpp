@@ -9,10 +9,12 @@
 #include <QPainter>
 #include <QTimer>
 #include <QKeyEvent>
+#include <QDebug>
 
 namespace Constants
 {
 const int BlockSize = 30;
+const QRect BoardGeometry = QRect(0, 0, BlockSize * 3, BlockSize * 3);
 
 const QMap<int, QColor> BlockColors = {
     {2, Qt::red},
@@ -65,28 +67,40 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
     {
         for(Block* pBlock : m_blocks)
         {
-            pBlock->setVelocity(Vector2(0, -1));
+            if(pBlock->getRect().top() > Constants::BoardGeometry.top() - 1)
+            {
+                pBlock->setVelocity(Vector2(0, -1));
+            }
         }
     }
     else if(event->key() == Qt::Key_Down)
     {
         for(Block* pBlock : m_blocks)
         {
-            pBlock->setVelocity(Vector2(0, 1));
+            if(pBlock->getRect().bottom() < Constants::BoardGeometry.bottom() + 1)
+            {
+                pBlock->setVelocity(Vector2(0, 1));
+            }
         }
     }
     else if(event->key() == Qt::Key_Right)
     {
         for(Block* pBlock : m_blocks)
         {
-            pBlock->setVelocity(Vector2(1, 0));
+            if(pBlock->getRect().right() < Constants::BoardGeometry.right() + 1)
+            {
+                pBlock->setVelocity(Vector2(1, 0));
+            }
         }
     }
     else if(event->key() == Qt::Key_Left)
     {
         for(Block* pBlock : m_blocks)
         {
-            pBlock->setVelocity(Vector2(-1, 0));
+            if(pBlock->getRect().left() > Constants::BoardGeometry.left() - 1)
+            {
+                pBlock->setVelocity(Vector2(-1, 0));
+            }
         }
     }
 }
