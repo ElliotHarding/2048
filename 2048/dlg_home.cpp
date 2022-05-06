@@ -439,34 +439,22 @@ void DLG_Home::onAiThink()
         map[indexX][indexY] = pBlock->value();
     }
 
-    Vector2 direction = Vector2(0, 1);
-    QVector<QVector<int>> movedMap = mapMove(map, direction);
-    int score = map != movedMap ? gameStateScore(movedMap) : 0;
-    movedMap = mapMove(map, Vector2(0, -1));
-    int score2 = map != movedMap ? gameStateScore(movedMap) : 0;
-    if(score2 > score)
+    QList<Vector2> directions = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
+    Vector2 chosenDirection = directions[0];
+    int score = 0;
+    for(const Vector2& direction : directions)
     {
-        score = score2;
-        direction = Vector2(0, -1);
-    }
-
-    movedMap = mapMove(map, Vector2(1, 0));
-    score2 = map != movedMap ? gameStateScore(movedMap) : 0;
-    if(score2 > score)
-    {
-        score = score2;
-        direction = Vector2(1, 0);
-    }
-
-    movedMap = mapMove(map, Vector2(-1, 0));
-    score2 = map != movedMap ? gameStateScore(movedMap) : 0;
-    if(score2 > score)
-    {
-        direction = Vector2(-1, 0);
+        QVector<QVector<int>> movedMap = mapMove(map, direction);
+        int mapScore = map != movedMap ? gameStateScore(movedMap) : 0;
+        if(mapScore > score)
+        {
+            score = mapScore;
+            chosenDirection = direction;
+        }
     }
 
     m_blocksMutex.unlock();
-    applyVelocity(direction);
+    applyVelocity(chosenDirection);
 }
 
 bool DLG_Home::trySpawnNewBlock()
