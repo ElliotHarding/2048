@@ -2,6 +2,7 @@
 #define DLG_HOME_H
 
 #include <QMainWindow>
+#include <QMutex>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class DLG_Home; }
@@ -15,6 +16,8 @@ class Block : public QWidget
 
 public:
     Block(QWidget *parent, const int& value, const QPoint& position);
+
+        QRect TESTRECT;
 
     int value() const;
     void setValue(const int& value);
@@ -63,6 +66,7 @@ private:
     bool m_bSomethingMovedSinceLastInput = false;
 
     QVector<Block*> m_blocks;
+    QMutex m_blocksMutex;
 
     QTimer* m_pUpdateTimer;
 };

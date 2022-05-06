@@ -62,12 +62,14 @@ DLG_Home::~DLG_Home()
 {
     delete ui;
 
+    m_blocksMutex.lock();
     for(Block* pBlock : m_blocks)
     {
         delete pBlock;
         pBlock = nullptr;
     }
     m_blocks.clear();
+    m_blocksMutex.unlock();
 }
 
 void DLG_Home::keyPressEvent(QKeyEvent *event)
@@ -76,6 +78,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
     {
         if(event->key() == Qt::Key_Up)
         {
+            m_blocksMutex.lock();
             for(Block* pBlock : m_blocks)
             {
                 if(pBlock->geometry().top() > Constants::BoardGeometry.top() - 1)
@@ -84,9 +87,11 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 }
             }
             m_bAcceptInput = false;
+            m_blocksMutex.unlock();
         }
         else if(event->key() == Qt::Key_Down)
         {
+            m_blocksMutex.lock();
             for(Block* pBlock : m_blocks)
             {
                 if(pBlock->geometry().bottom() < Constants::BoardGeometry.bottom() + 1)
@@ -95,9 +100,11 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 }
             }
             m_bAcceptInput = false;
+            m_blocksMutex.unlock();
         }
         else if(event->key() == Qt::Key_Right)
         {
+            m_blocksMutex.lock();
             for(Block* pBlock : m_blocks)
             {
                 if(pBlock->geometry().right() < Constants::BoardGeometry.right() + 1)
@@ -106,9 +113,11 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 }
             }
             m_bAcceptInput = false;
+            m_blocksMutex.unlock();
         }
         else if(event->key() == Qt::Key_Left)
         {
+            m_blocksMutex.lock();
             for(Block* pBlock : m_blocks)
             {
                 if(pBlock->geometry().left() > Constants::BoardGeometry.left() - 1)
@@ -117,12 +126,15 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 }
             }
             m_bAcceptInput = false;
+            m_blocksMutex.unlock();
         }
     }
 }
 
 void DLG_Home::onUpdate()
 {
+    m_blocksMutex.lock();
+
     QVector<QPoint> oldPositions;
     QVector<QPoint> newPositions;
 
@@ -130,9 +142,10 @@ void DLG_Home::onUpdate()
     bool anyMoved = false;
     for(Block* pBlock : m_blocks)
     {
-        const bool moved = pBlock->updatePosition();
-        anyMoved = moved | anyMoved;
         oldPositions.push_back(pBlock->geometry().topLeft());
+        const bool moved = pBlock->updatePosition();
+        anyMoved = moved | anyMoved;        
+        pBlock->TESTRECT = pBlock->geometry();
     }
 
     if(anyMoved)
@@ -167,6 +180,8 @@ void DLG_Home::onUpdate()
             m_bAcceptInput = true;
         }
     }
+
+    m_blocksMutex.unlock();
 }
 
 bool DLG_Home::trySpawnNewBlock()
@@ -283,6 +298,11 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     // - Otherwise check if block collides (intersects) with any other blocks
     //   - If collides with same m_value block; plan to remove due to merge
     //   - If collides with othr m_value block; stop velocity and set flush against other block.
+
+    for(Block* b : blocks)
+    {
+        b->TESTRECT = b->geometry();
+    }
 
     if(m_velocity.x() > 0)
     {
