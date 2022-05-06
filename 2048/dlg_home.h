@@ -37,6 +37,9 @@ private:
     ///Resets game
     void reset();
 
+    ///Apply velocity to blocks
+    void applyVelocity(const Vector2& vel);
+
     ///Make a move human + AI
     void move(Qt::Key dirKey);
 

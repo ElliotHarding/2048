@@ -84,31 +84,8 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void DLG_Home::move(Qt::Key dirKey)
+void DLG_Home::applyVelocity(const Vector2& vel)
 {
-    //Get velocity applied by arrow keys
-    Vector2 appliedVelocity;
-    if(dirKey == Qt::Key_Up)
-    {
-        appliedVelocity = Vector2(0, -Constants::BlockMovementSpeed);
-    }
-    else if(dirKey == Qt::Key_Down)
-    {
-        appliedVelocity = Vector2(0, Constants::BlockMovementSpeed);
-    }
-    else if(dirKey == Qt::Key_Right)
-    {
-        appliedVelocity = Vector2(Constants::BlockMovementSpeed, 0);
-    }
-    else if(dirKey == Qt::Key_Left)
-    {
-        appliedVelocity = Vector2(-Constants::BlockMovementSpeed, 0);
-    }
-    else
-    {
-        return;
-    }
-
     m_blocksMutex.lock();
 
     //Log block positions before they're changed by applied velocity
@@ -119,9 +96,9 @@ void DLG_Home::move(Qt::Key dirKey)
     {
         m_blocksPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
 
-        if(Constants::BoardGeometry.contains(pBlock->geometry().topLeft() + QPoint(appliedVelocity.x()/Constants::BlockMovementSpeed, appliedVelocity.y()/Constants::BlockMovementSpeed)))
+        if(Constants::BoardGeometry.contains(pBlock->geometry().topLeft() + QPoint(vel.x()/Constants::BlockMovementSpeed, vel.y()/Constants::BlockMovementSpeed)))
         {
-            pBlock->setVelocity(appliedVelocity);
+            pBlock->setVelocity(vel);
         }
     }
 
@@ -129,6 +106,27 @@ void DLG_Home::move(Qt::Key dirKey)
     m_bAcceptInput = false;
 
     m_blocksMutex.unlock();
+}
+
+void DLG_Home::move(Qt::Key dirKey)
+{
+    //Get velocity applied by arrow keys
+    if(dirKey == Qt::Key_Up)
+    {
+        applyVelocity(Vector2(0, -Constants::BlockMovementSpeed));
+    }
+    else if(dirKey == Qt::Key_Down)
+    {
+        applyVelocity(Vector2(0, Constants::BlockMovementSpeed));
+    }
+    else if(dirKey == Qt::Key_Right)
+    {
+        applyVelocity(Vector2(Constants::BlockMovementSpeed, 0));
+    }
+    else if(dirKey == Qt::Key_Left)
+    {
+        applyVelocity(Vector2(-Constants::BlockMovementSpeed, 0));
+    }    
 }
 
 void DLG_Home::onUpdate()
