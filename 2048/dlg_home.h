@@ -16,6 +16,7 @@ class Block : public QWidget
 
 public:
     Block(QWidget *parent, const int& value, const QPoint& position);
+    ~Block();
 
     int value() const;
     void setValue(const int& value);
@@ -31,6 +32,9 @@ public:
 protected:
     void paintEvent(QPaintEvent* paintEvent) override;
 
+private slots:
+    void onEndPopping();
+
 private:
     void setPosition(const QPoint& position);
 
@@ -38,6 +42,8 @@ private:
     int m_value;
     QColor m_col;
     Vector2 m_velocity;
+    bool m_bIsPopping = false;
+    QTimer* m_pPoppingTimer;
 };
 
 class DLG_Home : public QMainWindow

@@ -10,6 +10,9 @@
 namespace Constants
 {
 const int UpdateFrequency = 1;
+const int BlockSpeed = 3;
+
+const int BlockPopTime = 100;
 
 const int BlockSize = 100;
 const int MaxBlocksPerRow = 4;
@@ -50,6 +53,7 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
+    m_pUpdateTimer->setTimerType(Qt::PreciseTimer);
     m_pUpdateTimer->start(Constants::UpdateFrequency);
 }
 
@@ -103,7 +107,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().top() > Constants::BoardGeometry.top() - 1)
                 {
-                    pBlock->setVelocity(Vector2(0, -1));
+                    pBlock->setVelocity(Vector2(0, -Constants::BlockSpeed));
                 }
             }
             m_bAcceptInput = false;
@@ -120,7 +124,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().bottom() < Constants::BoardGeometry.bottom() + 1)
                 {
-                    pBlock->setVelocity(Vector2(0, 1));
+                    pBlock->setVelocity(Vector2(0, Constants::BlockSpeed));
                 }
             }
             m_bAcceptInput = false;
@@ -137,7 +141,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().right() < Constants::BoardGeometry.right() + 1)
                 {
-                    pBlock->setVelocity(Vector2(1, 0));
+                    pBlock->setVelocity(Vector2(Constants::BlockSpeed, 0));
                 }
             }
             m_bAcceptInput = false;
@@ -154,7 +158,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
                 m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().left() > Constants::BoardGeometry.left() - 1)
                 {
-                    pBlock->setVelocity(Vector2(-1, 0));
+                    pBlock->setVelocity(Vector2(-Constants::BlockSpeed, 0));
                 }
             }
             m_bAcceptInput = false;
@@ -269,9 +273,17 @@ void DLG_Home::updateScores()
 ///
 Block::Block(QWidget* parent, const int& value, const QPoint& position) : QWidget(parent)
 {
+    m_pPoppingTimer = new QTimer(this);
+    connect(m_pPoppingTimer, SIGNAL(timeout()), this, SLOT(onEndPopping()));
     setValue(value);
     setPosition(position);
     show();
+}
+
+Block::~Block()
+{
+    m_pPoppingTimer->stop();
+    delete m_pPoppingTimer;
 }
 
 void Block::paintEvent(QPaintEvent*)
@@ -280,7 +292,14 @@ void Block::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     QPainterPath path;
-    path.addRoundedRect(Constants::DrawBlockRect, 10, 10);
+    if(m_bIsPopping)
+    {
+        path.addRoundedRect(QRect(0, 0, Constants::BlockSize, Constants::BlockSize), 10, 10);
+    }
+    else
+    {
+        path.addRoundedRect(Constants::DrawBlockRect, 10, 10);
+    }
     painter.fillPath(path, m_col);
 
     painter.setPen(Constants::NumberTextCol);
@@ -289,6 +308,13 @@ void Block::paintEvent(QPaintEvent*)
     const float textWidth = Constants::NumberTextFontMetrics.horizontalAdvance(QString::number(m_value));
 
     painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + Constants::NumberTextFontMetrics.height()/4), QString::number(m_value));
+}
+
+void Block::onEndPopping()
+{
+    m_bIsPopping = false;
+    m_pPoppingTimer->stop();
+    update();
 }
 
 int Block::value() const
@@ -300,6 +326,9 @@ void Block::setValue(const int &value)
 {
     m_value = value;
     m_col = Constants::BlockColors[m_value];
+    m_bIsPopping = true;
+    m_pPoppingTimer->start(Constants::BlockPopTime);
+    update();
 }
 
 void Block::setPosition(const QPoint& position)
