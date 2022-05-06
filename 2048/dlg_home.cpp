@@ -38,7 +38,9 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     m_blocks.push_back(new Block(this, 2, QPoint(0,0)));
     m_blocks.push_back(new Block(this, 4, QPoint(Constants::BlockSize,0)));
-    m_blocks.push_back(new Block(this, 2, QPoint(0,Constants::BlockSize)));
+    m_blocks.push_back(new Block(this, 2, QPoint(Constants::BlockSize*2,0)));
+    m_blocks.push_back(new Block(this, 4, QPoint(0,Constants::BlockSize)));
+    m_blocks.push_back(new Block(this, 2, QPoint(0,Constants::BlockSize*2)));
 
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
@@ -209,6 +211,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     {
                         m_velocity = Vector2(0,0);
                         setPosition(QPoint(pBlockRect.left() - Constants::BlockSize, geometry().y()));
+                        break;
                     }
                 }
             }
@@ -236,6 +239,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     {
                         m_velocity = Vector2(0,0);
                         setPosition(QPoint(pBlockRect.right() + 1, geometry().y()));
+                        break;
                     }
                 }
             }
@@ -264,6 +268,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     {
                         m_velocity = Vector2(0,0);
                         setPosition(QPoint(geometry().x(), pBlockRect.top() - Constants::BlockSize));
+                        break;
                     }
                 }
             }
@@ -291,6 +296,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     {
                         m_velocity = Vector2(0,0);
                         setPosition(QPoint(geometry().x(), pBlockRect.bottom() + 1));
+                        break;
                     }
                 }
             }
