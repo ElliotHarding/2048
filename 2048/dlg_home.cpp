@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include <QDebug>
+#include <QThread>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +167,9 @@ void DLG_Home::onUpdate()
 
             m_bAcceptInput = true;
 
+            update();
+            QThread::sleep(4);
+
             //Todo generate map
             int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRow] = {0};
             for(Block* pBlock : m_blocks)
@@ -195,25 +199,28 @@ void DLG_Home::onUpdate()
             {
                 for(int x = 1; x < Constants::MaxBlocksPerRow-1; x++)
                 {
-                    if(map[x][y] == map[x][y+1])
+                    if(map[x][y] != 0)
                     {
-                        moveDir = Qt::Key_Up;
-                        break;
-                    }
-                    else if(map[x][y] == map[x][y-1])
-                    {
-                        moveDir = Qt::Key_Up;
-                        break;
-                    }
-                    else if(map[x][y] == map[x+1][y])
-                    {
-                        moveDir = Qt::Key_Right;
-                        break;
-                    }
-                    else if(map[x][y] == map[x-1][y])
-                    {
-                        moveDir = Qt::Key_Right;
-                        break;
+                        if(map[x][y] == map[x][y+1])
+                        {
+                            moveDir = Qt::Key_Up;
+                            break;
+                        }
+                        else if(map[x][y] == map[x][y-1])
+                        {
+                            moveDir = Qt::Key_Up;
+                            break;
+                        }
+                        else if(map[x][y] == map[x+1][y])
+                        {
+                            moveDir = Qt::Key_Right;
+                            break;
+                        }
+                        else if(map[x][y] == map[x-1][y])
+                        {
+                            moveDir = Qt::Key_Right;
+                            break;
+                        }
                     }
                 }
                 if(moveDir != Qt::Key_0)
