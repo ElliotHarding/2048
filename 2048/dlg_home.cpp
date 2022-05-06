@@ -38,7 +38,7 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
-    m_pUpdateTimer->start(10);
+    m_pUpdateTimer->start(1);
 }
 
 DLG_Home::~DLG_Home()
