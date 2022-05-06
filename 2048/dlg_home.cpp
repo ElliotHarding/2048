@@ -48,10 +48,6 @@ DLG_Home::DLG_Home(QWidget *parent)
     ui->setupUi(this);
 
     m_blocks.push_back(new Block(this, 2, QPoint(0,0)));
-    m_blocks.push_back(new Block(this, 2, QPoint(0,Constants::BlockSize)));
-    m_blocks.push_back(new Block(this, 4, QPoint(Constants::BlockSize,0)));
-    m_blocks.push_back(new Block(this, 2, QPoint(Constants::BlockSize*2,0)));
-    m_blocks.push_back(new Block(this, 4, QPoint(0,Constants::BlockSize*2)));
 
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
