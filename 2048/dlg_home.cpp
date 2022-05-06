@@ -339,6 +339,7 @@ namespace ScoreWeights
 const int ScoreWeightHighTopLeft = 30; //Reward % for having highest number in top left slot
 const int ScoreWeightHighNumbersClose = 20; //Reward % for having high value blocks next to eachother
 const int ScoreWeightHighestNumber = 50; //Reward % for having the highest number
+const int ScoreWeightNumberBlocks = 10;
 }
 
 int gameStateScore(QVector<QVector<int>> map)
@@ -416,6 +417,9 @@ int gameStateScore(QVector<QVector<int>> map)
     {
         score += 0.6 * ScoreWeights::ScoreWeightHighNumbersClose;
     }
+
+    //Lower score for too many blocks
+    score -= ScoreWeights::ScoreWeightNumberBlocks * (blockValues.size() / (Constants::MaxBlocksPerCol * Constants::MaxBlocksPerRow));
 
     return score;
 }
