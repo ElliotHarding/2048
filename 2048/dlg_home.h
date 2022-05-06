@@ -21,7 +21,7 @@ public:
 
     QRectF getRect() const;
 
-    void updatePosition();
+    bool updatePosition();
 
     void setVelocity(Vector2 vel);
     void checkBoundaries(QRect bounds, QVector<Block*>& blocks);
@@ -50,6 +50,8 @@ private slots:
 
 private:
     Ui::DLG_Home *ui;
+
+    bool m_bAcceptInput = true;
 
     QVector<Block*> m_blocks;
 

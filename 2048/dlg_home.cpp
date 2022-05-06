@@ -26,8 +26,9 @@ const QMap<int, QColor> BlockColors = {
 ///DLG_Home
 ///
 DLG_Home::DLG_Home(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::DLG_Home)
+    : QMainWindow(parent),
+      ui(new Ui::DLG_Home),
+      m_bAcceptInput(true)
 {
     ui->setupUi(this);
 
@@ -63,43 +64,46 @@ void DLG_Home::paintEvent(QPaintEvent*)
 
 void DLG_Home::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Up)
+    if(m_bAcceptInput)
     {
-        for(Block* pBlock : m_blocks)
+        if(event->key() == Qt::Key_Up)
         {
-            if(pBlock->getRect().top() > Constants::BoardGeometry.top() - 1)
+            for(Block* pBlock : m_blocks)
             {
-                pBlock->setVelocity(Vector2(0, -1));
+                if(pBlock->getRect().top() > Constants::BoardGeometry.top() - 1)
+                {
+                    pBlock->setVelocity(Vector2(0, -1));
+                }
             }
         }
-    }
-    else if(event->key() == Qt::Key_Down)
-    {
-        for(Block* pBlock : m_blocks)
+        else if(event->key() == Qt::Key_Down)
         {
-            if(pBlock->getRect().bottom() < Constants::BoardGeometry.bottom() + 1)
+            for(Block* pBlock : m_blocks)
             {
-                pBlock->setVelocity(Vector2(0, 1));
+                if(pBlock->getRect().bottom() < Constants::BoardGeometry.bottom() + 1)
+                {
+                    pBlock->setVelocity(Vector2(0, 1));
+                }
             }
         }
-    }
-    else if(event->key() == Qt::Key_Right)
-    {
-        for(Block* pBlock : m_blocks)
+        else if(event->key() == Qt::Key_Right)
         {
-            if(pBlock->getRect().right() < Constants::BoardGeometry.right() + 1)
+            for(Block* pBlock : m_blocks)
             {
-                pBlock->setVelocity(Vector2(1, 0));
+                if(pBlock->getRect().right() < Constants::BoardGeometry.right() + 1)
+                {
+                    pBlock->setVelocity(Vector2(1, 0));
+                }
             }
         }
-    }
-    else if(event->key() == Qt::Key_Left)
-    {
-        for(Block* pBlock : m_blocks)
+        else if(event->key() == Qt::Key_Left)
         {
-            if(pBlock->getRect().left() > Constants::BoardGeometry.left() - 1)
+            for(Block* pBlock : m_blocks)
             {
-                pBlock->setVelocity(Vector2(-1, 0));
+                if(pBlock->getRect().left() > Constants::BoardGeometry.left() - 1)
+                {
+                    pBlock->setVelocity(Vector2(-1, 0));
+                }
             }
         }
     }
@@ -107,17 +111,27 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
 
 void DLG_Home::onUpdate()
 {
+
+    //Update positions, check if any moved
+    bool anyMoved = false;
     for(Block* pBlock : m_blocks)
     {
-        pBlock->updatePosition();
+        const bool moved = pBlock->updatePosition();
+        anyMoved = moved | anyMoved;
     }
 
-    for(Block* pBlock : m_blocks)
+    //If no blocks moved set accept input for new movement
+    m_bAcceptInput = !anyMoved;
+
+    if(anyMoved)
     {
-        pBlock->checkBoundaries(QRect(0,0,120,120), m_blocks);
+        //If some blocks moved, check they're in correct bounds
+        for(Block* pBlock : m_blocks)
+        {
+            pBlock->checkBoundaries(QRect(0,0,120,120), m_blocks);
+        }
+        update();
     }
-
-    update();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,9 +164,14 @@ QRectF Block::getRect() const
     return m_rect;
 }
 
-void Block::updatePosition()
+bool Block::updatePosition()
 {
-    m_rect.translate(m_velocity.x(), m_velocity.y());
+    if(m_velocity.x() != 0 || m_velocity.y() != 0)
+    {
+        m_rect.translate(m_velocity.x(), m_velocity.y());
+        return true;
+    }
+    return false;
 }
 
 void Block::setVelocity(Vector2 vel)
