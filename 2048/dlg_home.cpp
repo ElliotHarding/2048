@@ -170,14 +170,14 @@ bool DLG_Home::trySpawnNewBlock()
 {
     //Find empty spaces
     QVector<QPoint> emptySpaces;
-    for(int x = 0; x < Constants::BlockSize * Constants::MaxBlocksPerRow; x+=Constants::BlockSize)
+    for(int x = Constants::BoardGeometry.left(); x < Constants::BoardGeometry.right(); x+=Constants::BlockSize)
     {
-        for(int y = 0; y < Constants::BlockSize * Constants::MaxBlocksPerCol; y+=Constants::BlockSize)
+        for(int y = Constants::BoardGeometry.top(); y < Constants::BoardGeometry.bottom(); y+=Constants::BlockSize)
         {
             bool bLocationTaken = false;
             for(Block* pBlock : m_blocks)
             {
-                if(pBlock->geometry().contains(Constants::BoardGeometry.topLeft() + QPoint(x+2,y+2)))
+                if(pBlock->geometry().contains(QPoint(x+2,y+2)))
                 {
                     bLocationTaken = true;
                     break;
@@ -186,7 +186,7 @@ bool DLG_Home::trySpawnNewBlock()
 
             if(!bLocationTaken)
             {
-                emptySpaces.push_back(Constants::BoardGeometry.topLeft() + QPoint(x,y));
+                emptySpaces.push_back(QPoint(x,y));
             }
         }
     }
