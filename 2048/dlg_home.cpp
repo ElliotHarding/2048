@@ -171,11 +171,11 @@ void DLG_Home::onUpdate()
             {
                 //todo - Game over...
             }
-        }
-        else
-        {
-            m_currentScore += 2;
-            updateScores();            
+            else
+            {
+                m_currentScore += 2;
+                updateScores();
+            }
         }
 
         m_bAcceptInput = true;
@@ -203,6 +203,7 @@ void DLG_Home::onAiThink()
         map[indexX][indexY] = pBlock->value();
     }
 
+    /*
     qDebug() << "---------------";
     for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
     {
@@ -214,6 +215,7 @@ void DLG_Home::onAiThink()
         qDebug() << colStr;
     }
     qDebug() << "---------------";
+    */
 
     Qt::Key moveDir = Qt::Key_0;
 
@@ -257,6 +259,11 @@ void DLG_Home::onAiThink()
                                 random == 1 ? Qt::Key_Down :
                                               random == 2 ? Qt::Key_Left :
                                                             Qt::Key_Right;
+    }
+    else
+    {
+        static int counter = 0;
+        qDebug() << "Intentional move " << counter++;
     }
 
     m_blocksMutex.unlock();
