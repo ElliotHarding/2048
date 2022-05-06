@@ -160,6 +160,30 @@ void DLG_Home::onUpdate()
             updateScores();
 
             m_bAcceptInput = true;
+
+            //Todo generate map
+            int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRow] = {0};
+            for(Block* pBlock : m_blocks)
+            {
+                const int indexX = (pBlock->geometry().x() - Constants::BoardGeometry.x())/Constants::BlockSize;
+                const int indexY = (pBlock->geometry().y() - Constants::BoardGeometry.y())/Constants::BlockSize;
+
+                map[indexX][indexY] = pBlock->value();
+            }
+
+            qDebug() << "---------------";
+            for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+            {
+                QString colStr = "";
+                for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+                {
+                    colStr += QString::number(map[x][y]) + " ";
+                }
+                qDebug() << colStr;
+            }
+            qDebug() << "---------------";
+
+            //Todo make decision
         }
     }
 
