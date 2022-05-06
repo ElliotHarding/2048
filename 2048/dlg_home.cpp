@@ -429,6 +429,13 @@ void DLG_Home::onAiThink()
         return;
     }
 
+    if(m_blocks.size() == Constants::MaxBlocksPerCol * Constants::MaxBlocksPerRow)
+    {
+        //game over
+        m_blocksMutex.unlock();
+        return;
+    }
+
     //Todo generate map
     QVector<QVector<int>> map(Constants::MaxBlocksPerCol, QVector<int>(Constants::MaxBlocksPerRow, 0));
     for(Block* pBlock : m_blocks)
