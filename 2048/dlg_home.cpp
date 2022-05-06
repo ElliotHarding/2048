@@ -197,7 +197,7 @@ const int ScoreWeightHighestNumber = 50; //Reward % for having the highest numbe
 }
 
 
-int gameStateScore(int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRow])
+int gameStateScore(QVector<QVector<int>> map)
 {
     int score = 0;
 
@@ -276,6 +276,11 @@ int gameStateScore(int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRo
     return score;
 }
 
+QVector<QVector<int>> mapMove(QVector<QVector<int>> map, Vector2 direction)
+{
+    return {0};
+}
+
 void DLG_Home::onAiThink()
 {
     m_blocksMutex.lock();
@@ -286,7 +291,7 @@ void DLG_Home::onAiThink()
     }
 
     //Todo generate map
-    int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRow] = {0};
+    QVector<QVector<int>> map(Constants::MaxBlocksPerCol, QVector<int>(Constants::MaxBlocksPerRow, 0));
     for(Block* pBlock : m_blocks)
     {
         const int indexX = (pBlock->geometry().x() - Constants::BoardGeometry.x())/Constants::BlockSize;
@@ -294,6 +299,38 @@ void DLG_Home::onAiThink()
 
         map[indexX][indexY] = pBlock->value();
     }
+
+    Vector2 direction = Vector2(0, 1);
+    int score = gameStateScore(mapMove(map, direction));
+
+    int score2 = gameStateScore(mapMove(map, Vector2(0, -1)));
+    if(score2 > score)
+    {
+        score = score2;
+        direction = Vector2(0, -1);
+    }
+
+    score2 = gameStateScore(mapMove(map, Vector2(0, -1)));
+    if(score2 > score)
+    {
+        score = score2;
+        direction = Vector2(0, -1);
+    }
+
+    score2 = gameStateScore(mapMove(map, Vector2(1, 0)));
+    if(score2 > score)
+    {
+        score = score2;
+        direction = Vector2(1, 0);
+    }
+
+    score2 = gameStateScore(mapMove(map, Vector2(-1, 0)));
+    if(score2 > score)
+    {
+        direction = Vector2(1, 0);
+    }
+
+    Qt::Key moveDir =
 
     /*
     qDebug() << "---------------";
@@ -312,6 +349,7 @@ void DLG_Home::onAiThink()
     Qt::Key moveDir = Qt::Key_0;
 
     //Todo make decision
+    /*
     for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
     {
         for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
@@ -356,7 +394,9 @@ void DLG_Home::onAiThink()
     {
         static int counter = 0;
         qDebug() << "Intentional move " << counter++;
-    }
+    }*/
+
+
 
     m_blocksMutex.unlock();
     move(moveDir);
