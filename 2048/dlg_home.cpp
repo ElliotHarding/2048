@@ -300,7 +300,6 @@ void DLG_Home::onAiThink()
 
     Vector2 direction = Vector2(0, 1);
     int score = gameStateScore(mapMove(map, direction));
-
     int score2 = gameStateScore(mapMove(map, Vector2(0, -1)));
     if(score2 > score)
     {
@@ -328,7 +327,9 @@ void DLG_Home::onAiThink()
         direction = Vector2(1, 0);
     }
 
-    Qt::Key moveDir =
+
+    m_blocksMutex.unlock();
+    applyVelocity(direction);
 
     /*
     qDebug() << "---------------";
@@ -344,7 +345,7 @@ void DLG_Home::onAiThink()
     qDebug() << "---------------";
     */
 
-    Qt::Key moveDir = Qt::Key_0;
+    //Qt::Key moveDir = Qt::Key_0;
 
     //Todo make decision
     /*
@@ -393,12 +394,6 @@ void DLG_Home::onAiThink()
         static int counter = 0;
         qDebug() << "Intentional move " << counter++;
     }*/
-
-
-
-    m_blocksMutex.unlock();
-    move(moveDir);
-    return;
 }
 
 bool DLG_Home::trySpawnNewBlock()
