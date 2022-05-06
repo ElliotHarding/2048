@@ -9,26 +9,27 @@ QT_END_NAMESPACE
 
 typedef QPointF Vector2;
 
-class Block
+class Block : QWidget
 {
-public:
-    Block(const int& value, const QPoint& position);
+    Q_OBJECT
 
-    void paint(QPainter& painter);
+public:
+    Block(QWidget *parent, const int& value, const QPoint& position);
 
     int value() const;
     void setValue(const int& value);
 
-    QRectF getRect() const;
-
+    void setPosition(const QPoint& position);
     bool updatePosition();
 
     void setVelocity(Vector2 vel);
     bool checkBoundaries(QRect bounds, QVector<Block*>& blocks);
 
+protected:
+    void paintEvent(QPaintEvent* paintEvent) override;
+
 private:
     int m_value;
-    QRectF m_rect;
     QColor m_col;
     Vector2 m_velocity;
 };
@@ -42,7 +43,6 @@ public:
     ~DLG_Home();
 
 protected:
-    void paintEvent(QPaintEvent* paintEvent) override;
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
