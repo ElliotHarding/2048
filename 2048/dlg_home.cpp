@@ -289,6 +289,11 @@ Vector2 Block::velocity()
     return m_velocity;
 }
 
+int roundToMultiple(const int& n, const int& multiple)
+{
+    return ((n + multiple/2)/multiple) * multiple;
+}
+
 //Enforces hitboxes & checks for & performs block merge
 bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 {
@@ -325,7 +330,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(pBlockRect.left() - Constants::BlockSize, geometry().y()));
+                        setPosition(QPoint(roundToMultiple(pBlockRect.left() - Constants::BlockSize, Constants::BlockSize), geometry().y()));
                     }
                     break;
                 }
@@ -353,7 +358,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(pBlockRect.right(), geometry().y()));
+                        setPosition(QPoint(roundToMultiple(pBlockRect.right(), Constants::BlockSize), geometry().y()));
                     }
                     break;
                 }
@@ -382,7 +387,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), pBlockRect.y() - Constants::BlockSize));
+                        setPosition(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() - Constants::BlockSize, Constants::BlockSize)));
                     }
                     break;
                 }
@@ -410,7 +415,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), pBlockRect.y() + Constants::BlockSize));
+                        setPosition(QPoint(geometry().x(), roundToMultiple(pBlockRect.y() + Constants::BlockSize, Constants::BlockSize)));
                     }
                     break;
                 }
