@@ -189,6 +189,61 @@ bool withinRangeInclusive(const int& value, const int& min, const int& max)
     return value >= min && value <= max;
 }
 
+namespace ScoreWeights
+{
+const int ScoreWeightHighTopLeft = 30; //Reward % for having highest number in top left slot
+const int ScoreWeightHighNumbersClose = 20; //Reward % for having high value blocks next to eachother
+const int ScoreWeightHighestNumber = 50; //Reward % for having the highest number
+}
+
+
+int gameStateScore(int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRow])
+{
+    int score = 0;
+
+    QList<int> blockValues;
+    int highestNumber = 0;
+    int highestNumberX = 0;
+    int highestNumberY = 0;
+    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+    {
+        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+        {
+            blockValues.push_back(map[x][y]);
+            if(map[x][y] > highestNumber)
+            {
+                highestNumber = map[x][y];
+                highestNumberX = x;
+                highestNumberY = y;
+            }
+        }
+    }
+    std::sort(blockValues.begin(), blockValues.end());
+
+    //Highest number in top left
+    if(map[0][0] == highestNumber)
+    {
+        score += 1 * ScoreWeights::ScoreWeightHighTopLeft;
+    }
+    else if(map[0][1] == highestNumber || map[1][0] == highestNumber)
+    {
+        score += 0.6 * ScoreWeights::ScoreWeightHighTopLeft;
+    }
+    else if(map[1][1] == highestNumber || map[2][0] == highestNumber || map[0][2] == highestNumber)
+    {
+        score += 0.3 * ScoreWeights::ScoreWeightHighTopLeft;
+    }
+
+    //Highest number created
+    score += (blockValues[blockValues.size()-1]/2048) * ScoreWeights::ScoreWeightHighestNumber;
+
+    //High numbers close to highest number
+    if(map[highestNumberX][highestNumberY])
+    {
+
+    }
+}
+
 void DLG_Home::onAiThink()
 {
     m_blocksMutex.lock();
