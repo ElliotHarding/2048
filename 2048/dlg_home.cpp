@@ -184,6 +184,11 @@ void DLG_Home::onUpdate()
     m_blocksMutex.unlock();
 }
 
+bool withinRangeInclusive(const int& value, const int& min, const int& max)
+{
+    return value >= min && value <= max;
+}
+
 void DLG_Home::onAiThink()
 {
     m_blocksMutex.lock();
@@ -220,28 +225,28 @@ void DLG_Home::onAiThink()
     Qt::Key moveDir = Qt::Key_0;
 
     //Todo make decision
-    for(int y = 1; y < Constants::MaxBlocksPerCol-1; y++)
+    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
     {
-        for(int x = 1; x < Constants::MaxBlocksPerRow-1; x++)
+        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
         {
             if(map[x][y] != 0)
             {
-                if(map[x][y] == map[x][y+1])
+                if(withinRangeInclusive(y+1, 0, Constants::MaxBlocksPerCol-1) && map[x][y] == map[x][y+1])
                 {
                     moveDir = Qt::Key_Up;
                     break;
                 }
-                else if(map[x][y] == map[x][y-1])
+                else if(withinRangeInclusive(y-1, 0, Constants::MaxBlocksPerCol-1) && map[x][y] == map[x][y-1])
                 {
                     moveDir = Qt::Key_Up;
                     break;
                 }
-                else if(map[x][y] == map[x+1][y])
+                else if(withinRangeInclusive(x+1, 0, Constants::MaxBlocksPerRow-1) && map[x][y] == map[x+1][y])
                 {
                     moveDir = Qt::Key_Right;
                     break;
                 }
-                else if(map[x][y] == map[x-1][y])
+                else if(withinRangeInclusive(x-1, 0, Constants::MaxBlocksPerRow-1) && map[x][y] == map[x-1][y])
                 {
                     moveDir = Qt::Key_Right;
                     break;
