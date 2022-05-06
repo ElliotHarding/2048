@@ -19,7 +19,8 @@ public:
     int value() const;
     void setValue(const int& value);
 
-    void setPosition(const QPoint& position);
+    QRect geometry() const;
+
     bool updatePosition();
 
     void setVelocity(Vector2 vel);
@@ -29,6 +30,8 @@ protected:
     void paintEvent(QPaintEvent* paintEvent) override;
 
 private:
+    void setPosition(const QPoint& position);
+
     int m_value;
     QColor m_col;
     Vector2 m_velocity;

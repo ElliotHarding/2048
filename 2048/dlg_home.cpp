@@ -63,7 +63,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         {
             for(Block* pBlock : m_blocks)
             {
-                if(pBlock->getRect().top() > Constants::BoardGeometry.top() - 1)
+                if(pBlock->geometry().top() > Constants::BoardGeometry.top() - 1)
                 {
                     pBlock->setVelocity(Vector2(0, -1));
                 }
@@ -73,7 +73,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         {
             for(Block* pBlock : m_blocks)
             {
-                if(pBlock->getRect().bottom() < Constants::BoardGeometry.bottom() + 1)
+                if(pBlock->geometry().bottom() < Constants::BoardGeometry.bottom() + 1)
                 {
                     pBlock->setVelocity(Vector2(0, 1));
                 }
@@ -83,7 +83,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         {
             for(Block* pBlock : m_blocks)
             {
-                if(pBlock->getRect().right() < Constants::BoardGeometry.right() + 1)
+                if(pBlock->geometry().right() < Constants::BoardGeometry.right() + 1)
                 {
                     pBlock->setVelocity(Vector2(1, 0));
                 }
@@ -93,7 +93,7 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         {
             for(Block* pBlock : m_blocks)
             {
-                if(pBlock->getRect().left() > Constants::BoardGeometry.left() - 1)
+                if(pBlock->geometry().left() > Constants::BoardGeometry.left() - 1)
                 {
                     pBlock->setVelocity(Vector2(-1, 0));
                 }
@@ -155,6 +155,11 @@ void Block::setValue(const int &value)
 {
     m_value = value;
     m_col = Constants::BlockColors[m_value];
+}
+
+QRect Block::geometry() const
+{
+    return QWidget::geometry();
 }
 
 void Block::setPosition(const QPoint& position)
@@ -229,9 +234,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(bounds.left(), geometry().y()));
-                        m_rect.setX(pBlockRect.right());
-                        m_rect.setRight(pBlockRect.right() + Constants::BlockSize);
+                        setPosition(QPoint(pBlockRect.right(), geometry().y()));
                     }
                 }
             }
@@ -240,19 +243,17 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 
     if(m_velocity.y() > 0)
     {
-        if(m_rect.bottom() > bounds.bottom())
+        if(geometry().bottom() > bounds.bottom())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), geometry().y()));
-            m_rect.setY(bounds.bottom() - Constants::BlockSize);
-            m_rect.setBottom(bounds.bottom());
+            setPosition(QPoint(geometry().x(), bounds.bottom() - Constants::BlockSize));
         }
         else
         {
             for(Block* pBlock : blocks)
             {
-                const QRectF pBlockRect = pBlock->getRect();
-                if(m_rect.intersects(pBlockRect) && this != pBlock)
+                const QRect pBlockRect = pBlock->geometry();
+                if(geometry().intersects(pBlockRect) && this != pBlock)
                 {
                     if(m_value == pBlock->value())
                     {
@@ -262,9 +263,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), geometry().y()));
-                        m_rect.setY(pBlockRect.top() - Constants::BlockSize);
-                        m_rect.setBottom(pBlockRect.top());
+                        setPosition(QPoint(geometry().x(), pBlockRect.top() - Constants::BlockSize));
                     }
                 }
             }
@@ -272,19 +271,17 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
     }
     else if(m_velocity.y() < 0)
     {
-        if(m_rect.top() < bounds.top())
+        if(geometry().top() < bounds.top())
         {
             m_velocity = Vector2(0,0);
-            setPosition(QPoint(geometry().x(), geometry().y()));
-            m_rect.setY(bounds.top());
-            m_rect.setBottom(bounds.top() + Constants::BlockSize);
+            setPosition(QPoint(geometry().x(), bounds.top()));
         }
         else
         {
             for(Block* pBlock : blocks)
             {
-                const QRectF pBlockRect = pBlock->getRect();
-                if(m_rect.intersects(pBlockRect) && this != pBlock)
+                const QRect pBlockRect = pBlock->geometry();
+                if(geometry().intersects(pBlockRect) && this != pBlock)
                 {
                     if(m_value == pBlock->value())
                     {
@@ -294,9 +291,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                     else
                     {
                         m_velocity = Vector2(0,0);
-                        setPosition(QPoint(geometry().x(), geometry().y()));
-                        m_rect.setY(pBlockRect.bottom());
-                        m_rect.setBottom(pBlockRect.bottom() + Constants::BlockSize);
+                        setPosition(QPoint(geometry().x(), pBlockRect.bottom()));
                     }
                 }
             }
