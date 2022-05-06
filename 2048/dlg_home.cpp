@@ -440,22 +440,26 @@ void DLG_Home::onAiThink()
     }
 
     Vector2 direction = Vector2(0, 1);
-    int score = gameStateScore(mapMove(map, direction));
-    int score2 = gameStateScore(mapMove(map, Vector2(0, -1)));
+    QVector<QVector<int>> movedMap = mapMove(map, direction);
+    int score = map != movedMap ? gameStateScore(movedMap) : 0;
+    movedMap = mapMove(map, Vector2(0, -1));
+    int score2 = map != movedMap ? gameStateScore(movedMap) : 0;
     if(score2 > score)
     {
         score = score2;
         direction = Vector2(0, -1);
     }
 
-    score2 = gameStateScore(mapMove(map, Vector2(1, 0)));
+    movedMap = mapMove(map, Vector2(1, 0));
+    score2 = map != movedMap ? gameStateScore(movedMap) : 0;
     if(score2 > score)
     {
         score = score2;
         direction = Vector2(1, 0);
     }
 
-    score2 = gameStateScore(mapMove(map, Vector2(-1, 0)));
+    movedMap = mapMove(map, Vector2(-1, 0));
+    score2 = map != movedMap ? gameStateScore(movedMap) : 0;
     if(score2 > score)
     {
         direction = Vector2(-1, 0);
