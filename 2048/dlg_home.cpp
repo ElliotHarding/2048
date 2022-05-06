@@ -458,7 +458,7 @@ void DLG_Home::onAiThink()
     score2 = gameStateScore(mapMove(map, Vector2(-1, 0)));
     if(score2 > score)
     {
-        direction = Vector2(1, 0);
+        direction = Vector2(-1, 0);
     }
 
     m_blocksMutex.unlock();
