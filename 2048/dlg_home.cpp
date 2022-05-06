@@ -274,30 +274,150 @@ int gameStateScore(QVector<QVector<int>> map)
     return score;
 }
 
-QVector<QVector<int>> mapMove(QVector<QVector<int>> map, Vector2 direction)
+QVector<QVector<int>> mapMove(QVector<QVector<int>> map, const Vector2& direction)
 {
     if(direction.x() > 0)
     {
-        for(int x = map.size()-1; x > -1; x++)
+        for(int moveCount = 0; moveCount < Constants::MaxBlocksPerRow; moveCount++)
         {
-            for(int y = 0; y < map[0].size(); y++)
+            bool moved = false;
+            for(int x = map.size()-1; x > -1; x--)
             {
-
+                for(int y = 0; y < map[0].size(); y++)
+                {
+                    if(map[x][y] != 0 && x < map.size()-1)
+                    {
+                        if(map[x+1][y] == 0)
+                        {
+                            map[x+1][y] = map[x][y];
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                        else if(map[x+1][y] == map[x][y])
+                        {
+                            map[x+1][y] *= 2;
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                    }
+                }
+            }
+            if(!moved)
+            {
+                break;
             }
         }
     }
     else if(direction.x() < 0)
     {
-
+        for(int moveCount = 0; moveCount < Constants::MaxBlocksPerRow; moveCount++)
+        {
+            bool moved = false;
+            for(int x = 0; x < map.size(); x++)
+            {
+                for(int y = 0; y < map[0].size(); y++)
+                {
+                    if(map[x][y] != 0 && x > 0)
+                    {
+                        if(map[x-1][y] == 0)
+                        {
+                            map[x-1][y] = map[x][y];
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                        else if(map[x-1][y] == map[x][y])
+                        {
+                            map[x-1][y] *= 2;
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                    }
+                }
+            }
+            if(!moved)
+            {
+                break;
+            }
+        }
     }
     else if(direction.y() > 0)
     {
-
+        for(int moveCount = 0; moveCount < Constants::MaxBlocksPerCol; moveCount++)
+        {
+            bool moved = false;
+            for(int x = 0; x < map.size(); x++)
+            {
+                for(int y = map[0].size()-1; y > -1; y--)
+                {
+                    if(map[x][y] != 0 && y < map[0].size()-1)
+                    {
+                        if(map[x][y+1] == 0)
+                        {
+                            map[x][y+1] = map[x][y];
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                        else if(map[x][y+1] == map[x][y])
+                        {
+                            map[x][y+1] *= 2;
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                    }
+                }
+            }
+            if(!moved)
+            {
+                break;
+            }
+        }
     }
     else if(direction.y() < 0)
     {
-
+        for(int moveCount = 0; moveCount < Constants::MaxBlocksPerCol; moveCount++)
+        {
+            bool moved = false;
+            for(int x = 0; x < map.size(); x++)
+            {
+                for(int y = 0; y < map[0].size(); y++)
+                {
+                    if(map[x][y] != 0 && y > 0)
+                    {
+                        if(map[x][y-1] == 0)
+                        {
+                            map[x][y-1] = map[x][y];
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                        else if(map[x][y-1] == map[x][y])
+                        {
+                            map[x][y-1] *= 2;
+                            map[x][y] = 0;
+                            moved = true;
+                        }
+                    }
+                }
+            }
+            if(!moved)
+            {
+                break;
+            }
+        }
     }
+
+    qDebug() << "---------------";
+    for(int y = 0; y < map[0].size(); y++)
+    {
+        QString colStr = "";
+        for(int x = 0; x < map.size(); x++)
+        {
+            colStr += QString::number(map[x][y]) + " ";
+        }
+        qDebug() << colStr;
+    }
+    qDebug() << "---------------";
+
+    return map;
 }
 
 void DLG_Home::onAiThink()
