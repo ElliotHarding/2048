@@ -24,7 +24,9 @@ public:
     bool updatePosition();
 
     void setVelocity(Vector2 vel);
-    bool checkBoundaries(QRect bounds, QVector<Block*>& blocks);
+    Vector2 velocity();
+
+    void checkBoundaries(QRect bounds, QVector<Block*>& blocks);
 
 protected:
     void paintEvent(QPaintEvent* paintEvent) override;
@@ -32,6 +34,7 @@ protected:
 private:
     void setPosition(const QPoint& position);
 
+    bool m_bToDelete = false;
     int m_value;
     QColor m_col;
     Vector2 m_velocity;

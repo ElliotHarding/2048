@@ -13,6 +13,8 @@
 
 namespace Constants
 {
+const int UpdateFrequency = 1;
+
 const int BlockSize = 30;
 const QRect BoardGeometry = QRect(0, 0, BlockSize * 3, BlockSize * 3);
 
@@ -40,7 +42,7 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
-    m_pUpdateTimer->start(1);
+    m_pUpdateTimer->start(Constants::UpdateFrequency);
 }
 
 DLG_Home::~DLG_Home()
@@ -121,11 +123,7 @@ void DLG_Home::onUpdate()
         //If some blocks moved, check they're in correct bounds
         for(Block* pBlock : m_blocks)
         {
-            if(pBlock->checkBoundaries(QRect(0,0,120,120), m_blocks))
-            {
-                m_blocks.removeOne(pBlock);
-                delete pBlock;
-            }
+            pBlock->checkBoundaries(QRect(0,0,120,120), m_blocks);
         }
         update();
     }
@@ -182,7 +180,12 @@ void Block::setVelocity(Vector2 vel)
     m_velocity = vel;
 }
 
-bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
+Vector2 Block::velocity()
+{
+    return m_velocity;
+}
+
+void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 {
     if(m_velocity.x() > 0)
     {
@@ -200,8 +203,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        pBlock->setValue(m_value + m_value);
-                        return true;
+                        m_bToDelete = true;
                     }
                     else
                     {
@@ -228,8 +230,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        pBlock->setValue(m_value + m_value);
-                        return true;
+                        m_bToDelete = true;
                     }
                     else
                     {
@@ -257,8 +258,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        pBlock->setValue(m_value + m_value);
-                        return true;
+                        m_bToDelete = true;
                     }
                     else
                     {
@@ -285,8 +285,7 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        pBlock->setValue(m_value + m_value);
-                        return true;
+                        m_bToDelete = true;
                     }
                     else
                     {
@@ -298,6 +297,11 @@ bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         }
     }
 
-    return false;
+    if(m_bToDelete && m_velocity == Vector2(0,0))
+    {
+        blocks.removeOne(this);
+        delete this;
+    }
+
     //Could loop checking if intersets now repositioned...
 }
