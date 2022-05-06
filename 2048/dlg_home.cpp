@@ -200,6 +200,13 @@ Vector2 Block::velocity()
 
 void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 {
+    //If the block has a velocity:
+    // - Check the block is in bounds (only considoring bounds in velocity direction)
+    //   - If not in bounds push it back into bounds and stop its velocity
+    // - Otherwise check if block collides (intersects) with any other blocks
+    //   - If collides with same m_value block; plan to remove due to merge
+    //   - If collides with othr m_value block; stop velocity and set flush against other block.
+
     if(m_velocity.x() > 0)
     {
         if(geometry().right() > bounds.right())
