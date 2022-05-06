@@ -34,7 +34,7 @@ protected:
 private:
     void setPosition(const QPoint& position);
 
-    bool m_bToDelete = false;
+    Block* m_pDeletingBlock = nullptr;
     int m_value;
     QColor m_col;
     Vector2 m_velocity;

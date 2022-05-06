@@ -203,7 +203,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_bToDelete = true;
+                        m_pDeletingBlock = pBlock;
                     }
                     else
                     {
@@ -230,7 +230,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_bToDelete = true;
+                        m_pDeletingBlock = pBlock;
                     }
                     else
                     {
@@ -258,7 +258,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_bToDelete = true;
+                        m_pDeletingBlock = pBlock;
                     }
                     else
                     {
@@ -285,7 +285,7 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 {
                     if(m_value == pBlock->value())
                     {
-                        m_bToDelete = true;
+                        m_pDeletingBlock = pBlock;
                     }
                     else
                     {
@@ -297,8 +297,9 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
         }
     }
 
-    if(m_bToDelete && m_velocity == Vector2(0,0))
+    if(m_pDeletingBlock && m_velocity == Vector2(0,0))
     {
+        m_pDeletingBlock->setValue(m_value + m_value);
         blocks.removeOne(this);
         delete this;
     }
