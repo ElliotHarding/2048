@@ -192,7 +192,7 @@ void DLG_Home::onUpdate()
         update();
     }
 
-    if(!m_bAcceptInput && !anyMoved)
+    else if(!m_bAcceptInput && !anyMoved)
     {
         QVector<QPoint> newPositions;
         for(Block* pBlock : m_blocks)
