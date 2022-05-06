@@ -235,13 +235,45 @@ int gameStateScore(int map[Constants::MaxBlocksPerCol][Constants::MaxBlocksPerRo
     }
 
     //Highest number created
-    score += (blockValues[blockValues.size()-1]/2048) * ScoreWeights::ScoreWeightHighestNumber;
+    score += (highestNumber/2048) * ScoreWeights::ScoreWeightHighestNumber;
+
+    //Find second & third highest numbers
+    const int secondHighestNumber = blockValues[blockValues.size()-2];
+    int secondHighestNumberX = 0;
+    int secondHighestNumberY = 0;
+    const int thirdHighestNumber = blockValues[blockValues.size()-3];
+    int thirdHighestNumberX = 0;
+    int thirdHighestNumberY = 0;
+    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+    {
+        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+        {
+            if(map[x][y] == secondHighestNumber)
+            {
+                secondHighestNumberX = x;
+                secondHighestNumberY = y;
+            }
+            else if(map[x][y] == thirdHighestNumber)
+            {
+                thirdHighestNumberX = x;
+                thirdHighestNumberY = y;
+            }
+        }
+    }
 
     //High numbers close to highest number
-    if(map[highestNumberX][highestNumberY])
+    if(secondHighestNumberX > highestNumberX - 2 && secondHighestNumberX < highestNumberX + 2 &&
+       secondHighestNumberY > highestNumberY - 2 && secondHighestNumberY < highestNumberY + 2)
     {
-
+        score += 1 * ScoreWeights::ScoreWeightHighNumbersClose;
     }
+    else if(thirdHighestNumberX > highestNumberX - 2 && thirdHighestNumberX < highestNumberX + 2 &&
+            thirdHighestNumberY > highestNumberY - 2 && thirdHighestNumberY < highestNumberY + 2)
+    {
+        score += 0.6 * ScoreWeights::ScoreWeightHighNumbersClose;
+    }
+
+    return score;
 }
 
 void DLG_Home::onAiThink()
