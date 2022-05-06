@@ -24,7 +24,7 @@ public:
     bool updatePosition();
 
     void setVelocity(Vector2 vel);
-    void checkBoundaries(QRect bounds, QVector<Block*>& blocks);
+    bool checkBoundaries(QRect bounds, QVector<Block*>& blocks);
 
 private:
     int m_value;

@@ -128,7 +128,11 @@ void DLG_Home::onUpdate()
         //If some blocks moved, check they're in correct bounds
         for(Block* pBlock : m_blocks)
         {
-            pBlock->checkBoundaries(QRect(0,0,120,120), m_blocks);
+            if(pBlock->checkBoundaries(QRect(0,0,120,120), m_blocks))
+            {
+                m_blocks.removeOne(pBlock);
+                delete pBlock;
+            }
         }
         update();
     }
@@ -179,7 +183,7 @@ void Block::setVelocity(Vector2 vel)
     m_velocity = vel;
 }
 
-void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
+bool Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
 {
     if(m_velocity.x() > 0)
     {
@@ -196,9 +200,17 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 const QRectF pBlockRect = pBlock->getRect();
                 if(m_rect.intersects(pBlockRect) && this != pBlock)
                 {
-                    m_velocity = Vector2(0,0);
-                    m_rect.setX(pBlockRect.left() - Constants::BlockSize);
-                    m_rect.setRight(pBlockRect.left());
+                    if(m_value == pBlock->value())
+                    {
+                        pBlock->setValue(m_value + m_value);
+                        return true;
+                    }
+                    else
+                    {
+                        m_velocity = Vector2(0,0);
+                        m_rect.setX(pBlockRect.left() - Constants::BlockSize);
+                        m_rect.setRight(pBlockRect.left());
+                    }
                 }
             }
         }
@@ -218,9 +230,17 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 const QRectF pBlockRect = pBlock->getRect();
                 if(m_rect.intersects(pBlockRect) && this != pBlock)
                 {
-                    m_velocity = Vector2(0,0);
-                    m_rect.setX(pBlockRect.right());
-                    m_rect.setRight(pBlockRect.right() + Constants::BlockSize);
+                    if(m_value == pBlock->value())
+                    {
+                        pBlock->setValue(m_value + m_value);
+                        return true;
+                    }
+                    else
+                    {
+                        m_velocity = Vector2(0,0);
+                        m_rect.setX(pBlockRect.right());
+                        m_rect.setRight(pBlockRect.right() + Constants::BlockSize);
+                    }
                 }
             }
         }
@@ -241,9 +261,17 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 const QRectF pBlockRect = pBlock->getRect();
                 if(m_rect.intersects(pBlockRect) && this != pBlock)
                 {
-                    m_velocity = Vector2(0,0);
-                    m_rect.setY(pBlockRect.top() - Constants::BlockSize);
-                    m_rect.setBottom(pBlockRect.top());
+                    if(m_value == pBlock->value())
+                    {
+                        pBlock->setValue(m_value + m_value);
+                        return true;
+                    }
+                    else
+                    {
+                        m_velocity = Vector2(0,0);
+                        m_rect.setY(pBlockRect.top() - Constants::BlockSize);
+                        m_rect.setBottom(pBlockRect.top());
+                    }
                 }
             }
         }
@@ -263,13 +291,22 @@ void Block::checkBoundaries(QRect bounds, QVector<Block*>& blocks)
                 const QRectF pBlockRect = pBlock->getRect();
                 if(m_rect.intersects(pBlockRect) && this != pBlock)
                 {
-                    m_velocity = Vector2(0,0);
-                    m_rect.setY(pBlockRect.bottom());
-                    m_rect.setBottom(pBlockRect.bottom() + Constants::BlockSize);
+                    if(m_value == pBlock->value())
+                    {
+                        pBlock->setValue(m_value + m_value);
+                        return true;
+                    }
+                    else
+                    {
+                        m_velocity = Vector2(0,0);
+                        m_rect.setY(pBlockRect.bottom());
+                        m_rect.setBottom(pBlockRect.bottom() + Constants::BlockSize);
+                    }
                 }
             }
         }
     }
 
+    return false;
     //Could loop checking if intersets now repositioned...
 }
