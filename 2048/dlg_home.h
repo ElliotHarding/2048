@@ -63,10 +63,9 @@ private:
 
     bool m_bAcceptInput = true;
 
-    bool m_bSomethingMovedSinceLastInput = false;
-
     QVector<Block*> m_blocks;
     QMutex m_blocksMutex;
+    QVector<QPoint> m_blockPositionsBeforeInput;
 
     QTimer* m_pUpdateTimer;
 };

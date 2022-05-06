@@ -79,8 +79,12 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         if(event->key() == Qt::Key_Up)
         {
             m_blocksMutex.lock();
+
+            m_blockPositionsBeforeInput.clear();
+
             for(Block* pBlock : m_blocks)
             {
+                m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().top() > Constants::BoardGeometry.top() - 1)
                 {
                     pBlock->setVelocity(Vector2(0, -1));
@@ -92,8 +96,12 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         else if(event->key() == Qt::Key_Down)
         {
             m_blocksMutex.lock();
+
+            m_blockPositionsBeforeInput.clear();
+
             for(Block* pBlock : m_blocks)
             {
+                m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().bottom() < Constants::BoardGeometry.bottom() + 1)
                 {
                     pBlock->setVelocity(Vector2(0, 1));
@@ -105,8 +113,12 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         else if(event->key() == Qt::Key_Right)
         {
             m_blocksMutex.lock();
+
+            m_blockPositionsBeforeInput.clear();
+
             for(Block* pBlock : m_blocks)
             {
+                m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().right() < Constants::BoardGeometry.right() + 1)
                 {
                     pBlock->setVelocity(Vector2(1, 0));
@@ -118,8 +130,12 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
         else if(event->key() == Qt::Key_Left)
         {
             m_blocksMutex.lock();
+
+            m_blockPositionsBeforeInput.clear();
+
             for(Block* pBlock : m_blocks)
             {
+                m_blockPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
                 if(pBlock->geometry().left() > Constants::BoardGeometry.left() - 1)
                 {
                     pBlock->setVelocity(Vector2(-1, 0));
@@ -135,14 +151,10 @@ void DLG_Home::onUpdate()
 {
     m_blocksMutex.lock();
 
-    QVector<QPoint> oldPositions;
-    QVector<QPoint> newPositions;
-
     //Update positions, check if any moved
     bool anyMoved = false;
     for(Block* pBlock : m_blocks)
     {
-        oldPositions.push_back(pBlock->geometry().topLeft());
         const bool moved = pBlock->updatePosition();
         anyMoved = moved | anyMoved;        
         pBlock->TESTRECT = pBlock->geometry();
@@ -159,24 +171,22 @@ void DLG_Home::onUpdate()
             }
         }
         update();
+    }
 
+    if(!m_bAcceptInput && !anyMoved)
+    {
+        QVector<QPoint> newPositions;
         for(Block* pBlock : m_blocks)
         {
             newPositions.push_back(pBlock->geometry().topLeft());
         }
 
-        m_bSomethingMovedSinceLastInput = m_bSomethingMovedSinceLastInput | (oldPositions != newPositions);
-    }
-
-    if(!m_bAcceptInput && !anyMoved)
-    {
-        if(m_bSomethingMovedSinceLastInput && !trySpawnNewBlock())
+        if(m_blockPositionsBeforeInput != newPositions && !trySpawnNewBlock())
         {
             //todo - Game over...
         }
         else
         {
-            m_bSomethingMovedSinceLastInput = false;
             m_bAcceptInput = true;
         }
     }
