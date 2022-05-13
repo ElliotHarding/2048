@@ -146,10 +146,11 @@ void DLG_Home::move(Vector2 direction)
                         m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
-                    else if(m_blocksGrid[x+direction.x()][y+direction.y()] == m_blocksGrid[x][y])
+                    else if(m_blocksGrid[x+direction.x()][y+direction.y()]->value() == m_blocksGrid[x][y]->value())
                     {
                         m_blocksGrid[x+direction.x()][y+direction.y()]->setValue(m_blocksGrid[x][y]->value()*2);
                         delete m_blocksGrid[x][y];
+                        m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
                 }
