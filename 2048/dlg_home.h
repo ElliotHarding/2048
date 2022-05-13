@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMutex>
 
+#include "ai.h"
 #include "block.h"
 
 QT_BEGIN_NAMESPACE
@@ -64,5 +65,8 @@ private:
     QTimer* m_pUpdateTimer;
     QTimer* m_pAiTimer;
     bool m_bGameOver = false;
+
+    ///AI
+    AI m_ai;
 };
 #endif // DLG_HOME_H

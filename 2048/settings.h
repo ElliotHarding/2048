@@ -49,6 +49,4 @@ const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1,
 
 }
 
-typedef QPointF Vector2;
-
 #endif // SETTINGS_H
