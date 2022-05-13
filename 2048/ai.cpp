@@ -237,6 +237,7 @@ bool compareNumberAndLocation(const NumberAndLocation &a, const NumberAndLocatio
 
 int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>& blockValues, const int& numMerges)
 {
+    //Number of merges adds to score
     int score = numMerges * Constants::ScoreWeightNumMerges;
 
     int numZeroBlocks = 0;
@@ -279,6 +280,7 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
         score += Constants::ScoreWeightHighTopLeftN2;
     }
 
+    //No number in bottom right
     if(map[map.size()-1][map[0].size()-1] != 0)
     {
         score -= Constants::ScoreWeightHighTopLeftN0;
@@ -303,7 +305,7 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
         score += Constants::ScoreWeightHighNumbersCloseN1;
     }
 
-    //Lower score for too many blocks
+    //Add to score for number of 0 blocks
     score += Constants::ScoreWeightNumberBlocks * numZeroBlocks;
 
     return score > 0 ? score : 0;
