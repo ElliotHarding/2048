@@ -210,7 +210,26 @@ void DLG_Home::onAiThink()
         map[indexX][indexY] = pBlock->value();
     }
 
-    const Vector2 bestDirection = m_ai.getBestDirection(map);
+    map[0][0] = 2;
+    map[1][0] = 0;
+    map[2][0] = 0;
+    map[3][0] = 0;
+    map[0][1] = 0;
+    map[1][1] = 2;
+    map[2][1] = 0;
+    map[3][1] = 0;
+    map[0][2] = 0;
+    map[1][2] = 4;
+    map[2][2] = 0;
+    map[3][2] = 0;
+    map[0][3] = 0;
+    map[1][3] = 2;
+    map[2][3] = 0;
+    map[3][3] = 0;
+
+    //make const... todo
+    Vector2 bestDirection = m_ai.getBestDirection(map);
+    bestDirection = Vector2(0,0);
 
     m_blocksMutex.unlock();
     applyVelocity(bestDirection);

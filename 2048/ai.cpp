@@ -282,6 +282,9 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
 Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
 {
     Vector2 chosenDirection = Constants::PossibleMoveDirections[0];
+
+    clock_t start = clock();
+
     int score = 0;
     for(const Vector2& direction : Constants::PossibleMoveDirections)
     {
@@ -297,5 +300,9 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
             }
         }
     }
+
+    clock_t finish = clock();
+    qDebug() << finish - start;
+
     return chosenDirection;
 }
