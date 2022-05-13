@@ -307,8 +307,7 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     QVector<QVector<int>> movedSpawnStateMem = map;
     QVector<QVector<int>> moveMap = map;
 
-    NumberAndLocation numAndLocation;
-    QVector<NumberAndLocation> blockValuesMem = QVector<NumberAndLocation>(Constants::MaxBlocks, numAndLocation);
+    QVector<NumberAndLocation> blockValuesMem = QVector<NumberAndLocation>(Constants::MaxBlocks, NumberAndLocation());
 
     int score = 0;
     int mapScore;
