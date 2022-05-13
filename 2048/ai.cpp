@@ -233,26 +233,6 @@ int gameStateScore(const QVector<QVector<int>>& map)
     return score > 0 ? score : 0;
 }
 
-QList<QVector<QVector<int>>> possibleSpawnStates(const QVector<QVector<int>>& map)
-{
-    QList<QVector<QVector<int>>> possibleSpawnStates;
-
-    for(int x = 0; x < map.size(); x++)
-    {
-        for(int y = 0; y < map[x].size(); y++)
-        {
-            if(map[x][y] == 0)
-            {
-                QVector<QVector<int>> newMap = map;
-                newMap[x][y] = 2;
-                possibleSpawnStates.push_back(newMap);
-            }
-        }
-    }
-
-    return possibleSpawnStates;
-}
-
 void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth)
 {
     if(depth == 0)
@@ -260,20 +240,28 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
         return;
     }
 
-    QList<QVector<QVector<int>>> spawnStates = possibleSpawnStates(map);
-    for(const QVector<QVector<int>>& spawnState : spawnStates)
+    for(int x = 0; x < map.size(); x++)
     {
-        for(const Vector2& direction : Constants::PossibleMoveDirections)
+        for(int y = 0; y < map[x].size(); y++)
         {
-            QVector<QVector<int>> movedSpawnState = std::move(spawnState);
-            if(mapMove(movedSpawnState, direction))
+            if(map[x][y] == 0)
             {
-                int score = gameStateScore(movedSpawnState);
-                if(score > highScore)
+                QVector<QVector<int>> spawnState = map;
+                spawnState[x][y] = 2;
+
+                for(const Vector2& direction : Constants::PossibleMoveDirections)
                 {
-                    highScore = score;
+                    QVector<QVector<int>> movedSpawnState = spawnState;
+                    if(mapMove(movedSpawnState, direction))
+                    {
+                        int score = gameStateScore(movedSpawnState);
+                        if(score > highScore)
+                        {
+                            highScore = score;
+                        }
+                        getHighestScore(movedSpawnState, highScore, depth - 1);
+                    }
                 }
-                getHighestScore(movedSpawnState, highScore, depth - 1);
             }
         }
     }
