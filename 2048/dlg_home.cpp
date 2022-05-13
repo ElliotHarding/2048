@@ -18,18 +18,15 @@ DLG_Home::DLG_Home(QWidget *parent)
 {
     ui->setupUi(this);
 
-    reset();
-
-    //Start game loop - runs forever
     m_pUpdateTimer = new QTimer(this);
     connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
     m_pUpdateTimer->setTimerType(Qt::PreciseTimer);
-    m_pUpdateTimer->start(Constants::GameUpdateFrequency);
 
     m_pAiTimer = new QTimer(this);
     connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));
     m_pAiTimer->setTimerType(Qt::PreciseTimer);
-    m_pAiTimer->start(Constants::AiThinkFrequency);
+
+    reset();
 }
 
 DLG_Home::~DLG_Home()
@@ -66,10 +63,14 @@ void DLG_Home::reset()
     m_blocks.clear();
 
     //Initial game board contains one block
-    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft()));
+    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft() + QPoint(0, 0)));
 
     m_bAcceptInput = true;
     m_bGameOver = false;
+
+    //Start game loop - runs forever
+    m_pUpdateTimer->start(Constants::GameUpdateFrequency);
+    m_pAiTimer->start(Constants::AiThinkFrequency);
 
     m_blocksMutex.unlock();
 
@@ -155,7 +156,7 @@ void DLG_Home::onUpdate()
         update();
     }
 
-    else if(!m_bAcceptInput && !anyMoved)
+    else if(!m_bAcceptInput)
     {
         QVector<QPoint> newPositions;
         for(Block* pBlock : m_blocks)
@@ -163,12 +164,19 @@ void DLG_Home::onUpdate()
             newPositions.push_back(pBlock->geometry().topLeft());
         }
 
+        if(m_blocks.size() == Constants::MaxBlocks)
+        {
+            m_bGameOver = true;
+            m_pAiTimer->stop();
+            m_pUpdateTimer->stop();
+        }
+
         //If board changed after input then can try spawn a new block
         if(m_blocksPositionsBeforeInput != newPositions)
         {
             if(!trySpawnNewBlock())
             {
-                m_bGameOver = true;
+                qDebug() << "DLG_Home::onUpdate : Failed to spawn new block, but game not over";
             }
             else
             {
