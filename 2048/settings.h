@@ -17,6 +17,10 @@ const int GameUpdateFrequency = 1;
 const int BlockMovementSpeed = 3;
 const int AiThinkFrequency = 1000;
 
+///Spawn block settings
+const int PercentageSpawn2block = 80;
+const int PercentageSpawn4block = 20;
+
 ///Visual block settings
 const int BlockPopTimeMs = 100; //Block pops bigger when merging or spawning
 const int BlockSize = 100;

@@ -269,8 +269,8 @@ bool DLG_Home::trySpawnNewBlock()
     const int randomPosition = QRandomGenerator::global()->generateDouble() * emptySpaces.size() - 1;
     const QPoint spawnPos = emptySpaces[randomPosition];
 
-    const int randomStartOption = QRandomGenerator::global()->generateDouble() * 2;
-    const int startValue = randomStartOption == 0 ? 2 : 4;
+    const int randomStartOption = QRandomGenerator::global()->generateDouble() * 100;
+    const int startValue = randomStartOption < Constants::PercentageSpawn2block ? 2 : 4;
 
     m_blocks.push_back(new Block(this, startValue, spawnPos));
 
