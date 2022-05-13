@@ -348,6 +348,12 @@ int gameStateScore(QVector<QVector<int>> map)
     int highestNumber = 0;
     int highestNumberX = 0;
     int highestNumberY = 0;
+    int secondHighestNumber = 0;
+    int secondHighestNumberX = 0;
+    int secondHighestNumberY = 0;
+    int thirdHighestNumber = 0;
+    int thirdHighestNumberX = 0;
+    int thirdHighestNumberY = 0;
     for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
     {
         for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
@@ -358,6 +364,18 @@ int gameStateScore(QVector<QVector<int>> map)
                 highestNumber = map[x][y];
                 highestNumberX = x;
                 highestNumberY = y;
+            }
+            else if(map[x][y] > secondHighestNumber && (x != highestNumberX || y != highestNumberY))
+            {
+                secondHighestNumber = map[x][y];
+                secondHighestNumberX = x;
+                secondHighestNumberY = y;
+            }
+            else if(map[x][y] > thirdHighestNumber && (x != highestNumberX || y != highestNumberY) && (x != secondHighestNumberX || y != secondHighestNumberY))
+            {
+                thirdHighestNumber = map[x][y];
+                thirdHighestNumberX = x;
+                thirdHighestNumberY = y;
             }
         }
     }
@@ -379,30 +397,6 @@ int gameStateScore(QVector<QVector<int>> map)
 
     //Highest number created
     score += (highestNumber/2048) * ScoreWeights::ScoreWeightHighestNumber;
-
-    //Find second & third highest numbers
-    const int secondHighestNumber = blockValues[blockValues.size()-2];
-    int secondHighestNumberX = 0;
-    int secondHighestNumberY = 0;
-    const int thirdHighestNumber = blockValues[blockValues.size()-3];
-    int thirdHighestNumberX = 0;
-    int thirdHighestNumberY = 0;
-    for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
-    {
-        for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
-        {
-            if(map[x][y] == secondHighestNumber)
-            {
-                secondHighestNumberX = x;
-                secondHighestNumberY = y;
-            }
-            else if(map[x][y] == thirdHighestNumber)
-            {
-                thirdHighestNumberX = x;
-                thirdHighestNumberY = y;
-            }
-        }
-    }
 
     //High numbers close to highest number
     if(secondHighestNumberX > highestNumberX - 2 && secondHighestNumberX < highestNumberX + 2 &&
