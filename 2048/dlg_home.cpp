@@ -337,7 +337,7 @@ namespace ScoreWeights
 const int ScoreWeightHighTopLeft = 30; //Reward % for having highest number in top left slot
 const int ScoreWeightHighNumbersClose = 20; //Reward % for having high value blocks next to eachother
 const int ScoreWeightHighestNumber = 50; //Reward % for having the highest number
-const int ScoreWeightNumberBlocks = 10;
+const int ScoreWeightNumberBlocks = 30;
 }
 
 struct NumberAndLocation
@@ -393,7 +393,7 @@ int gameStateScore(QVector<QVector<int>> map)
     }
 
     //Highest number created
-    score += (highestNumber/2048) * ScoreWeights::ScoreWeightHighestNumber;
+    score += (highestNumber/1024) * ScoreWeights::ScoreWeightHighestNumber;
 
     //High numbers close to highest number
     if(secondHighestNumberX > highestNumberX - 2 && secondHighestNumberX < highestNumberX + 2 &&
@@ -481,7 +481,7 @@ void getHighestScore(QVector<QVector<int>> map, int& highScore, int depth)
                 {
                     highScore = score;
                 }
-                getHighestScore(movedSpawnState, highScore, --depth);
+                getHighestScore(movedSpawnState, highScore, depth - 1);
             }
         }
     }
@@ -500,7 +500,7 @@ Vector2 getBestDirection(const QVector<QVector<int>>& map)
         if(mapMoved)
         {
             int mapScore = gameStateScore(moveMap);
-            getHighestScore(moveMap, mapScore, 0);
+            getHighestScore(moveMap, mapScore, 2);
             if(mapScore > score)
             {
                 score = mapScore;
