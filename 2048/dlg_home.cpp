@@ -187,7 +187,7 @@ bool withinRangeInclusive(const int& value, const int& min, const int& max)
     return value >= min && value <= max;
 }
 
-QVector<QVector<int>> mapMove(QVector<QVector<int>> map, const Vector2& direction)
+void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
 {
     if(direction.x() > 0)
     {
@@ -330,8 +330,6 @@ QVector<QVector<int>> mapMove(QVector<QVector<int>> map, const Vector2& directio
         qDebug() << colStr;
     }
     qDebug() << "---------------";*/
-
-    return map;
 }
 
 namespace ScoreWeights
@@ -435,8 +433,9 @@ Vector2 getBestDirection(const QVector<QVector<int>>& map)
     int score = 0;
     for(const Vector2& direction : MovementOptions::PossibleMoveDirections)
     {
-        QVector<QVector<int>> movedMap = mapMove(map, direction);
-        int mapScore = map != movedMap ? gameStateScore(movedMap) : 0;
+        QVector<QVector<int>> moveMap = map;
+        mapMove(moveMap, direction);
+        int mapScore = map != moveMap ? gameStateScore(moveMap) : 0;
         if(mapScore > score)
         {
             score = mapScore;
