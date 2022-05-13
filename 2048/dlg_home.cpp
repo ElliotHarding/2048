@@ -69,6 +69,7 @@ void DLG_Home::reset()
     m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft()));
 
     m_bAcceptInput = true;
+    m_bGameOver = false;
 
     m_blocksMutex.unlock();
 
@@ -167,7 +168,7 @@ void DLG_Home::onUpdate()
         {
             if(!trySpawnNewBlock())
             {
-                //todo - Game over...
+                m_bGameOver = true;
             }
             else
             {
@@ -519,15 +520,8 @@ Vector2 getBestDirection(const QVector<QVector<int>>& map)
 void DLG_Home::onAiThink()
 {
     m_blocksMutex.lock();
-    if(!m_bAcceptInput)
+    if(!m_bAcceptInput || m_bGameOver)
     {
-        m_blocksMutex.unlock();
-        return;
-    }
-
-    if(m_blocks.size() == Constants::MaxBlocksPerCol * Constants::MaxBlocksPerRow)
-    {
-        //game over
         m_blocksMutex.unlock();
         return;
     }

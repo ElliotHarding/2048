@@ -63,5 +63,6 @@ private:
     ///Game loop timer
     QTimer* m_pUpdateTimer;
     QTimer* m_pAiTimer;
+    bool m_bGameOver = false;
 };
 #endif // DLG_HOME_H
