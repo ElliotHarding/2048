@@ -340,46 +340,43 @@ const int ScoreWeightHighestNumber = 50; //Reward % for having the highest numbe
 const int ScoreWeightNumberBlocks = 10;
 }
 
+struct NumberAndLocation
+{
+    int number = 0;
+    int posX = 0;
+    int posY = 0;
+};
+
+bool compareNumberAndLocation(const NumberAndLocation &a, const NumberAndLocation &b)
+{
+    return a.number < b.number;
+}
+
 int gameStateScore(QVector<QVector<int>> map)
 {
     int score = 0;
 
-    QList<int> blockValues;
-    int highestNumber = 0;
-    int highestNumberX = 0;
-    int highestNumberY = 0;
-    int secondHighestNumber = 0;
-    int secondHighestNumberX = 0;
-    int secondHighestNumberY = 0;
-    int thirdHighestNumber = 0;
-    int thirdHighestNumberX = 0;
-    int thirdHighestNumberY = 0;
+    QList<NumberAndLocation> blockValues;
     for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
     {
         for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
         {
-            blockValues.push_back(map[x][y]);
-            if(map[x][y] > highestNumber)
-            {
-                highestNumber = map[x][y];
-                highestNumberX = x;
-                highestNumberY = y;
-            }
-            else if(map[x][y] > secondHighestNumber && (x != highestNumberX || y != highestNumberY))
-            {
-                secondHighestNumber = map[x][y];
-                secondHighestNumberX = x;
-                secondHighestNumberY = y;
-            }
-            else if(map[x][y] > thirdHighestNumber && (x != highestNumberX || y != highestNumberY) && (x != secondHighestNumberX || y != secondHighestNumberY))
-            {
-                thirdHighestNumber = map[x][y];
-                thirdHighestNumberX = x;
-                thirdHighestNumberY = y;
-            }
+            NumberAndLocation numAndLocation;
+            numAndLocation.number = map[x][y];
+            numAndLocation.posX = x;
+            numAndLocation.posY = y;
+            blockValues.push_back(numAndLocation);
         }
     }
-    std::sort(blockValues.begin(), blockValues.end());
+    std::sort(blockValues.begin(), blockValues.end(), compareNumberAndLocation);
+
+    const int highestNumber = blockValues[blockValues.size()-1].number;
+    const int highestNumberX = blockValues[blockValues.size()-1].posX;
+    const int highestNumberY = blockValues[blockValues.size()-1].posY;
+    const int secondHighestNumberX = blockValues.size() > 1 ? blockValues[blockValues.size()-2].posX : 0;
+    const int secondHighestNumberY = blockValues.size() > 1 ? blockValues[blockValues.size()-2].posY : 0;
+    const int thirdHighestNumberX = blockValues.size() > 2 ? blockValues[blockValues.size()-3].posX : 0;
+    const int thirdHighestNumberY = blockValues.size() > 2 ? blockValues[blockValues.size()-3].posY : 0;
 
     //Highest number in top left
     if(map[0][0] == highestNumber)
