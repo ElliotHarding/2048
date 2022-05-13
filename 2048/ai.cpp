@@ -69,7 +69,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
     return anyMoved;
 }*/
 
-bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
+bool mapMove(QVector<QVector<int>>& map, const Vector2& direction, int& numMerges)
 {
     bool anyMoved = false;
     if(direction.x() > 0)
@@ -94,6 +94,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                             map[x+1][y] *= 2;
                             map[x][y] = 0;
                             moved = true;
+                            numMerges++;
                         }
                     }
                 }
@@ -130,6 +131,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                             map[x-1][y] *= 2;
                             map[x][y] = 0;
                             moved = true;
+                            numMerges++;
                         }
                     }
                 }
@@ -166,6 +168,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                             map[x][y+1] *= 2;
                             map[x][y] = 0;
                             moved = true;
+                            numMerges++;
                         }
                     }
                 }
@@ -202,6 +205,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                             map[x][y-1] *= 2;
                             map[x][y] = 0;
                             moved = true;
+                            numMerges++;
                         }
                     }
                 }
@@ -231,15 +235,20 @@ bool compareNumberAndLocation(const NumberAndLocation &a, const NumberAndLocatio
     return a.number < b.number;
 }
 
-int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>& blockValues)
+int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>& blockValues, const int& numMerges)
 {
-    int score = 0;
+    int score = numMerges * Constants::ScoreWeightNumMerges;
 
+    int numZeroBlocks = 0;
     int iBlockValues = 0;
     for(int x = 0; x < map.size(); x++)
     {
         for(int y = 0; y < map[0].size(); y++)
         {
+            if(map[x][y] == 0)
+            {
+                numZeroBlocks++;
+            }
             blockValues[iBlockValues].number = map[x][y];
             blockValues[iBlockValues].posX = x;
             blockValues[iBlockValues].posY = y;
@@ -286,7 +295,7 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
     }
 
     //Lower score for too many blocks
-    score += Constants::ScoreWeightNumberBlocks * (blockValues.size() / (map.size() * map[0].size()));
+    score += Constants::ScoreWeightNumberBlocks * numZeroBlocks;
 
     return score > 0 ? score : 0;
 }
@@ -299,6 +308,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
         return;
     }
 
+    int numMerges;
     for(int x = 0; x < map.size(); x++)
     {
         for(int y = 0; y < map[x].size(); y++)
@@ -311,9 +321,10 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                 for(const Vector2& direction : Constants::PossibleMoveDirections)
                 {
                     movedSpawnState = spawnState;
-                    if(mapMove(movedSpawnState, direction))
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges))
                     {
-                        int score = gameStateScore(movedSpawnState, blockValues);
+                        int score = gameStateScore(movedSpawnState, blockValues, numMerges);
                         if(score > highScore)
                         {
                             highScore = score;
@@ -339,12 +350,14 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
 
     int score = 0;
     int mapScore;
+    int numMerges;
     for(const Vector2& direction : Constants::PossibleMoveDirections)
     {
         moveMap = map;
-        if(mapMove(moveMap, direction))
+        numMerges = 0;
+        if(mapMove(moveMap, direction, numMerges))
         {
-            mapScore = gameStateScore(moveMap, blockValuesMem);
+            mapScore = gameStateScore(moveMap, blockValuesMem, numMerges);
             getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem);
             if(mapScore > score)
             {

@@ -50,13 +50,14 @@ const int MaxBlocks = MaxBlocksPerCol * MaxBlocksPerRow;
 const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
 
 ///Score weights for game state value calculations
+const int ScoreWeightNumMerges = 100;
 const int ScoreWeightHighTopLeftN0 = 100; //Reward % for having highest number in top left slot
 const int ScoreWeightHighTopLeftN1 = 50;
 const int ScoreWeightHighTopLeftN2 = 20;
 const int ScoreWeightHighNumbersCloseN0 = 70; //Reward % for having high value blocks next to eachother
 const int ScoreWeightHighNumbersCloseN1 = 40;
 const int ScoreWeightHighestNumber = 1; //Reward % for having the highest number
-const int ScoreWeightNumberBlocks = -15;
+const int ScoreWeightNumberBlocks = 20;
 
 ///Depth for best direction choice calcuations
 const int DirectionChoiceDepth = 2;
