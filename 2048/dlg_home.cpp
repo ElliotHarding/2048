@@ -418,6 +418,27 @@ namespace MovementOptions
 const QList<Vector2> PossibleMoveDirections = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
 }
 
+QList<QVector<QVector<int>>> possibleSpawnStates(const QVector<QVector<int>>& map)
+{
+    QList<QVector<QVector<int>>> possibleSpawnStates;
+
+    for(int x = 0; x < map.size(); x++)
+    {
+        for(int y = 0; y < map[x].size(); y++)
+        {
+            if(map[x][y] == 0)
+            {
+                QVector<QVector<int>> newMap = map;
+                newMap[x][y] = 2;
+                possibleSpawnStates.push_back(newMap);
+            }
+        }
+    }
+
+    return possibleSpawnStates;
+}
+
+/*
 Vector2 getBestDirection(const QVector<QVector<int>>& map)
 {
     Vector2 chosenDirection = MovementOptions::PossibleMoveDirections[0];
@@ -431,6 +452,60 @@ Vector2 getBestDirection(const QVector<QVector<int>>& map)
         {
             score = mapScore;
             chosenDirection = direction;
+        }
+    }
+    return chosenDirection;
+}
+*/
+
+void getHighestScore(QVector<QVector<int>> map, int& highScore, int depth)
+{
+    if(depth == 0)
+    {
+        return;
+    }
+
+    QList<QVector<QVector<int>>> spawnStates = possibleSpawnStates(map);
+    for(QVector<QVector<int>> spawnState : spawnStates)
+    {
+        for(const Vector2& direction : MovementOptions::PossibleMoveDirections)
+        {
+            QVector<QVector<int>> movedSpawnState = spawnState;
+            mapMove(movedSpawnState, direction);
+
+            const bool spawnStateMoved = spawnState != movedSpawnState;
+            if(spawnStateMoved)
+            {
+                int score = gameStateScore(movedSpawnState);
+                if(score > highScore)
+                {
+                    highScore = score;
+                }
+                getHighestScore(movedSpawnState, highScore, --depth);
+            }
+        }
+    }
+}
+
+Vector2 getBestDirection(const QVector<QVector<int>>& map)
+{
+    Vector2 chosenDirection = MovementOptions::PossibleMoveDirections[0];
+    int score = 0;
+    for(const Vector2& direction : MovementOptions::PossibleMoveDirections)
+    {
+        QVector<QVector<int>> moveMap = map;
+        mapMove(moveMap, direction);
+
+        const bool mapMoved = map != moveMap;
+        if(mapMoved)
+        {
+            int mapScore = gameStateScore(moveMap);
+            getHighestScore(moveMap, mapScore, 0);
+            if(mapScore > score)
+            {
+                score = mapScore;
+                chosenDirection = direction;
+            }
         }
     }
     return chosenDirection;
