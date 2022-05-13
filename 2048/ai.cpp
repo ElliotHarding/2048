@@ -172,20 +172,19 @@ bool compareNumberAndLocation(const NumberAndLocation &a, const NumberAndLocatio
     return a.number < b.number;
 }
 
-int gameStateScore(const QVector<QVector<int>>& map)
+int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>& blockValues)
 {
     int score = 0;
 
-    QList<NumberAndLocation> blockValues;
+    int iBlockValues = 0;
     for(int x = 0; x < map.size(); x++)
     {
         for(int y = 0; y < map[0].size(); y++)
         {
-            NumberAndLocation numAndLocation;
-            numAndLocation.number = map[x][y];
-            numAndLocation.posX = x;
-            numAndLocation.posY = y;
-            blockValues.push_back(numAndLocation);
+            blockValues[iBlockValues].number = map[x][y];
+            blockValues[iBlockValues].posX = x;
+            blockValues[iBlockValues].posY = y;
+            iBlockValues++;
         }
     }
     std::sort(blockValues.begin(), blockValues.end(), compareNumberAndLocation);
@@ -234,7 +233,7 @@ int gameStateScore(const QVector<QVector<int>>& map)
 }
 
 void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
-                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState)
+                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState, QVector<NumberAndLocation>& blockValues)
 {
     if(depth == 0)
     {
@@ -255,12 +254,12 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     movedSpawnState = spawnState;
                     if(mapMove(movedSpawnState, direction))
                     {
-                        int score = gameStateScore(movedSpawnState);
+                        int score = gameStateScore(movedSpawnState, blockValues);
                         if(score > highScore)
                         {
                             highScore = score;
                         }
-                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState);
+                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues);
                     }
                 }
             }
@@ -278,14 +277,18 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
     QVector<QVector<int>> movedSpawnStateMem = map;
     QVector<QVector<int>> moveMap = map;
 
+    NumberAndLocation numAndLocation;
+    QVector<NumberAndLocation> blockValuesMem = QVector<NumberAndLocation>(Constants::MaxBlocks, numAndLocation);
+
     int score = 0;
+    int mapScore;
     for(const Vector2& direction : Constants::PossibleMoveDirections)
     {
         moveMap = map;
         if(mapMove(moveMap, direction))
         {
-            int mapScore = gameStateScore(moveMap);
-            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem);
+            mapScore = gameStateScore(moveMap, blockValuesMem);
+            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem);
             if(mapScore > score)
             {
                 score = mapScore;
