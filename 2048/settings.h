@@ -7,7 +7,13 @@
 #include <QColor>
 #include <QMap>
 
-typedef QPointF Vector2;
+enum Direction
+{
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+};
 
 namespace Constants
 {
@@ -64,7 +70,7 @@ const int ScoreWeightNumberBlocks = 20;
 const int DirectionChoiceDepth = 5;
 
 ///Movement options
-const QList<Vector2> PossibleMoveDirections = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
+const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};
 
 }
 

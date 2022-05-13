@@ -94,19 +94,19 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
     {
         if(event->key() == Qt::Key_Up)
         {
-            move(Vector2(0, -1));
+            move(UP);
         }
         else if(event->key() == Qt::Key_Down)
         {
-            move(Vector2(0, 1));
+            move(DOWN);
         }
         else if(event->key() == Qt::Key_Right)
         {
-            move(Vector2(1, 0));
+            move(RIGHT);
         }
         else if(event->key() == Qt::Key_Left)
         {
-            move(Vector2(-1, 0));
+            move(LEFT);
         }
     }
 }
@@ -121,17 +121,36 @@ bool inRange(const int& value, const int& min, const int& max, const int& inc)
     return inRange(value, min, max) && inRange(value + inc, min, max);
 }
 
-void DLG_Home::move(Vector2 direction)
+typedef QPointF Vector2;
+
+Vector2 directionToVector(Direction direction)
+{
+    switch (direction)
+    {
+        case UP:
+            return Vector2(0, -1);
+        case DOWN:
+            return Vector2(0, 1);
+        case LEFT:
+            return Vector2(-1, 0);
+        case RIGHT:
+            return Vector2(1, 0);
+    }
+    return Vector2(0,0);
+}
+
+void DLG_Home::move(Direction dir)
 {
     m_blocksMutex.lock();
 
     //Block input until things have moved where they need to go
     m_bAcceptInput = false;
 
-    const int xStart =  direction.x() > 0 ? Constants::MaxBlocksPerRow-1 : 0;
-    const int xInc =    direction.x() > 0 ? -1 : 1;
-    const int yStart =  direction.y() > 0 ? Constants::MaxBlocksPerCol-1 : 0;
-    const int yInc =    direction.y() > 0 ? -1 : 1;
+    const int xStart =  dir == RIGHT ? Constants::MaxBlocksPerRow-1 : 0;
+    const int xInc =    dir == RIGHT ? -1 : 1;
+    const int yStart =  dir == DOWN ? Constants::MaxBlocksPerCol-1 : 0;
+    const int yInc =    dir == DOWN ? -1 : 1;
+    Vector2 direction = directionToVector(dir);
     for(int moveCount = 0; moveCount < m_blocksGrid.size(); moveCount++)
     {
         bool moved = false;
@@ -239,7 +258,7 @@ void DLG_Home::onAiThink()
     map[3][3] = 0;*/
 
     //make const... todo
-    const Vector2 bestDirection = m_ai.getBestDirection(map);
+    const Direction bestDirection = m_ai.getBestDirection(map);
 
     m_blocksMutex.unlock();
     move(bestDirection);

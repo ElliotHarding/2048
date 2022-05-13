@@ -9,7 +9,7 @@ class AI
 public:
     AI();
 
-    Vector2 getBestDirection(const QVector<QVector<int>>& map);
+    Direction getBestDirection(const QVector<QVector<int>>& map);
 };
 
 #endif // AI_H

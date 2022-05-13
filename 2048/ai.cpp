@@ -24,55 +24,10 @@ bool withinRangeInclusive(const int& value, const int& min, const int& max)
     return value >= min && value <= max;
 }
 
-/*      More compressed map move - less efficient
-bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
-{
-    const int xStart =  direction.x() > 0 ? map.size()-1 : 0;
-    const int xInc =    direction.x() > 0 ? -1 : 1;
-    const int yStart =  direction.y() > 0 ? map[0].size()-1 : 0;
-    const int yInc =    direction.y() > 0 ? -1 : 1;
-    bool anyMoved = false;
-    for(int moveCount = 0; moveCount < map.size(); moveCount++)
-    {
-        bool moved = false;
-        for(int x = xStart; xInc == -1 ? (x > -1) : (x < map.size()); x+=xInc)
-        {
-            for(int y = yStart; yInc == -1 ? (y > -1) : (y < map[x].size()); y+=yInc)
-            {
-                if(map[x][y] != 0 && inRange(x, 0, map.size(), direction.x()) && inRange(y, 0, map[x].size(), direction.y()))
-                {
-                    if(map[x+direction.x()][y+direction.y()] == 0)
-                    {
-                        map[x+direction.x()][y+direction.y()] = map[x][y];
-                        map[x][y] = 0;
-                        moved = true;
-                    }
-                    else if(map[x+direction.x()][y+direction.y()] == map[x][y])
-                    {
-                        map[x+direction.x()][y+direction.y()] *= 2;
-                        map[x][y] = 0;
-                        moved = true;
-                    }
-                }
-            }
-        }
-        if(moved)
-        {
-            anyMoved = true;
-        }
-        else
-        {
-            return anyMoved;
-        }
-    }
-
-    return anyMoved;
-}*/
-
-bool mapMove(QVector<QVector<int>>& map, const Vector2& direction, int& numMerges)
+bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMerges)
 {
     bool anyMoved = false;
-    if(direction.x() > 0)
+    if(direction == RIGHT)
     {
         for(int moveCount = 0; moveCount < map.size(); moveCount++)
         {
@@ -109,7 +64,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction, int& numMerge
             }
         }
     }
-    else if(direction.x() < 0)
+    else if(direction == LEFT)
     {
         for(int moveCount = 0; moveCount < map.size(); moveCount++)
         {
@@ -146,7 +101,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction, int& numMerge
             }
         }
     }
-    else if(direction.y() > 0)
+    else if(direction == DOWN)
     {
         for(int moveCount = 0; moveCount < map[0].size(); moveCount++)
         {
@@ -183,7 +138,7 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction, int& numMerge
             }
         }
     }
-    else if(direction.y() < 0)
+    else if(direction == UP)
     {
         for(int moveCount = 0; moveCount < map[0].size(); moveCount++)
         {
@@ -329,7 +284,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                 spawnState = map;
                 spawnState[x][y] = 2;
 
-                for(const Vector2& direction : Constants::PossibleMoveDirections)
+                for(const Direction& direction : Constants::PossibleMoveDirections)
                 {
                     movedSpawnState = spawnState;
                     numMerges = 0;
@@ -344,9 +299,9 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
     }
 }
 
-Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
+Direction AI::getBestDirection(const QVector<QVector<int>>& map)
 {
-    Vector2 chosenDirection = Constants::PossibleMoveDirections[0];
+    Direction chosenDirection = Constants::PossibleMoveDirections[0];
 
     QVector<QVector<int>> spawnStateMem = map;
     QVector<QVector<int>> movedSpawnStateMem = map;
@@ -358,7 +313,7 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
     int score = 0;
     int mapScore;
     int numMerges;
-    for(const Vector2& direction : Constants::PossibleMoveDirections)
+    for(const Direction& direction : Constants::PossibleMoveDirections)
     {
         moveMap = map;
         numMerges = 0;

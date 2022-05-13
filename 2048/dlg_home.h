@@ -39,7 +39,7 @@ private:
     void reset();
 
     ///Make a move human + AI
-    void move(Vector2 direction);
+    void move(Direction direction);
 
     ///Block generation
     /// - returns true if succeeded in generating block (board could be full)
