@@ -334,10 +334,15 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
 
 namespace ScoreWeights
 {
-const int ScoreWeightHighTopLeft = 30; //Reward % for having highest number in top left slot
-const int ScoreWeightHighNumbersClose = 20; //Reward % for having high value blocks next to eachother
-const int ScoreWeightHighestNumber = 50; //Reward % for having the highest number
-const int ScoreWeightNumberBlocks = 30;
+const int ScoreWeightHighTopLeftN0 = 100; //Reward % for having highest number in top left slot
+const int ScoreWeightHighTopLeftN1 = 50;
+const int ScoreWeightHighTopLeftN2 = 20;
+
+const int ScoreWeightHighNumbersCloseN0 = 70; //Reward % for having high value blocks next to eachother
+const int ScoreWeightHighNumbersCloseN1 = 40;
+
+const int ScoreWeightHighestNumber = 1; //Reward % for having the highest number
+const int ScoreWeightNumberBlocks = -15;
 }
 
 struct NumberAndLocation
@@ -381,36 +386,36 @@ int gameStateScore(QVector<QVector<int>> map)
     //Highest number in top left
     if(map[0][0] == highestNumber)
     {
-        score += 1 * ScoreWeights::ScoreWeightHighTopLeft;
+        score += ScoreWeights::ScoreWeightHighTopLeftN0;
     }
     else if(map[0][1] == highestNumber || map[1][0] == highestNumber)
     {
-        score += 0.6 * ScoreWeights::ScoreWeightHighTopLeft;
+        score += ScoreWeights::ScoreWeightHighTopLeftN1;
     }
     else if(map[1][1] == highestNumber || map[2][0] == highestNumber || map[0][2] == highestNumber)
     {
-        score += 0.3 * ScoreWeights::ScoreWeightHighTopLeft;
+        score += ScoreWeights::ScoreWeightHighTopLeftN2;
     }
 
     //Highest number created
-    score += (highestNumber/1024) * ScoreWeights::ScoreWeightHighestNumber;
+    score += highestNumber * ScoreWeights::ScoreWeightHighestNumber;
 
     //High numbers close to highest number
     if(secondHighestNumberX > highestNumberX - 2 && secondHighestNumberX < highestNumberX + 2 &&
        secondHighestNumberY > highestNumberY - 2 && secondHighestNumberY < highestNumberY + 2)
     {
-        score += 1 * ScoreWeights::ScoreWeightHighNumbersClose;
+        score += ScoreWeights::ScoreWeightHighNumbersCloseN0;
     }
     else if(thirdHighestNumberX > highestNumberX - 2 && thirdHighestNumberX < highestNumberX + 2 &&
             thirdHighestNumberY > highestNumberY - 2 && thirdHighestNumberY < highestNumberY + 2)
     {
-        score += 0.6 * ScoreWeights::ScoreWeightHighNumbersClose;
+        score += ScoreWeights::ScoreWeightHighNumbersCloseN1;
     }
 
     //Lower score for too many blocks
-    score -= ScoreWeights::ScoreWeightNumberBlocks * (blockValues.size() / (Constants::MaxBlocksPerCol * Constants::MaxBlocksPerRow));
+    score += ScoreWeights::ScoreWeightNumberBlocks * (blockValues.size() / (Constants::MaxBlocksPerCol * Constants::MaxBlocksPerRow));
 
-    return score;
+    return score > 0 ? score : 0;
 }
 
 namespace MovementOptions
