@@ -162,9 +162,9 @@ bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
 
 struct NumberAndLocation
 {
-    int number = 0;
-    int posX = 0;
-    int posY = 0;
+    int number;
+    int posX;
+    int posY;
 };
 
 bool compareNumberAndLocation(const NumberAndLocation &a, const NumberAndLocation &b)
