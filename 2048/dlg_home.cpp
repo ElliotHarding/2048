@@ -63,7 +63,7 @@ void DLG_Home::reset()
     m_blocks.clear();
 
     //Initial game board contains one block
-    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft() + QPoint(0, 0)));
+    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft()));
 
     m_bAcceptInput = true;
     m_bGameOver = false;
