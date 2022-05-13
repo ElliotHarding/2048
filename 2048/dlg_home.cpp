@@ -41,11 +41,16 @@ DLG_Home::~DLG_Home()
     m_pAiTimer->stop();
     delete m_pAiTimer;
 
-    for(Block* pBlock : m_blocks)
+    for(QVector<Block*> blockCol : m_blocksGrid)
     {
-        delete pBlock;
+        for(Block* block : blockCol)
+        {
+            delete block;
+        }
+        blockCol.clear();
     }
-    m_blocks.clear();
+    m_blocksGrid.clear();
+
     m_blocksMutex.unlock();
 }
 
@@ -56,14 +61,21 @@ void DLG_Home::reset()
 
     //Remove previous blocks
     // todo : object recycle system to stop creating new memory each time
-    for(Block* pBlock : m_blocks)
+    for(QVector<Block*> blockCol : m_blocksGrid)
     {
-        delete pBlock;
+        for(Block* block : blockCol)
+        {
+            delete block;
+        }
+        blockCol.clear();
     }
-    m_blocks.clear();
+    m_blocksGrid.clear();
+
+    //Create new grid
+    m_blocksGrid = QVector<QVector<Block*>>(Constants::MaxBlocksPerCol, QVector<Block*>(Constants::MaxBlocksPerRow, nullptr));
 
     //Initial game board contains one block
-    m_blocks.push_back(new Block(this, 2, Constants::BoardGeometry.topLeft()));
+    m_blocksGrid[0][0] = new Block(this, 2, Constants::BoardGeometry.topLeft());
 
     m_bAcceptInput = true;
     m_bGameOver = false;
@@ -82,53 +94,80 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
 {
     if(m_bAcceptInput)
     {
-        move((Qt::Key)event->key());
+        if(event->key() == Qt::Key_Up)
+        {
+            move(Vector2(0, -Constants::BlockMovementSpeed));
+        }
+        else if(event->key() == Qt::Key_Down)
+        {
+            move(Vector2(0, Constants::BlockMovementSpeed));
+        }
+        else if(event->key() == Qt::Key_Right)
+        {
+            move(Vector2(Constants::BlockMovementSpeed, 0));
+        }
+        else if(event->key() == Qt::Key_Left)
+        {
+            move(Vector2(-Constants::BlockMovementSpeed, 0));
+        }
     }
 }
 
-void DLG_Home::applyVelocity(const Vector2& vel)
+bool inRange(const int& value, const int& min, const int& max)
+{
+    return value >= min && value <= max;
+}
+
+bool inRange(const int& value, const int& min, const int& max, const int& inc)
+{
+    return inRange(value, min, max) && inRange(value + inc, min, max);
+}
+
+void DLG_Home::move(Vector2 direction)
 {
     m_blocksMutex.lock();
 
     //Log block positions before they're changed by applied velocity
     m_blocksPositionsBeforeInput.clear();
 
-    //Apply velocity to all blocks
-    for(Block* pBlock : m_blocks)
+    const int xStart =  direction.x() > 0 ? Constants::MaxBlocksPerRow-1 : 0;
+    const int xInc =    direction.x() > 0 ? -1 : 1;
+    const int yStart =  direction.y() > 0 ? Constants::MaxBlocksPerCol-1 : 0;
+    const int yInc =    direction.y() > 0 ? -1 : 1;
+    for(int moveCount = 0; moveCount < m_blocksGrid.size(); moveCount++)
     {
-        m_blocksPositionsBeforeInput.push_back(pBlock->geometry().topLeft());
-
-        if(Constants::BoardGeometry.contains(pBlock->geometry().topLeft() + QPoint(vel.x()/Constants::BlockMovementSpeed, vel.y()/Constants::BlockMovementSpeed)))
+        bool moved = false;
+        for(int x = xStart; inRange(x, 0, Constants::MaxBlocksPerRow); x+=xInc)
         {
-            pBlock->setVelocity(vel);
+            for(int y = yStart; inRange(y, 0, Constants::MaxBlocksPerCol); y+=yInc)
+            {
+                if(m_blocksGrid[x][y] != 0 && inRange(x, 0, m_blocksGrid.size()-1, direction.x()) && inRange(y, 0, m_blocksGrid[x].size()-1, direction.y()))
+                {
+                    if(m_blocksGrid[x+direction.x()][y+direction.y()] == 0)
+                    {
+                        m_blocksGrid[x+direction.x()][y+direction.y()] = m_blocksGrid[x][y];
+                        m_blocksGrid[x][y] = 0;
+                        moved = true;
+                    }
+                    else if(m_blocksGrid[x+direction.x()][y+direction.y()] == m_blocksGrid[x][y])
+                    {
+                        m_blocksGrid[x+direction.x()][y+direction.y()]->setValue(m_blocksGrid[x][y]->value()*2);
+                        m_blocksGrid[x][y] = 0;
+                        moved = true;
+                    }
+                }
+            }
+        }
+        if(!moved)
+        {
+            break;
         }
     }
 
-    //Block input (adding extra velocities) until things have moved where they need to go
+    //Block input until things have moved where they need to go
     m_bAcceptInput = false;
 
     m_blocksMutex.unlock();
-}
-
-void DLG_Home::move(Qt::Key dirKey)
-{
-    //Get velocity applied by arrow keys
-    if(dirKey == Qt::Key_Up)
-    {
-        applyVelocity(Vector2(0, -Constants::BlockMovementSpeed));
-    }
-    else if(dirKey == Qt::Key_Down)
-    {
-        applyVelocity(Vector2(0, Constants::BlockMovementSpeed));
-    }
-    else if(dirKey == Qt::Key_Right)
-    {
-        applyVelocity(Vector2(Constants::BlockMovementSpeed, 0));
-    }
-    else if(dirKey == Qt::Key_Left)
-    {
-        applyVelocity(Vector2(-Constants::BlockMovementSpeed, 0));
-    }    
 }
 
 void DLG_Home::onUpdate()
@@ -202,12 +241,12 @@ void DLG_Home::onAiThink()
 
     //Todo generate map
     QVector<QVector<int>> map(Constants::MaxBlocksPerCol, QVector<int>(Constants::MaxBlocksPerRow, 0));
-    for(Block* pBlock : m_blocks)
+    for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
     {
-        const int indexX = (pBlock->geometry().x() - Constants::BoardGeometry.x())/Constants::BlockSize;
-        const int indexY = (pBlock->geometry().y() - Constants::BoardGeometry.y())/Constants::BlockSize;
-
-        map[indexX][indexY] = pBlock->value();
+        for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+        {
+            map[x][y] = m_blocksGrid[x][y]->value();
+        }
     }
 
     /* Test map
@@ -232,28 +271,18 @@ void DLG_Home::onAiThink()
     const Vector2 bestDirection = m_ai.getBestDirection(map);
 
     m_blocksMutex.unlock();
-    applyVelocity(bestDirection);
+    move(bestDirection);
 }
 
 bool DLG_Home::trySpawnNewBlock()
 {
     //Find empty spaces
     QVector<QPoint> emptySpaces;
-    for(int x = Constants::BoardGeometry.left(); x < Constants::BoardGeometry.right(); x+=Constants::BlockSize)
+    for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
     {
-        for(int y = Constants::BoardGeometry.top(); y < Constants::BoardGeometry.bottom(); y+=Constants::BlockSize)
+        for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
         {
-            bool bLocationTaken = false;
-            for(Block* pBlock : m_blocks)
-            {
-                if(pBlock->geometry().contains(QPoint(x+2,y+2)))
-                {
-                    bLocationTaken = true;
-                    break;
-                }
-            }
-
-            if(!bLocationTaken)
+            if(m_blocksGrid[x][y] == nullptr)
             {
                 emptySpaces.push_back(QPoint(x,y));
             }
@@ -272,7 +301,7 @@ bool DLG_Home::trySpawnNewBlock()
     const int randomStartOption = QRandomGenerator::global()->generateDouble() * 100;
     const int startValue = randomStartOption < Constants::PercentageSpawn2block ? 2 : 4;
 
-    m_blocks.push_back(new Block(this, startValue, spawnPos));
+    m_blocksGrid[spawnPos.x()][spawnPos.y()] = new Block(this, startValue, Constants::BoardGeometry.topLeft() + QPoint(spawnPos.x() * Constants::BlockSize, spawnPos.y() * Constants::BlockSize));
 
     return true;
 }

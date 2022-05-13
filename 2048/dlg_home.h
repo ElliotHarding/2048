@@ -38,11 +38,8 @@ private:
     ///Resets game
     void reset();
 
-    ///Apply velocity to blocks
-    void applyVelocity(const Vector2& vel);
-
     ///Make a move human + AI
-    void move(Qt::Key dirKey);
+    void move(Vector2 direction);
 
     ///Block generation
     /// - returns true if succeeded in generating block (board could be full)
@@ -52,7 +49,7 @@ private:
     bool m_bAcceptInput = true;
 
     ///Block info
-    QVector<Block*> m_blocks;
+    QVector<QVector<Block*>> m_blocksGrid;
     QMutex m_blocksMutex;
     QVector<QPoint> m_blocksPositionsBeforeInput;
 
