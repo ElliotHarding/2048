@@ -25,6 +25,9 @@ public:
 protected:
     void paintEvent(QPaintEvent* paintEvent) override;
 
+private slots:
+    void onMerge();
+
 private:
     void setPosition(const QPoint& position);
 
