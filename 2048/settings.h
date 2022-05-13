@@ -7,6 +7,8 @@
 #include <QColor>
 #include <QMap>
 
+typedef QPointF Vector2;
+
 namespace Constants
 {
 
@@ -46,6 +48,18 @@ const int MaxBlocksPerRow = 4;
 const int MaxBlocksPerCol = 4;
 const int MaxBlocks = MaxBlocksPerCol * MaxBlocksPerRow;
 const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
+
+///Score weights for game state value calculations
+const int ScoreWeightHighTopLeftN0 = 100; //Reward % for having highest number in top left slot
+const int ScoreWeightHighTopLeftN1 = 50;
+const int ScoreWeightHighTopLeftN2 = 20;
+const int ScoreWeightHighNumbersCloseN0 = 70; //Reward % for having high value blocks next to eachother
+const int ScoreWeightHighNumbersCloseN1 = 40;
+const int ScoreWeightHighestNumber = 1; //Reward % for having the highest number
+const int ScoreWeightNumberBlocks = -15;
+
+///Movement options
+const QList<Vector2> PossibleMoveDirections = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
 
 }
 

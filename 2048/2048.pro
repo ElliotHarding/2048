@@ -26,8 +26,7 @@ HEADERS += \
     block.h \
     dlg_home.h \
     futureplans.h \
-    settings.h \
-    vector2.h
+    settings.h
 
 FORMS += \
     dlg_home.ui

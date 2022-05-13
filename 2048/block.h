@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include "settings.h"
-#include "vector2.h"
 
 class Block : public QWidget
 {

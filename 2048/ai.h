@@ -2,7 +2,7 @@
 #define AI_H
 
 #include <QList>
-#include "vector2.h"
+#include "settings.h"
 
 class AI
 {
