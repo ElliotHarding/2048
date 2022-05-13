@@ -5,10 +5,69 @@ AI::AI()
 {
 }
 
+void debugMap(const QVector<QVector<int>>& map)
+{
+    qDebug() << "----- Map ------";
+    for(int y = 0; y < map[0].size(); y++)
+    {
+        QString row = "";
+        for(int x = 0; x < map.size(); x++)
+        {
+            row+=QString::number(map[x][y]);
+        }
+        qDebug() << row;
+    }
+}
+
 bool withinRangeInclusive(const int& value, const int& min, const int& max)
 {
     return value >= min && value <= max;
 }
+
+/*      More compressed map move - less efficient
+bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
+{
+    const int xStart =  direction.x() > 0 ? map.size()-1 : 0;
+    const int xInc =    direction.x() > 0 ? -1 : 1;
+    const int yStart =  direction.y() > 0 ? map[0].size()-1 : 0;
+    const int yInc =    direction.y() > 0 ? -1 : 1;
+    bool anyMoved = false;
+    for(int moveCount = 0; moveCount < map.size(); moveCount++)
+    {
+        bool moved = false;
+        for(int x = xStart; xInc == -1 ? (x > -1) : (x < map.size()); x+=xInc)
+        {
+            for(int y = yStart; yInc == -1 ? (y > -1) : (y < map[x].size()); y+=yInc)
+            {
+                if(map[x][y] != 0 && inRange(x, 0, map.size(), direction.x()) && inRange(y, 0, map[x].size(), direction.y()))
+                {
+                    if(map[x+direction.x()][y+direction.y()] == 0)
+                    {
+                        map[x+direction.x()][y+direction.y()] = map[x][y];
+                        map[x][y] = 0;
+                        moved = true;
+                    }
+                    else if(map[x+direction.x()][y+direction.y()] == map[x][y])
+                    {
+                        map[x+direction.x()][y+direction.y()] *= 2;
+                        map[x][y] = 0;
+                        moved = true;
+                    }
+                }
+            }
+        }
+        if(moved)
+        {
+            anyMoved = true;
+        }
+        else
+        {
+            return anyMoved;
+        }
+    }
+
+    return anyMoved;
+}*/
 
 bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
 {
@@ -271,8 +330,6 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
 {
     Vector2 chosenDirection = Constants::PossibleMoveDirections[0];
 
-    clock_t start = clock();
-
     QVector<QVector<int>> spawnStateMem = map;
     QVector<QVector<int>> movedSpawnStateMem = map;
     QVector<QVector<int>> moveMap = map;
@@ -296,9 +353,6 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
             }
         }
     }
-
-    clock_t finish = clock();
-    qDebug() << finish - start;
 
     return chosenDirection;
 }
