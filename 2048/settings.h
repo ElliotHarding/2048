@@ -14,8 +14,8 @@ namespace Constants
 
 ///Speed & movement
 const int GameUpdateFrequency = 1;
-const int BlockMovementSpeed = 3;
-const int AiThinkFrequency = 1000;
+const int BlockMovementSpeed = 30;
+const int AiThinkFrequency = 10;
 
 ///Spawn block settings
 const int PercentageSpawn2block = 80;
@@ -55,16 +55,16 @@ const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1,
 
 ///Score weights for game state value calculations
 const int ScoreWeightNumMerges = 100;
-const int ScoreWeightHighTopLeftN0 = 100; //Reward % for having highest number in top left slot
-const int ScoreWeightHighTopLeftN1 = 50;
-const int ScoreWeightHighTopLeftN2 = 20;
+const int ScoreWeightHighTopLeftN0 = 1000; //Reward % for having highest number in top left slot
+const int ScoreWeightHighTopLeftN1 = 600;
+const int ScoreWeightHighTopLeftN2 = 300;
 const int ScoreWeightHighNumbersCloseN0 = 70; //Reward % for having high value blocks next to eachother
 const int ScoreWeightHighNumbersCloseN1 = 40;
-const int ScoreWeightHighestNumber = 1; //Reward % for having the highest number
+const int ScoreWeightHighestNumber = 10; //Reward % for having the highest number
 const int ScoreWeightNumberBlocks = 20;
 
 ///Depth for best direction choice calcuations
-const int DirectionChoiceDepth = 2;
+const int DirectionChoiceDepth = 3;
 
 ///Movement options
 const QList<Vector2> PossibleMoveDirections = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
