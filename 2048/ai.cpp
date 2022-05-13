@@ -233,7 +233,8 @@ int gameStateScore(const QVector<QVector<int>>& map)
     return score > 0 ? score : 0;
 }
 
-void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth)
+void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
+                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState)
 {
     if(depth == 0)
     {
@@ -246,12 +247,12 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
         {
             if(map[x][y] == 0)
             {
-                QVector<QVector<int>> spawnState = map;
+                spawnState = map;
                 spawnState[x][y] = 2;
 
                 for(const Vector2& direction : Constants::PossibleMoveDirections)
                 {
-                    QVector<QVector<int>> movedSpawnState = spawnState;
+                    movedSpawnState = spawnState;
                     if(mapMove(movedSpawnState, direction))
                     {
                         int score = gameStateScore(movedSpawnState);
@@ -259,7 +260,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                         {
                             highScore = score;
                         }
-                        getHighestScore(movedSpawnState, highScore, depth - 1);
+                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState);
                     }
                 }
             }
@@ -273,14 +274,18 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
 
     clock_t start = clock();
 
+    QVector<QVector<int>> spawnStateMem = map;
+    QVector<QVector<int>> movedSpawnStateMem = map;
+    QVector<QVector<int>> moveMap = map;
+
     int score = 0;
     for(const Vector2& direction : Constants::PossibleMoveDirections)
     {
-        QVector<QVector<int>> moveMap = std::move(map);
+        moveMap = map;
         if(mapMove(moveMap, direction))
         {
             int mapScore = gameStateScore(moveMap);
-            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth);
+            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem);
             if(mapScore > score)
             {
                 score = mapScore;
