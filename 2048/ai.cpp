@@ -1,4 +1,5 @@
 #include "ai.h"
+#include <QDebug>
 
 AI::AI()
 {
@@ -9,8 +10,9 @@ bool withinRangeInclusive(const int& value, const int& min, const int& max)
     return value >= min && value <= max;
 }
 
-void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
+bool mapMove(QVector<QVector<int>>& map, const Vector2& direction)
 {
+    bool anyMoved = false;
     if(direction.x() > 0)
     {
         for(int moveCount = 0; moveCount < map.size(); moveCount++)
@@ -37,9 +39,13 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                     }
                 }
             }
-            if(!moved)
+            if(moved)
             {
-                return;
+                anyMoved = true;
+            }
+            else
+            {
+                return anyMoved;
             }
         }
     }
@@ -69,9 +75,13 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                     }
                 }
             }
-            if(!moved)
+            if(moved)
             {
-                return;
+                anyMoved = true;
+            }
+            else
+            {
+                return anyMoved;
             }
         }
     }
@@ -101,9 +111,13 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                     }
                 }
             }
-            if(!moved)
+            if(moved)
             {
-                return;
+                anyMoved = true;
+            }
+            else
+            {
+                return anyMoved;
             }
         }
     }
@@ -133,12 +147,17 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
                     }
                 }
             }
-            if(!moved)
+            if(moved)
             {
-                return;
+                anyMoved = true;
+            }
+            else
+            {
+                return anyMoved;
             }
         }
     }
+    return anyMoved;
 }
 
 struct NumberAndLocation
@@ -247,10 +266,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
         for(const Vector2& direction : Constants::PossibleMoveDirections)
         {
             QVector<QVector<int>> movedSpawnState = std::move(spawnState);
-            mapMove(movedSpawnState, direction);
-
-            const bool spawnStateMoved = spawnState != movedSpawnState;
-            if(spawnStateMoved)
+            if(mapMove(movedSpawnState, direction))
             {
                 int score = gameStateScore(movedSpawnState);
                 if(score > highScore)
@@ -270,10 +286,7 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
     for(const Vector2& direction : Constants::PossibleMoveDirections)
     {
         QVector<QVector<int>> moveMap = std::move(map);
-        mapMove(moveMap, direction);
-
-        const bool mapMoved = map != moveMap;
-        if(mapMoved)
+        if(mapMove(moveMap, direction))
         {
             int mapScore = gameStateScore(moveMap);
             getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth);
