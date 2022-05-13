@@ -32,6 +32,8 @@ private slots:
     ///UI slots
     void on_btn_restart_clicked();
 
+    void on_cb_useAi_toggled(bool checked);
+
 private:
     Ui::DLG_Home *ui;
 

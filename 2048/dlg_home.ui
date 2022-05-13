@@ -230,6 +230,19 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
+   <widget class="QCheckBox" name="cb_useAi">
+    <property name="geometry">
+     <rect>
+      <x>185</x>
+      <y>77</y>
+      <width>30</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AI</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources>

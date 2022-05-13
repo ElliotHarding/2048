@@ -80,7 +80,10 @@ void DLG_Home::reset()
     m_bGameOver = false;
 
     //Start game loop - runs forever
-    m_pAiTimer->start(Constants::AiThinkFrequency);
+    if(ui->cb_useAi->isChecked())
+    {
+        m_pAiTimer->start(Constants::AiThinkFrequency);
+    }
 
     m_blocksMutex.unlock();
 
@@ -309,4 +312,16 @@ void DLG_Home::updateScores()
 void DLG_Home::on_btn_restart_clicked()
 {
     reset();
+}
+
+void DLG_Home::on_cb_useAi_toggled(bool checked)
+{
+    if(checked)
+    {
+        m_pAiTimer->start(Constants::AiThinkFrequency);
+    }
+    else
+    {
+        m_pAiTimer->stop();
+    }
 }
