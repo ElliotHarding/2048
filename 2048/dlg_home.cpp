@@ -94,19 +94,19 @@ void DLG_Home::keyPressEvent(QKeyEvent *event)
     {
         if(event->key() == Qt::Key_Up)
         {
-            move(Vector2(0, -Constants::BlockMovementSpeed));
+            move(Vector2(0, -1));
         }
         else if(event->key() == Qt::Key_Down)
         {
-            move(Vector2(0, Constants::BlockMovementSpeed));
+            move(Vector2(0, 1));
         }
         else if(event->key() == Qt::Key_Right)
         {
-            move(Vector2(Constants::BlockMovementSpeed, 0));
+            move(Vector2(1, 0));
         }
         else if(event->key() == Qt::Key_Left)
         {
-            move(Vector2(-Constants::BlockMovementSpeed, 0));
+            move(Vector2(-1, 0));
         }
     }
 }
