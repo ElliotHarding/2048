@@ -19,10 +19,12 @@ DLG_Home::DLG_Home(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //Calls AI movement decision slot every Constants::AiThinkFrequency ms
     m_pAiTimer = new QTimer(this);
     m_pAiTimer->setTimerType(Qt::PreciseTimer);
     connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));    
 
+    //Calls onUpdate() once move animations have finished
     m_pFinishAnimationTimer = new QTimer(this);
     m_pFinishAnimationTimer->setTimerType(Qt::PreciseTimer);
     m_pFinishAnimationTimer->setSingleShot(true);
@@ -39,6 +41,9 @@ DLG_Home::~DLG_Home()
 
     m_pAiTimer->stop();
     delete m_pAiTimer;
+
+    m_pFinishAnimationTimer->stop();
+    delete m_pFinishAnimationTimer;
 
     for(QVector<Block*> blockCol : m_blocksGrid)
     {
@@ -149,6 +154,7 @@ void DLG_Home::move(Direction dir)
     //Block input until things have moved where they need to go
     m_bAcceptInput = false;
 
+    //Perform move in dir direction
     const int xStart =  dir == RIGHT ? Constants::MaxBlocksPerRow-1 : 0;
     const int xInc =    dir == RIGHT ? -1 : 1;
     const int yStart =  dir == DOWN ? Constants::MaxBlocksPerCol-1 : 0;
@@ -184,6 +190,7 @@ void DLG_Home::move(Direction dir)
         }
     }
 
+    //start move animations of moved blocks
     for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
     {
         for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
@@ -195,11 +202,13 @@ void DLG_Home::move(Direction dir)
         }
     }
 
+    //Spawn timer to handle stuff once move animations are finished (calls onUpdate())
     m_pFinishAnimationTimer->start(Constants::MoveAnimationMs);
 
     m_blocksMutex.unlock();
 }
 
+//Called once blocks move animations are finished
 void DLG_Home::onUpdate()
 {
     m_blocksMutex.lock();
@@ -229,7 +238,7 @@ void DLG_Home::onAiThink()
         return;
     }
 
-    //Todo generate map
+    //Turn m_blocksGrid into something AI can understand
     QVector<QVector<int>> map(Constants::MaxBlocksPerCol, QVector<int>(Constants::MaxBlocksPerRow, 0));
     for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
     {
@@ -260,7 +269,7 @@ void DLG_Home::onAiThink()
     map[2][3] = 0;
     map[3][3] = 0;*/
 
-    //make const... todo
+    //Ai determines best direction to move
     const Direction bestDirection = m_ai.getBestDirection(map);
 
     m_blocksMutex.unlock();

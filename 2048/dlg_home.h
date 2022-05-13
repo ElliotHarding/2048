@@ -24,7 +24,7 @@ protected:
 
 private slots:
     ///Game loop function
-    void onUpdate();
+    void onUpdate();//Called once blocks move animations are finished
 
     ///Ai loop function
     void onAiThink();
@@ -60,8 +60,8 @@ private:
     void updateScores();
 
     ///Game loop timer
-    QTimer* m_pAiTimer;
-    QTimer* m_pFinishAnimationTimer;
+    QTimer* m_pAiTimer; //Calls AI movement decision slot every Constants::AiThinkFrequency ms
+    QTimer* m_pFinishAnimationTimer; //Calls onUpdate() once move animations have finished
     bool m_bGameOver = false;
 
     ///AI
