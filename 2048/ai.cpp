@@ -279,6 +279,15 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
         score += Constants::ScoreWeightHighTopLeftN2;
     }
 
+    if(map[map.size()-1][map[0].size()-1] != 0)
+    {
+        score -= Constants::ScoreWeightHighTopLeftN0;
+    }
+    else if(map[map.size()-1][map[0].size()-2] != 0 || map[map.size()-2][map[0].size()-1] != 0)
+    {
+        score -= Constants::ScoreWeightHighTopLeftN1;
+    }
+
     //Highest number created
     score += highestNumber * Constants::ScoreWeightHighestNumber;
 
