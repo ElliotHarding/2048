@@ -26,8 +26,6 @@ const int BlockPopTimeMs = 100; //Block pops bigger when merging or spawning
 const int BlockSize = 100;
 const int BlockDrawMargin = 5;
 const int BlockRectRadius = 10;
-const QRect BlockDrawRect(BlockDrawMargin, BlockDrawMargin, Constants::BlockSize-BlockDrawMargin*2, Constants::BlockSize-BlockDrawMargin*2);
-const QRect BlockDrawRectPopping(0, 0, Constants::BlockSize, Constants::BlockSize);
 
 ///Visual block settings (text and colors)
 const QFont BlockTextFont = QFont("Helvetica [Cronyx]", 10, QFont::Normal);

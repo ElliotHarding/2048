@@ -8,6 +8,21 @@
 ///
 Block::Block(QWidget* parent, const int& value, const QPoint& position) : QWidget(parent)
 {
+    m_pPopAnimationGroup = new QSequentialAnimationGroup(this);
+
+    m_pPopValueIncAnimation = new QPropertyAnimation(this, "popValue");
+    m_pPopValueIncAnimation->setDuration(Constants::BlockPopTimeMs);
+    m_pPopValueIncAnimation->setStartValue(0);
+    m_pPopValueIncAnimation->setEndValue(Constants::BlockDrawMargin);
+
+    m_pPopValueDecAnimation = new QPropertyAnimation(this, "popValue");
+    m_pPopValueDecAnimation->setDuration(Constants::BlockPopTimeMs);
+    m_pPopValueDecAnimation->setStartValue(Constants::BlockDrawMargin);
+    m_pPopValueDecAnimation->setEndValue(0);
+
+    m_pPopAnimationGroup->addAnimation(m_pPopValueIncAnimation);
+    m_pPopAnimationGroup->addAnimation(m_pPopValueDecAnimation);
+
     //Set inital values
     // - will be moved to seperate function when object recycling is done
     setValue(value);
@@ -25,6 +40,18 @@ Block::~Block()
     {
         m_pMoveAnimation->stop();
         delete m_pMoveAnimation;
+    }
+
+    if(m_pPopAnimationGroup != nullptr)
+    {
+        m_pPopValueIncAnimation->stop();
+        delete m_pPopValueIncAnimation;
+
+        m_pPopValueDecAnimation->stop();
+        delete m_pPopValueDecAnimation;
+
+        m_pPopAnimationGroup->stop();
+        delete m_pPopAnimationGroup;
     }
 
     m_pMergeTimer->stop();
@@ -58,6 +85,17 @@ void Block::setToMerge(int x, int y, Block *pMergingBlock)
     m_pMergeTimer->start(Constants::MoveAnimationMs);
 }
 
+int Block::popValue()
+{
+    return m_popValue;
+}
+
+void Block::setPopValue(int popValue)
+{
+    m_popValue = popValue;
+    update();
+}
+
 void Block::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
@@ -66,7 +104,7 @@ void Block::paintEvent(QPaintEvent*)
     //Paint block rectangle (fill entire geometry if m_bIsPopping)
     // Block pops bigger when merging or spawning
     QPainterPath path;
-    path.addRoundedRect(m_bIsPopping ? Constants::BlockDrawRectPopping : Constants::BlockDrawRect, Constants::BlockRectRadius, Constants::BlockRectRadius);
+    path.addRoundedRect(QRect(Constants::BlockDrawMargin - m_popValue, Constants::BlockDrawMargin - m_popValue, Constants::BlockSize-((Constants::BlockDrawMargin - m_popValue)*2), Constants::BlockSize-((Constants::BlockDrawMargin - m_popValue)*2)), Constants::BlockRectRadius, Constants::BlockRectRadius);
     painter.fillPath(path, m_col);
 
     //Prep value text drawing
@@ -94,7 +132,7 @@ void Block::setValue(const int &value)
     m_value = value;
     m_col = Constants::BlockColors[m_value];
 
-    //todo pop
+    m_pPopAnimationGroup->start();
 
     update();
 }
