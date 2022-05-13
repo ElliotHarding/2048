@@ -58,6 +58,9 @@ const int ScoreWeightHighNumbersCloseN1 = 40;
 const int ScoreWeightHighestNumber = 1; //Reward % for having the highest number
 const int ScoreWeightNumberBlocks = -15;
 
+///Depth for best direction choice calcuations
+const int DirectionChoiceDepth = 2;
+
 ///Movement options
 const QList<Vector2> PossibleMoveDirections = {Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)};
 

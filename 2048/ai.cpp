@@ -276,7 +276,7 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
         if(mapMoved)
         {
             int mapScore = gameStateScore(moveMap);
-            getHighestScore(moveMap, mapScore, 2);
+            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth);
             if(mapScore > score)
             {
                 score = mapScore;
