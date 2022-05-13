@@ -7,6 +7,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <QThread>
+#include <QPropertyAnimation>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,13 +19,13 @@ DLG_Home::DLG_Home(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_pUpdateTimer = new QTimer(this);
-    connect(m_pUpdateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
-    m_pUpdateTimer->setTimerType(Qt::PreciseTimer);
-
     m_pAiTimer = new QTimer(this);
     connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));
     m_pAiTimer->setTimerType(Qt::PreciseTimer);
+
+    m_pFinishAnimationTimer = new QTimer(this);
+    connect(m_pFinishAnimationTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
+    m_pFinishAnimationTimer->setTimerType(Qt::PreciseTimer);
 
     reset();
 }
@@ -34,9 +35,6 @@ DLG_Home::~DLG_Home()
     delete ui;
 
     m_blocksMutex.lock();
-
-    m_pUpdateTimer->stop();
-    delete m_pUpdateTimer;
 
     m_pAiTimer->stop();
     delete m_pAiTimer;
@@ -81,7 +79,6 @@ void DLG_Home::reset()
     m_bGameOver = false;
 
     //Start game loop - runs forever
-    m_pUpdateTimer->start(Constants::GameUpdateFrequency);
     m_pAiTimer->start(Constants::AiThinkFrequency);
 
     m_blocksMutex.unlock();
@@ -127,8 +124,8 @@ void DLG_Home::move(Vector2 direction)
 {
     m_blocksMutex.lock();
 
-    //Log block positions before they're changed by applied velocity
-    m_blocksPositionsBeforeInput.clear();
+    //Block input until things have moved where they need to go
+    m_bAcceptInput = false;
 
     const int xStart =  direction.x() > 0 ? Constants::MaxBlocksPerRow-1 : 0;
     const int xInc =    direction.x() > 0 ? -1 : 1;
@@ -137,22 +134,22 @@ void DLG_Home::move(Vector2 direction)
     for(int moveCount = 0; moveCount < m_blocksGrid.size(); moveCount++)
     {
         bool moved = false;
-        for(int x = xStart; inRange(x, 0, Constants::MaxBlocksPerRow); x+=xInc)
+        for(int x = xStart; inRange(x, 0, Constants::MaxBlocksPerRow-1); x+=xInc)
         {
-            for(int y = yStart; inRange(y, 0, Constants::MaxBlocksPerCol); y+=yInc)
+            for(int y = yStart; inRange(y, 0, Constants::MaxBlocksPerCol-1); y+=yInc)
             {
-                if(m_blocksGrid[x][y] != 0 && inRange(x, 0, m_blocksGrid.size()-1, direction.x()) && inRange(y, 0, m_blocksGrid[x].size()-1, direction.y()))
+                if(m_blocksGrid[x][y] != 0 && inRange(x, 0, Constants::MaxBlocksPerRow-1, direction.x()) && inRange(y, 0, Constants::MaxBlocksPerCol-1, direction.y()))
                 {
                     if(m_blocksGrid[x+direction.x()][y+direction.y()] == 0)
                     {
                         m_blocksGrid[x+direction.x()][y+direction.y()] = m_blocksGrid[x][y];
-                        m_blocksGrid[x][y] = 0;
+                        m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
                     else if(m_blocksGrid[x+direction.x()][y+direction.y()] == m_blocksGrid[x][y])
                     {
                         m_blocksGrid[x+direction.x()][y+direction.y()]->setValue(m_blocksGrid[x][y]->value()*2);
-                        m_blocksGrid[x][y] = 0;
+                        delete m_blocksGrid[x][y];
                         moved = true;
                     }
                 }
@@ -164,8 +161,18 @@ void DLG_Home::move(Vector2 direction)
         }
     }
 
-    //Block input until things have moved where they need to go
-    m_bAcceptInput = false;
+    for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+    {
+        for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+        {
+            if(m_blocksGrid[x][y] != nullptr)
+            {
+                m_blocksGrid[x][y]->startMoveAnimation(x, y);
+            }
+        }
+    }
+
+    m_pFinishAnimationTimer->start(Constants::MoveAnimationMs);
 
     m_blocksMutex.unlock();
 }
@@ -174,58 +181,20 @@ void DLG_Home::onUpdate()
 {
     m_blocksMutex.lock();
 
-    //Update positions, check if any moved
-    bool anyMoved = false;
-    for(Block* pBlock : m_blocks)
+    m_pFinishAnimationTimer->stop();
+
+    if(!trySpawnNewBlock())
     {
-        const bool moved = pBlock->updatePosition();
-        anyMoved = moved | anyMoved;        
+        m_bGameOver = true;
+        m_pAiTimer->stop();
+    }
+    else
+    {
+        m_currentScore += 2;
+        updateScores();
     }
 
-    if(anyMoved)
-    {
-        //If some blocks moved, check they're in correct bounds
-        for(Block* pBlock : m_blocks)
-        {
-            if(pBlock->checkBoundaries(Constants::BoardGeometry, m_blocks))
-            {
-                break;
-            }
-        }
-        update();
-    }
-
-    else if(!m_bAcceptInput)
-    {
-        QVector<QPoint> newPositions;
-        for(Block* pBlock : m_blocks)
-        {
-            newPositions.push_back(pBlock->geometry().topLeft());
-        }
-
-        if(m_blocks.size() == Constants::MaxBlocks)
-        {
-            m_bGameOver = true;
-            m_pAiTimer->stop();
-            m_pUpdateTimer->stop();
-        }
-
-        //If board changed after input then can try spawn a new block
-        if(m_blocksPositionsBeforeInput != newPositions)
-        {
-            if(!trySpawnNewBlock())
-            {
-                qDebug() << "DLG_Home::onUpdate : Failed to spawn new block, but game not over";
-            }
-            else
-            {
-                m_currentScore += 2;
-                updateScores();
-            }
-        }
-
-        m_bAcceptInput = true;
-    }
+    m_bAcceptInput = true;
 
     m_blocksMutex.unlock();
 }
@@ -245,7 +214,10 @@ void DLG_Home::onAiThink()
     {
         for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
         {
-            map[x][y] = m_blocksGrid[x][y]->value();
+            if(m_blocksGrid[x][y] != nullptr)
+            {
+                map[x][y] = m_blocksGrid[x][y]->value();
+            }
         }
     }
 

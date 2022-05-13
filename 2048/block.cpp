@@ -23,6 +23,30 @@ Block::~Block()
 {
     m_pPoppingTimer->stop();
     delete m_pPoppingTimer;
+
+    if(m_pMoveAnimation != nullptr)
+    {
+        m_pMoveAnimation->stop();
+        delete m_pMoveAnimation;
+    }
+}
+
+void Block::startMoveAnimation(int x, int y)
+{
+    if(m_pMoveAnimation)
+    {
+        m_pMoveAnimation->stop();
+        delete m_pMoveAnimation;
+    }
+
+    m_pMoveAnimation = new QPropertyAnimation(this, "geometry");
+    m_pMoveAnimation->setDuration(Constants::MoveAnimationMs);
+    m_pMoveAnimation->setStartValue(geometry());
+    m_pMoveAnimation->setEndValue(QRect(Constants::BoardGeometry.left() + x * Constants::BlockSize,
+                                Constants::BoardGeometry.top() + y * Constants::BlockSize,
+                                Constants::BlockSize,
+                                Constants::BlockSize));
+    m_pMoveAnimation->start();
 }
 
 void Block::paintEvent(QPaintEvent*)

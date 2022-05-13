@@ -2,6 +2,7 @@
 #define BLOCK_H
 
 #include <QWidget>
+#include <QPropertyAnimation>
 #include "settings.h"
 
 class Block : public QWidget
@@ -11,6 +12,9 @@ class Block : public QWidget
 public:
     Block(QWidget *parent, const int& value, const QPoint& position);
     ~Block();
+
+    ///Animations
+    void startMoveAnimation(int x, int y);
 
     ///Text value
     int value() const;
@@ -52,6 +56,9 @@ private:
     /// - Block pops bigger when merging or spawning
     bool m_bIsPopping = false;
     QTimer* m_pPoppingTimer;
+
+    ///Animations
+    QPropertyAnimation* m_pMoveAnimation = nullptr;
 private slots:
     void onEndPopping();
 };

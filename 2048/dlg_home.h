@@ -51,7 +51,6 @@ private:
     ///Block info
     QVector<QVector<Block*>> m_blocksGrid;
     QMutex m_blocksMutex;
-    QVector<QPoint> m_blocksPositionsBeforeInput;
 
     ///Score and highscore
     int m_currentScore;
@@ -59,8 +58,8 @@ private:
     void updateScores();
 
     ///Game loop timer
-    QTimer* m_pUpdateTimer;
     QTimer* m_pAiTimer;
+    QTimer* m_pFinishAnimationTimer;
     bool m_bGameOver = false;
 
     ///AI

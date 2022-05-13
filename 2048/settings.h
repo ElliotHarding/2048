@@ -13,9 +13,9 @@ namespace Constants
 {
 
 ///Speed & movement
-const int GameUpdateFrequency = 1;
 const int BlockMovementSpeed = 30;
-const int AiThinkFrequency = 10;
+const int AiThinkFrequency = 1000;
+const int MoveAnimationMs = 500;
 
 ///Spawn block settings
 const int PercentageSpawn2block = 80;
