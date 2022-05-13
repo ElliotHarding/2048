@@ -13,6 +13,10 @@ Block::Block(QWidget* parent, const int& value, const QPoint& position) : QWidge
     setValue(value);
     setPosition(position);
     show();
+
+    m_pMergeTimer = new QTimer(this);
+    m_pMergeTimer->setSingleShot(true);
+    connect(m_pMergeTimer, SIGNAL(timeout()), this, SLOT(onMerge()));
 }
 
 Block::~Block()
@@ -22,6 +26,11 @@ Block::~Block()
         m_pMoveAnimation->stop();
         delete m_pMoveAnimation;
     }
+
+    m_pMergeTimer->stop();
+    delete m_pMergeTimer;
+
+    m_pMergingBlock = nullptr;
 }
 
 void Block::startMoveAnimation(int x, int y)
@@ -42,6 +51,13 @@ void Block::startMoveAnimation(int x, int y)
     m_pMoveAnimation->start();
 }
 
+void Block::setToMerge(int x, int y, Block *pMergingBlock)
+{
+    startMoveAnimation(x, y);
+    m_pMergingBlock = pMergingBlock;
+    m_pMergeTimer->start(Constants::MoveAnimationMs);
+}
+
 void Block::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
@@ -60,6 +76,12 @@ void Block::paintEvent(QPaintEvent*)
 
     //Draw value text
     painter.drawText(QPoint(Constants::BlockSize/2 - textWidth/2, Constants::BlockSize/2 + Constants::BlockTextFontMetrics.height()/4), QString::number(m_value));
+}
+
+void Block::onMerge()
+{
+    m_pMergingBlock->setValue(m_value*2);
+    delete this;
 }
 
 int Block::value() const

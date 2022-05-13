@@ -20,12 +20,13 @@ DLG_Home::DLG_Home(QWidget *parent)
     ui->setupUi(this);
 
     m_pAiTimer = new QTimer(this);
-    connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));
     m_pAiTimer->setTimerType(Qt::PreciseTimer);
+    connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));    
 
     m_pFinishAnimationTimer = new QTimer(this);
-    connect(m_pFinishAnimationTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
     m_pFinishAnimationTimer->setTimerType(Qt::PreciseTimer);
+    m_pFinishAnimationTimer->setSingleShot(true);
+    connect(m_pFinishAnimationTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
 
     reset();
 }
@@ -181,8 +182,6 @@ void DLG_Home::move(Vector2 direction)
 void DLG_Home::onUpdate()
 {
     m_blocksMutex.lock();
-
-    m_pFinishAnimationTimer->stop();
 
     if(!trySpawnNewBlock())
     {

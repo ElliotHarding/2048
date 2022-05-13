@@ -16,6 +16,8 @@ public:
     ///Animations
     void startMoveAnimation(int x, int y);
 
+    void setToMerge(int x, int y, Block* pMergingBlock);
+
     ///Text value
     int value() const;
     void setValue(const int& value);
@@ -26,11 +28,13 @@ protected:
 private:
     void setPosition(const QPoint& position);
 
-    ///Text value
+    ///Value properties
     int m_value;
-
-    ///Color - related to value
     QColor m_col;
+
+    ///Merging with block
+    Block* m_pMergingBlock = nullptr;
+    QTimer* m_pMergeTimer = nullptr;
 
     ///Animations
     QPropertyAnimation* m_pMoveAnimation = nullptr;
