@@ -39,7 +39,7 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
             }
             if(!moved)
             {
-                break;
+                return;
             }
         }
     }
@@ -71,7 +71,7 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
             }
             if(!moved)
             {
-                break;
+                return;
             }
         }
     }
@@ -103,7 +103,7 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
             }
             if(!moved)
             {
-                break;
+                return;
             }
         }
     }
@@ -135,7 +135,7 @@ void mapMove(QVector<QVector<int>>& map, const Vector2& direction)
             }
             if(!moved)
             {
-                break;
+                return;
             }
         }
     }
@@ -153,7 +153,7 @@ bool compareNumberAndLocation(const NumberAndLocation &a, const NumberAndLocatio
     return a.number < b.number;
 }
 
-int gameStateScore(QVector<QVector<int>> map)
+int gameStateScore(const QVector<QVector<int>>& map)
 {
     int score = 0;
 
@@ -242,11 +242,11 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
     }
 
     QList<QVector<QVector<int>>> spawnStates = possibleSpawnStates(map);
-    for(QVector<QVector<int>> spawnState : spawnStates)
+    for(const QVector<QVector<int>>& spawnState : spawnStates)
     {
         for(const Vector2& direction : Constants::PossibleMoveDirections)
         {
-            QVector<QVector<int>> movedSpawnState = spawnState;
+            QVector<QVector<int>> movedSpawnState = std::move(spawnState);
             mapMove(movedSpawnState, direction);
 
             const bool spawnStateMoved = spawnState != movedSpawnState;
@@ -269,7 +269,7 @@ Vector2 AI::getBestDirection(const QVector<QVector<int>>& map)
     int score = 0;
     for(const Vector2& direction : Constants::PossibleMoveDirections)
     {
-        QVector<QVector<int>> moveMap = map;
+        QVector<QVector<int>> moveMap = std::move(map);
         mapMove(moveMap, direction);
 
         const bool mapMoved = map != moveMap;
