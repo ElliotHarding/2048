@@ -160,7 +160,7 @@ void DLG_Home::move(Direction dir)
     const int yStart =  dir == DOWN ? Constants::MaxBlocksPerCol-2 : dir == UP ? 1 : 0;
     const int yInc =    dir == DOWN ? -1 : 1;
     Vector2 direction = directionToVector(dir);
-    for(int moveCount = 0; moveCount < m_blocksGrid.size(); moveCount++)
+    for(int moveCount = 0; moveCount < m_blocksGrid.size()-1; moveCount++)
     {
         bool moved = false;
         for(int x = xStart; inRange(x, 0, Constants::MaxBlocksPerRow-1); x+=xInc)

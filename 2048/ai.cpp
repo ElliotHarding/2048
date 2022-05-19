@@ -43,7 +43,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
     bool anyMoved = false;
     if(direction == RIGHT)
     {
-        for(int moveCount = 0; moveCount < map.size(); moveCount++)
+        for(int moveCount = 0; moveCount < xWidth-1; moveCount++)
         {
             bool moved = false;
             for(int x = xWidth-2; x > -1; x--)
@@ -80,7 +80,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
     }
     else if(direction == LEFT)
     {
-        for(int moveCount = 0; moveCount < map.size(); moveCount++)
+        for(int moveCount = 0; moveCount < xWidth-1; moveCount++)
         {
             bool moved = false;
             for(int x = 1; x < xWidth; x++)
@@ -117,7 +117,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
     }
     else if(direction == DOWN)
     {
-        for(int moveCount = 0; moveCount < yWidth; moveCount++)
+        for(int moveCount = 0; moveCount < yWidth-1; moveCount++)
         {
             bool moved = false;
             for(int x = 0; x < xWidth; x++)
@@ -154,7 +154,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
     }
     else if(direction == UP)
     {
-        for(int moveCount = 0; moveCount < yWidth; moveCount++)
+        for(int moveCount = 0; moveCount < yWidth-1; moveCount++)
         {
             bool moved = false;
             for(int x = 0; x < xWidth; x++)
