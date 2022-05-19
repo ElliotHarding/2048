@@ -327,6 +327,8 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
         return;
     }
 
+    //Todo : Cache previously calculated game states
+
     int numMerges;
     for(int x = 0; x < xWidth; x++)
     {
