@@ -11,6 +11,7 @@ public:
 
     Direction getBestDirection(const QVector<QVector<int>>& map);
     Direction getBestSmoothnessDirection(const QVector<QVector<int>>& map);
+    Direction getBestSmoothness2Direction(const QVector<QVector<int>>& map);
 };
 
 #endif // AI_H
