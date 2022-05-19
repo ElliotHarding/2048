@@ -204,16 +204,16 @@ bool compareNumberAndLocation(const NumberAndLocation &a, const NumberAndLocatio
     return a.number < b.number;
 }
 
-int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>& blockValues, const int& numMerges)
+int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>& blockValues, const int& numMerges, const int& xWidth, const int& yWidth)
 {
     //Number of merges adds to score
     int score = numMerges * Constants::ScoreWeightNumMerges;
 
     int numZeroBlocks = 0;
     int iBlockValues = 0;
-    for(int x = 0; x < map.size(); x++)
+    for(int x = 0; x < xWidth; x++)
     {
-        for(int y = 0; y < map[0].size(); y++)
+        for(int y = 0; y < yWidth; y++)
         {
             if(map[x][y] == 0)
             {
@@ -227,13 +227,13 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
     }
     std::sort(blockValues.begin(), blockValues.end(), compareNumberAndLocation);
 
-    const int highestNumber = blockValues[blockValues.size()-1].number;
-    const int highestNumberX = blockValues[blockValues.size()-1].posX;
-    const int highestNumberY = blockValues[blockValues.size()-1].posY;
-    const int secondHighestNumberX = blockValues.size() > 1 ? blockValues[blockValues.size()-2].posX : 0;
-    const int secondHighestNumberY = blockValues.size() > 1 ? blockValues[blockValues.size()-2].posY : 0;
-    const int thirdHighestNumberX = blockValues.size() > 2 ? blockValues[blockValues.size()-3].posX : 0;
-    const int thirdHighestNumberY = blockValues.size() > 2 ? blockValues[blockValues.size()-3].posY : 0;
+    const int highestNumber = blockValues[iBlockValues-1].number;
+    const int highestNumberX = blockValues[iBlockValues-1].posX;
+    const int highestNumberY = blockValues[iBlockValues-1].posY;
+    const int secondHighestNumberX = blockValues.size() > 1 ? blockValues[iBlockValues-2].posX : 0;
+    const int secondHighestNumberY = blockValues.size() > 1 ? blockValues[iBlockValues-2].posY : 0;
+    const int thirdHighestNumberX = blockValues.size() > 2 ? blockValues[iBlockValues-3].posX : 0;
+    const int thirdHighestNumberY = blockValues.size() > 2 ? blockValues[iBlockValues-3].posY : 0;
 
     //Highest number in top left
     if(map[0][0] == highestNumber)
@@ -250,11 +250,11 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
     }
 
     //No number in bottom right
-    if(map[map.size()-1][map[0].size()-1] == 0)
+    if(map[xWidth-1][yWidth-1] == 0)
     {
         score += Constants::ScoreWeightNoneBottomRightN0;
     }
-    else if(map[map.size()-1][map[0].size()-2] == 0 || map[map.size()-2][map[0].size()-1] == 0)
+    else if(map[xWidth-1][yWidth-2] == 0 || map[xWidth-2][yWidth-1] == 0)
     {
         score += Constants::ScoreWeightNoneBottomRightN1;
     }
@@ -328,9 +328,9 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
     }
 
     int numMerges;
-    for(int x = 0; x < map.size(); x++)
+    for(int x = 0; x < xWidth; x++)
     {
-        for(int y = 0; y < map[x].size(); y++)
+        for(int y = 0; y < yWidth; y++)
         {
             if(map[x][y] == 0)
             {
@@ -342,7 +342,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
                     {
-                        highScore += gameStateScore(movedSpawnState, blockValues, numMerges);
+                        highScore += gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth);
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth);
                     }
                 }
@@ -354,7 +354,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
                     {
-                        highScore += gameStateScore(movedSpawnState, blockValues, numMerges);
+                        highScore += gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth);
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth);
                     }
                 }
@@ -385,7 +385,7 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         numMerges = 0;
         if(mapMove(moveMap, direction, numMerges, xWidth, yWidth))
         {
-            mapScore = gameStateScore(moveMap, blockValuesMem, numMerges);
+            mapScore = gameStateScore(moveMap, blockValuesMem, numMerges, xWidth, yWidth);
             getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem, xWidth, yWidth);
             if(mapScore > score)
             {
