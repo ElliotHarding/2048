@@ -236,7 +236,7 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
     //Number of merges adds to score
     int score = numMerges * Constants::ScoreWeightNumMerges;
 
-    int numZeroBlocks = 1;
+    int numZeroBlocks = 0;
     int highestNumber = 0;
     int smoothness = 0;
     for(int x = 0; x < width; x++)
@@ -264,7 +264,13 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
         }
     }
 
-    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);//numZeroBlocks is never 0
+    const int maxBlocks = width * height;
+    if(numZeroBlocks == maxBlocks)
+    {
+        numZeroBlocks = maxBlocks - 1;
+    }
+
+    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
 
     //Highest number created
     score += highestNumber * Constants::ScoreWeightHighestNumber;
