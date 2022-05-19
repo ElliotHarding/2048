@@ -38,11 +38,6 @@ void debugDirection(const Direction& direction)
     }
 }
 
-bool withinRangeInclusive(const int& value, const int& min, const int& max)
-{
-    return value >= min && value <= max;
-}
-
 bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMerges)
 {
     bool anyMoved = false;
