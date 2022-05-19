@@ -19,6 +19,25 @@ void debugMap(const QVector<QVector<int>>& map)
     }
 }
 
+void debugDirection(const Direction& direction)
+{
+    switch (direction)
+    {
+        case UP:
+            qDebug("Direction: UP");
+            break;
+        case DOWN:
+            qDebug("Direction: DOWN");
+            break;
+        case LEFT:
+            qDebug("Direction: LEFT");
+            break;
+        case RIGHT:
+            qDebug("Direction: RIGHT");
+            break;
+    }
+}
+
 bool withinRangeInclusive(const int& value, const int& min, const int& max)
 {
     return value >= min && value <= max;
@@ -69,11 +88,11 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
         for(int moveCount = 0; moveCount < map.size(); moveCount++)
         {
             bool moved = false;
-            for(int x = 0; x < map.size(); x++)
+            for(int x = 1; x < map.size(); x++)
             {
                 for(int y = 0; y < map[0].size(); y++)
                 {
-                    if(map[x][y] != 0 && x > 0)
+                    if(map[x][y] != 0)
                     {
                         if(map[x-1][y] == 0)
                         {
@@ -108,9 +127,9 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
             bool moved = false;
             for(int x = 0; x < map.size(); x++)
             {
-                for(int y = map[0].size()-1; y > -1; y--)
+                for(int y = map[0].size()-2; y > -1; y--)
                 {
-                    if(map[x][y] != 0 && y < map[0].size()-1)
+                    if(map[x][y] != 0)
                     {
                         if(map[x][y+1] == 0)
                         {
@@ -145,9 +164,9 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
             bool moved = false;
             for(int x = 0; x < map.size(); x++)
             {
-                for(int y = 0; y < map[0].size(); y++)
+                for(int y = 1; y < map[0].size(); y++)
                 {
-                    if(map[x][y] != 0 && y > 0)
+                    if(map[x][y] != 0)
                     {
                         if(map[x][y-1] == 0)
                         {
