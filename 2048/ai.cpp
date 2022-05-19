@@ -261,7 +261,7 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
     }
 
     //Add to score for number of 0 blocks
-    score += Constants::ScoreWeightNumberBlocks * numZeroBlocks;
+    score += Constants::ScoreWeightNumberEmptySpots * numZeroBlocks;
 
     return score > 0 ? score : 0;
 }

@@ -64,7 +64,7 @@ const int ScoreWeightHighTopLeftN2 = 300;
 const int ScoreWeightHighNumbersCloseN0 = 70; //Reward % for having high value blocks next to eachother
 const int ScoreWeightHighNumbersCloseN1 = 40;
 const int ScoreWeightHighestNumber = 10; //Reward % for having the highest number
-const int ScoreWeightNumberBlocks = 20;
+const int ScoreWeightNumberEmptySpots = 20;
 
 ///Depth for best direction choice calcuations
 const int DirectionChoiceDepth = 20;
