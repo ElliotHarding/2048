@@ -51,11 +51,11 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
         for(int moveCount = 0; moveCount < map.size(); moveCount++)
         {
             bool moved = false;
-            for(int x = map.size()-1; x > -1; x--)
+            for(int x = map.size()-2; x > -1; x--)
             {
                 for(int y = 0; y < map[0].size(); y++)
                 {
-                    if(map[x][y] != 0 && x < map.size()-1)
+                    if(map[x][y] != 0)
                     {
                         if(map[x+1][y] == 0)
                         {
