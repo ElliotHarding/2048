@@ -38,7 +38,7 @@ void debugDirection(const Direction& direction)
     }
 }
 
-bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMerges)
+bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMerges, const int& xWidth, const int& yWidth)
 {
     bool anyMoved = false;
     if(direction == RIGHT)
@@ -46,9 +46,9 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
         for(int moveCount = 0; moveCount < map.size(); moveCount++)
         {
             bool moved = false;
-            for(int x = map.size()-2; x > -1; x--)
+            for(int x = xWidth-2; x > -1; x--)
             {
-                for(int y = 0; y < map[0].size(); y++)
+                for(int y = 0; y < yWidth; y++)
                 {
                     if(map[x][y] != 0)
                     {
@@ -83,9 +83,9 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
         for(int moveCount = 0; moveCount < map.size(); moveCount++)
         {
             bool moved = false;
-            for(int x = 1; x < map.size(); x++)
+            for(int x = 1; x < xWidth; x++)
             {
-                for(int y = 0; y < map[0].size(); y++)
+                for(int y = 0; y < yWidth; y++)
                 {
                     if(map[x][y] != 0)
                     {
@@ -117,12 +117,12 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
     }
     else if(direction == DOWN)
     {
-        for(int moveCount = 0; moveCount < map[0].size(); moveCount++)
+        for(int moveCount = 0; moveCount < yWidth; moveCount++)
         {
             bool moved = false;
-            for(int x = 0; x < map.size(); x++)
+            for(int x = 0; x < xWidth; x++)
             {
-                for(int y = map[0].size()-2; y > -1; y--)
+                for(int y = yWidth-2; y > -1; y--)
                 {
                     if(map[x][y] != 0)
                     {
@@ -154,12 +154,12 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
     }
     else if(direction == UP)
     {
-        for(int moveCount = 0; moveCount < map[0].size(); moveCount++)
+        for(int moveCount = 0; moveCount < yWidth; moveCount++)
         {
             bool moved = false;
-            for(int x = 0; x < map.size(); x++)
+            for(int x = 0; x < xWidth; x++)
             {
-                for(int y = 1; y < map[0].size(); y++)
+                for(int y = 1; y < yWidth; y++)
                 {
                     if(map[x][y] != 0)
                     {
@@ -319,7 +319,8 @@ int smooth2GameStateScore(const QVector<QVector<int>>& map)
 }
 
 void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
-                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState, QVector<NumberAndLocation>& blockValues)
+                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState, QVector<NumberAndLocation>& blockValues,
+                     const int& xWidth, const int& yWidth)
 {
     if(depth == 0)
     {
@@ -339,10 +340,10 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                 {
                     movedSpawnState = spawnState;
                     numMerges = 0;
-                    if(mapMove(movedSpawnState, direction, numMerges))
+                    if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
                     {
                         highScore += gameStateScore(movedSpawnState, blockValues, numMerges);
-                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues);
+                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth);
                     }
                 }
 
@@ -351,10 +352,10 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                 {
                     movedSpawnState = spawnState;
                     numMerges = 0;
-                    if(mapMove(movedSpawnState, direction, numMerges))
+                    if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
                     {
                         highScore += gameStateScore(movedSpawnState, blockValues, numMerges);
-                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues);
+                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth);
                     }
                 }
             }
@@ -370,6 +371,9 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     QVector<QVector<int>> movedSpawnStateMem = map;
     QVector<QVector<int>> moveMap = map;
 
+    const int xWidth = map.size();
+    const int yWidth = map[0].size();
+
     QVector<NumberAndLocation> blockValuesMem = QVector<NumberAndLocation>(Constants::MaxBlocks, NumberAndLocation());
 
     int score = 0;
@@ -379,10 +383,10 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     {
         moveMap = map;
         numMerges = 0;
-        if(mapMove(moveMap, direction, numMerges))
+        if(mapMove(moveMap, direction, numMerges, xWidth, yWidth))
         {
             mapScore = gameStateScore(moveMap, blockValuesMem, numMerges);
-            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem);
+            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem, xWidth, yWidth);
             if(mapScore > score)
             {
                 score = mapScore;
@@ -394,9 +398,12 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     return chosenDirection;
 }
 
-Direction AI::getBestSmoothnessDirection(const QVector<QVector<int> > &map)
+Direction AI::getBestSmoothnessDirection(const QVector<QVector<int>>& map)
 {
     Direction chosenDirection = Constants::PossibleMoveDirections[0];
+
+    const int xWidth = map.size();
+    const int yWidth = map[0].size();
 
     int score = -99999999;
     int mapScore;
@@ -405,7 +412,7 @@ Direction AI::getBestSmoothnessDirection(const QVector<QVector<int> > &map)
     {
         QVector<QVector<int>> moveMap = map;
         numMerges = 0;
-        if(mapMove(moveMap, direction, numMerges))
+        if(mapMove(moveMap, direction, numMerges, xWidth, yWidth))
         {
             mapScore = smoothGameStateScore(moveMap);
             if(mapScore > score)
@@ -419,9 +426,12 @@ Direction AI::getBestSmoothnessDirection(const QVector<QVector<int> > &map)
     return chosenDirection;
 }
 
-Direction AI::getBestSmoothness2Direction(const QVector<QVector<int> > &map)
+Direction AI::getBestSmoothness2Direction(const QVector<QVector<int>>& map)
 {
     Direction chosenDirection = Constants::PossibleMoveDirections[0];
+
+    const int xWidth = map.size();
+    const int yWidth = map[0].size();
 
     int score = -99999999;
     int mapScore;
@@ -430,7 +440,7 @@ Direction AI::getBestSmoothness2Direction(const QVector<QVector<int> > &map)
     {
         QVector<QVector<int>> moveMap = map;
         numMerges = 0;
-        if(mapMove(moveMap, direction, numMerges))
+        if(mapMove(moveMap, direction, numMerges, xWidth, yWidth))
         {
             mapScore = smooth2GameStateScore(moveMap);
             if(mapScore > score)
