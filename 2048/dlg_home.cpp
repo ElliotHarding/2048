@@ -219,6 +219,8 @@ void DLG_Home::move(Direction dir)
     //Block input until things have moved where they need to go
     m_bAcceptInput = false;
 
+    bool anyMoved = false;
+
     //Perform move in dir direction
     const int xStart =  dir == RIGHT ? ui->sb_rows->value()-2 : dir == LEFT ? 1 : 0;
     const int xInc =    dir == RIGHT ? -1 : 1;
@@ -253,14 +255,25 @@ void DLG_Home::move(Direction dir)
                 }
             }
         }
-        if(!moved)
+        if(moved)
+        {
+            anyMoved = true;
+        }
+        else
         {
             break;
         }
     }
 
-    //Spawn timer to handle stuff once move animations are finished (calls onUpdate())
-    m_pFinishAnimationTimer->start(Constants::MoveAnimationMs);
+    if(anyMoved)
+    {
+        //Spawn timer to handle stuff once move animations are finished (calls onUpdate())
+        m_pFinishAnimationTimer->start(Constants::MoveAnimationMs);
+    }
+    else
+    {
+        m_bAcceptInput = true;
+    }
 
     m_blocksMutex.unlock();
 }
