@@ -25,6 +25,8 @@ const int MoveAnimationMs = 250;
 ///Spawn block settings
 const int PercentageSpawn2block = 80;
 const int PercentageSpawn4block = 20;
+const double RatioSpawn2Block = PercentageSpawn2block/100;
+const double RatioSpawn4Block = PercentageSpawn4block/100;
 
 ///Visual block settings
 const int BlockPopTimeMs = 100; //Block pops bigger when merging or spawning
@@ -69,7 +71,7 @@ const int ScoreWeightHighestNumber = 10; //Reward % for having the highest numbe
 const int ScoreWeightNumberEmptySpots = 20;
 
 ///Depth for best direction choice calcuations
-const int DirectionChoiceDepth = 10;
+const int DirectionChoiceDepth = 3;
 
 ///Movement options
 const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};

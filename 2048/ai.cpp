@@ -358,7 +358,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
                     {
-                        const int score = gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth);
+                        const int score = gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth) * Constants::RatioSpawn2Block;
                         cacheValues.insert(map, score);
                         highScore += score;
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth, cacheValues);
@@ -374,7 +374,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
                     {
-                        const int score = gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth);
+                        const int score = gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth) * Constants::RatioSpawn4Block;
                         cacheValues.insert(map, score);
                         highScore += score;
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth, cacheValues);
