@@ -321,6 +321,60 @@ int smooth2GameStateScore(const QVector<QVector<int>>& map)
 
 void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
                      QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState, QVector<NumberAndLocation>& blockValues,
+                     const int& xWidth, const int& yWidth)
+{
+    if(depth == 0)
+    {
+        return;
+    }
+
+    //Game state evaluation vars
+    int numMerges;
+
+    //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
+    // then evaluate spawnState (to a set depth of moves)
+    for(int x = 0; x < xWidth; x++)
+    {
+        for(int y = 0; y < yWidth; y++)
+        {
+            if(map[x][y] == 0)
+            {
+                spawnState = map;
+
+                //Add 2 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 2;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
+                    {
+                        highScore += gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth) * Constants::RatioSpawn2Block;
+                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth);
+                    }
+                }
+
+                //Add 4 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 4;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges, xWidth, yWidth))
+                    {
+                        highScore += gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth) * Constants::RatioSpawn4Block;
+                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void getHighestScoreCacheValues(const QVector<QVector<int>>& map, int& highScore, int depth,
+                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState, QVector<NumberAndLocation>& blockValues,
                      const int& xWidth, const int& yWidth, QMap<QVector<QVector<int>>, int>& cacheValues)
 {
     if(depth == 0)
@@ -361,7 +415,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                         const int score = gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth) * Constants::RatioSpawn2Block;
                         cacheValues.insert(map, score);
                         highScore += score;
-                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth, cacheValues);
+                        getHighestScoreCacheValues(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth, cacheValues);
                     }
                 }
 
@@ -377,7 +431,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                         const int score = gameStateScore(movedSpawnState, blockValues, numMerges, xWidth, yWidth) * Constants::RatioSpawn4Block;
                         cacheValues.insert(map, score);
                         highScore += score;
-                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth, cacheValues);
+                        getHighestScoreCacheValues(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues, xWidth, yWidth, cacheValues);
                     }
                 }
             }
@@ -386,6 +440,45 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
 }
 
 Direction AI::getBestDirection(const QVector<QVector<int>>& map)
+{
+    Direction chosenDirection = Constants::PossibleMoveDirections[0];
+
+    //Reuseable memory for depth search
+    QVector<QVector<int>> spawnStateMem = map;
+    QVector<QVector<int>> movedSpawnStateMem = map;
+    QVector<QVector<int>> moveMap = map;
+    QVector<NumberAndLocation> blockValuesMem = QVector<NumberAndLocation>(Constants::MaxBlocks, NumberAndLocation());
+
+    //Size of map, quicker to retrieve from const
+    const int xWidth = map.size();
+    const int yWidth = map[0].size();
+
+    //Game state evaluation vars
+    int score = 0;
+    int mapScore;
+    int numMerges;
+
+    //For each direction, evaluate its score (to a set depth of moves), choose best direction
+    for(const Direction& direction : Constants::PossibleMoveDirections)
+    {
+        moveMap = map;
+        numMerges = 0;
+        if(mapMove(moveMap, direction, numMerges, xWidth, yWidth))
+        {
+            mapScore = gameStateScore(moveMap, blockValuesMem, numMerges, xWidth, yWidth);
+            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem, xWidth, yWidth);
+            if(mapScore > score)
+            {
+                score = mapScore;
+                chosenDirection = direction;
+            }
+        }
+    }
+
+    return chosenDirection;
+}
+
+Direction AI::getBestDirectionCacheValues(const QVector<QVector<int> > &map)
 {
     Direction chosenDirection = Constants::PossibleMoveDirections[0];
 
@@ -415,7 +508,7 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         if(mapMove(moveMap, direction, numMerges, xWidth, yWidth))
         {
             mapScore = gameStateScore(moveMap, blockValuesMem, numMerges, xWidth, yWidth);
-            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem, xWidth, yWidth, cacheGameStates);
+            getHighestScoreCacheValues(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem, xWidth, yWidth, cacheGameStates);
             if(mapScore > score)
             {
                 score = mapScore;
