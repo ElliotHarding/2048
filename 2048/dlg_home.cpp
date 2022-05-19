@@ -172,12 +172,14 @@ void DLG_Home::move(Direction dir)
                     if(m_blocksGrid[x+direction.x()][y+direction.y()] == 0)
                     {
                         m_blocksGrid[x+direction.x()][y+direction.y()] = m_blocksGrid[x][y];
+                        m_blocksGrid[x+direction.x()][y+direction.y()]->startMoveAnimation(x+direction.x(), y+direction.y());
                         m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
                     else if(m_blocksGrid[x+direction.x()][y+direction.y()]->value() == m_blocksGrid[x][y]->value())
                     {
                         m_blocksGrid[x][y]->setToMerge(x+direction.x(), y+direction.y(), m_blocksGrid[x+direction.x()][y+direction.y()]);
+                        m_blocksGrid[x][y]->startMoveAnimation(x+direction.x(), y+direction.y());
                         m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
@@ -187,18 +189,6 @@ void DLG_Home::move(Direction dir)
         if(!moved)
         {
             break;
-        }
-    }
-
-    //start move animations of moved blocks
-    for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
-    {
-        for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
-        {
-            if(m_blocksGrid[x][y] != nullptr)
-            {
-                m_blocksGrid[x][y]->startMoveAnimation(x, y);
-            }
         }
     }
 
