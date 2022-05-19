@@ -155,9 +155,9 @@ void DLG_Home::move(Direction dir)
     m_bAcceptInput = false;
 
     //Perform move in dir direction
-    const int xStart =  dir == RIGHT ? Constants::MaxBlocksPerRow-1 : 0;
+    const int xStart =  dir == RIGHT ? Constants::MaxBlocksPerRow-2 : dir == LEFT ? 1 : 0;
     const int xInc =    dir == RIGHT ? -1 : 1;
-    const int yStart =  dir == DOWN ? Constants::MaxBlocksPerCol-1 : 0;
+    const int yStart =  dir == DOWN ? Constants::MaxBlocksPerCol-2 : dir == UP ? 1 : 0;
     const int yInc =    dir == DOWN ? -1 : 1;
     Vector2 direction = directionToVector(dir);
     for(int moveCount = 0; moveCount < m_blocksGrid.size(); moveCount++)
@@ -167,7 +167,7 @@ void DLG_Home::move(Direction dir)
         {
             for(int y = yStart; inRange(y, 0, Constants::MaxBlocksPerCol-1); y+=yInc)
             {
-                if(m_blocksGrid[x][y] != 0 && inRange(x, 0, Constants::MaxBlocksPerRow-1, direction.x()) && inRange(y, 0, Constants::MaxBlocksPerCol-1, direction.y()))
+                if(m_blocksGrid[x][y] != 0)
                 {
                     if(m_blocksGrid[x+direction.x()][y+direction.y()] == 0)
                     {
