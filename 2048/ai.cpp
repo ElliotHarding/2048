@@ -236,13 +236,13 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
     }
 
     //No number in bottom right
-    if(map[map.size()-1][map[0].size()-1] != 0)
+    if(map[map.size()-1][map[0].size()-1] == 0)
     {
-        score -= Constants::ScoreWeightHighTopLeftN0;
+        score += Constants::ScoreWeightNoneBottomRightN0;
     }
-    else if(map[map.size()-1][map[0].size()-2] != 0 || map[map.size()-2][map[0].size()-1] != 0)
+    else if(map[map.size()-1][map[0].size()-2] == 0 || map[map.size()-2][map[0].size()-1] == 0)
     {
-        score -= Constants::ScoreWeightHighTopLeftN1;
+        score += Constants::ScoreWeightNoneBottomRightN1;
     }
 
     //Highest number created
