@@ -75,8 +75,60 @@ void DLG_Home::reset()
     }
     m_blocksGrid.clear();
 
+    const int numCols = ui->sb_cols->value();
+    const int numRows = ui->sb_rows->value();
+    const int endX = numCols * Constants::BlockSize;
+    const int endY = numRows * Constants::BlockSize;
+
+    int lineIndex = 0;
+    for(int x = 0; x < numCols; x++)
+    {
+        if(lineIndex > m_uiLines.size()-1)
+        {
+            QFrame* newCol = new QFrame(this);
+            newCol->setFrameShape(QFrame::VLine);
+            newCol->setGeometry(x * Constants::BlockSize, 0, 1, endY);
+            newCol->raise();
+            m_uiLines.push_back(newCol);
+        }
+        else
+        {
+            m_uiLines[lineIndex]->setFrameShape(QFrame::VLine);
+            m_uiLines[lineIndex]->setGeometry(x * Constants::BlockSize, 0, 1, endY);
+        }
+        lineIndex++;
+    }
+    for(int y = 0; y < numRows; y++)
+    {
+        if(lineIndex > m_uiLines.size()-1)
+        {
+            QFrame* newRow = new QFrame(this);
+            newRow->setFrameShape(QFrame::HLine);
+            newRow->setGeometry(0, y * Constants::BlockSize, endX, 1);
+            newRow->raise();
+            m_uiLines.push_back(newRow);
+        }
+        else
+        {
+            m_uiLines[lineIndex]->setFrameShape(QFrame::HLine);
+            m_uiLines[lineIndex]->setGeometry(0, y * Constants::BlockSize, endX, 1);
+        }
+        lineIndex++;
+    }
+
+    //Remove any extra lines
+    if(lineIndex < m_uiLines.size()-1)
+    {
+        for(int i = lineIndex; i < m_uiLines.size();)
+        {
+            delete m_uiLines[i];
+            m_uiLines.removeAt(i);
+        }
+    }
+
+
     //Create new grid
-    m_blocksGrid = QVector<QVector<Block*>>(Constants::MaxBlocksPerCol, QVector<Block*>(Constants::MaxBlocksPerRow, nullptr));
+    m_blocksGrid = QVector<QVector<Block*>>(ui->sb_cols->value(), QVector<Block*>(ui->sb_rows->value(), nullptr));
 
     //Initial game board contains one block
     m_blocksGrid[0][0] = new Block(this, 2, Constants::BoardGeometry.topLeft());

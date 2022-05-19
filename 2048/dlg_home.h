@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMutex>
+#include <QFrame>
 
 #include "ai.h"
 #include "block.h"
@@ -35,7 +36,9 @@ private slots:
     void on_cb_useAi_toggled(bool checked);
 
 private:
+    ///UI
     Ui::DLG_Home *ui;
+    QList<QFrame*> m_uiLines;
 
     ///Resets game
     void reset();
