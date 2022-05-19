@@ -61,6 +61,8 @@ DLG_Home::~DLG_Home()
 //Reset game
 void DLG_Home::reset()
 {
+    resetUiLines();
+
     m_blocksMutex.lock();
 
     //Remove previous blocks
@@ -75,63 +77,11 @@ void DLG_Home::reset()
     }
     m_blocksGrid.clear();
 
-    const int numCols = ui->sb_cols->value();
-    const int numRows = ui->sb_rows->value();
-    const int endX = numCols * Constants::BlockSize;
-    const int endY = numRows * Constants::BlockSize;
-
-    int lineIndex = 0;
-    for(int x = 0; x < numCols; x++)
-    {
-        if(lineIndex > m_uiLines.size()-1)
-        {
-            QFrame* newCol = new QFrame(this);
-            newCol->setFrameShape(QFrame::VLine);
-            newCol->setGeometry(x * Constants::BlockSize, 0, 1, endY);
-            newCol->raise();
-            m_uiLines.push_back(newCol);
-        }
-        else
-        {
-            m_uiLines[lineIndex]->setFrameShape(QFrame::VLine);
-            m_uiLines[lineIndex]->setGeometry(x * Constants::BlockSize, 0, 1, endY);
-        }
-        lineIndex++;
-    }
-    for(int y = 0; y < numRows; y++)
-    {
-        if(lineIndex > m_uiLines.size()-1)
-        {
-            QFrame* newRow = new QFrame(this);
-            newRow->setFrameShape(QFrame::HLine);
-            newRow->setGeometry(0, y * Constants::BlockSize, endX, 1);
-            newRow->raise();
-            m_uiLines.push_back(newRow);
-        }
-        else
-        {
-            m_uiLines[lineIndex]->setFrameShape(QFrame::HLine);
-            m_uiLines[lineIndex]->setGeometry(0, y * Constants::BlockSize, endX, 1);
-        }
-        lineIndex++;
-    }
-
-    //Remove any extra lines
-    if(lineIndex < m_uiLines.size()-1)
-    {
-        for(int i = lineIndex; i < m_uiLines.size();)
-        {
-            delete m_uiLines[i];
-            m_uiLines.removeAt(i);
-        }
-    }
-
-
     //Create new grid
     m_blocksGrid = QVector<QVector<Block*>>(ui->sb_cols->value(), QVector<Block*>(ui->sb_rows->value(), nullptr));
 
     //Initial game board contains one block
-    m_blocksGrid[0][0] = new Block(this, 2, Constants::BoardGeometry.topLeft());
+    m_blocksGrid[0][0] = new Block(this, 2, Constants::BoardStart);
 
     m_bAcceptInput = true;
     m_bGameOver = false;
@@ -146,6 +96,68 @@ void DLG_Home::reset()
 
     m_currentScore = 0;
     updateScores();
+}
+
+//Creates grid for UI
+void DLG_Home::resetUiLines()
+{
+    //Uses existing line objects to create ui grid
+    //If theres not enough line objects, creates more
+    //If theres too many line objects, removes them
+
+    const int numCols = ui->sb_cols->value();
+    const int numRows = ui->sb_rows->value();
+    const int totalWidth = numCols * Constants::BlockSize;
+    const int totalHeight = numRows * Constants::BlockSize;
+    int lineIndex = 0;
+    for(int x = 0; x < numCols+1; x++)
+    {
+        if(lineIndex > m_uiLines.size()-1)
+        {
+            QFrame* newCol = new QFrame(this);
+            newCol->setFrameShape(QFrame::VLine);
+            newCol->setGeometry(Constants::BoardStart.x() + x * Constants::BlockSize, Constants::BoardStart.y(), 1, totalHeight);
+            newCol->raise();
+            newCol->show();
+            m_uiLines.push_back(newCol);
+        }
+        else
+        {
+            m_uiLines[lineIndex]->setFrameShape(QFrame::VLine);
+            m_uiLines[lineIndex]->setGeometry(Constants::BoardStart.x() + x * Constants::BlockSize, Constants::BoardStart.y(), 1, totalHeight);
+        }
+        lineIndex++;
+    }
+    for(int y = 0; y < numRows+1; y++)
+    {
+        if(lineIndex > m_uiLines.size()-1)
+        {
+            QFrame* newRow = new QFrame(this);
+            newRow->setFrameShape(QFrame::HLine);
+            newRow->setGeometry(Constants::BoardStart.x(), Constants::BoardStart.y() + y * Constants::BlockSize, totalWidth, 1);
+            newRow->raise();
+            newRow->show();
+            m_uiLines.push_back(newRow);
+        }
+        else
+        {
+            m_uiLines[lineIndex]->setFrameShape(QFrame::HLine);
+            m_uiLines[lineIndex]->setGeometry(Constants::BoardStart.x(), Constants::BoardStart.y() + y * Constants::BlockSize, totalWidth, 1);
+        }
+        lineIndex++;
+    }
+
+    //Remove any extra lines
+    if(lineIndex < m_uiLines.size()-1)
+    {
+        for(int i = lineIndex; i < m_uiLines.size();)
+        {
+            delete m_uiLines[i];
+            m_uiLines.removeAt(i);
+        }
+    }
+
+    ui->lbl_background->setGeometry(Constants::BoardStart.x(), Constants::BoardStart.y(), totalWidth, totalHeight);
 }
 
 void DLG_Home::keyPressEvent(QKeyEvent *event)
@@ -207,31 +219,33 @@ void DLG_Home::move(Direction dir)
     m_bAcceptInput = false;
 
     //Perform move in dir direction
-    const int xStart =  dir == RIGHT ? Constants::MaxBlocksPerRow-2 : dir == LEFT ? 1 : 0;
+    const int xStart =  dir == RIGHT ? ui->sb_rows->value()-2 : dir == LEFT ? 1 : 0;
     const int xInc =    dir == RIGHT ? -1 : 1;
-    const int yStart =  dir == DOWN ? Constants::MaxBlocksPerCol-2 : dir == UP ? 1 : 0;
+    const int yStart =  dir == DOWN ? ui->sb_cols->value()-2 : dir == UP ? 1 : 0;
     const int yInc =    dir == DOWN ? -1 : 1;
     Vector2 direction = directionToVector(dir);
     for(int moveCount = 0; moveCount < m_blocksGrid.size()-1; moveCount++)
     {
         bool moved = false;
-        for(int x = xStart; inRange(x, 0, Constants::MaxBlocksPerRow-1); x+=xInc)
+        for(int x = xStart; inRange(x, 0, ui->sb_cols->value()-1); x+=xInc)
         {
-            for(int y = yStart; inRange(y, 0, Constants::MaxBlocksPerCol-1); y+=yInc)
+            for(int y = yStart; inRange(y, 0, ui->sb_rows->value()-1); y+=yInc)
             {
                 if(m_blocksGrid[x][y] != 0)
                 {
                     if(m_blocksGrid[x+direction.x()][y+direction.y()] == 0)
                     {
                         m_blocksGrid[x+direction.x()][y+direction.y()] = m_blocksGrid[x][y];
-                        m_blocksGrid[x+direction.x()][y+direction.y()]->startMoveAnimation(x+direction.x(), y+direction.y());
+                        m_blocksGrid[x+direction.x()][y+direction.y()]->startMoveAnimation(Constants::BoardStart.x() + (Constants::BlockSize * (x+direction.x())), Constants::BoardStart.y() + (Constants::BlockSize * (y+direction.y())));
                         m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
                     else if(m_blocksGrid[x+direction.x()][y+direction.y()]->value() == m_blocksGrid[x][y]->value())
                     {
-                        m_blocksGrid[x][y]->setToMerge(x+direction.x(), y+direction.y(), m_blocksGrid[x+direction.x()][y+direction.y()]);
-                        m_blocksGrid[x][y]->startMoveAnimation(x+direction.x(), y+direction.y());
+                        const int xPos = Constants::BoardStart.x() + (Constants::BlockSize * (x+direction.x()));
+                        const int yPos = Constants::BoardStart.y() + (Constants::BlockSize * (y+direction.y()));
+                        m_blocksGrid[x][y]->setToMerge(xPos, yPos, m_blocksGrid[x+direction.x()][y+direction.y()]);
+                        m_blocksGrid[x][y]->startMoveAnimation(xPos, yPos);
                         m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
@@ -281,10 +295,10 @@ void DLG_Home::onAiThink()
     }
 
     //Turn m_blocksGrid into something AI can understand
-    QVector<QVector<int>> map(Constants::MaxBlocksPerCol, QVector<int>(Constants::MaxBlocksPerRow, 0));
-    for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+    QVector<QVector<int>> map(ui->sb_cols->value(), QVector<int>(ui->sb_rows->value(), 0));
+    for(int x = 0; x < ui->sb_cols->value(); x++)
     {
-        for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+        for(int y = 0; y < ui->sb_rows->value(); y++)
         {
             if(m_blocksGrid[x][y] != nullptr)
             {
@@ -322,9 +336,9 @@ bool DLG_Home::trySpawnNewBlock()
 {
     //Find empty spaces
     QVector<QPoint> emptySpaces;
-    for(int x = 0; x < Constants::MaxBlocksPerRow; x++)
+    for(int x = 0; x < ui->sb_cols->value(); x++)
     {
-        for(int y = 0; y < Constants::MaxBlocksPerCol; y++)
+        for(int y = 0; y < ui->sb_rows->value(); y++)
         {
             if(m_blocksGrid[x][y] == nullptr)
             {
@@ -345,7 +359,7 @@ bool DLG_Home::trySpawnNewBlock()
     const int randomStartOption = QRandomGenerator::global()->generateDouble() * 100;
     const int startValue = randomStartOption < Constants::PercentageSpawn2block ? 2 : 4;
 
-    m_blocksGrid[spawnPos.x()][spawnPos.y()] = new Block(this, startValue, Constants::BoardGeometry.topLeft() + QPoint(spawnPos.x() * Constants::BlockSize, spawnPos.y() * Constants::BlockSize));
+    m_blocksGrid[spawnPos.x()][spawnPos.y()] = new Block(this, startValue, Constants::BoardStart + QPoint(spawnPos.x() * Constants::BlockSize, spawnPos.y() * Constants::BlockSize));
 
     return true;
 }

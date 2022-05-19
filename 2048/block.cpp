@@ -72,8 +72,7 @@ void Block::startMoveAnimation(int x, int y)
     m_pMoveAnimation = new QPropertyAnimation(this, "geometry");
     m_pMoveAnimation->setDuration(Constants::MoveAnimationMs);
     m_pMoveAnimation->setStartValue(geometry());
-    m_pMoveAnimation->setEndValue(QRect(Constants::BoardGeometry.left() + x * Constants::BlockSize,
-                                Constants::BoardGeometry.top() + y * Constants::BlockSize,
+    m_pMoveAnimation->setEndValue(QRect(x, y,
                                 Constants::BlockSize,
                                 Constants::BlockSize));
     m_pMoveAnimation->start();

@@ -136,7 +136,7 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="lbl_background">
     <property name="geometry">
      <rect>
       <x>0</x>

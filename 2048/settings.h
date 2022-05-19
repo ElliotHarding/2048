@@ -53,10 +53,7 @@ const QMap<int, QColor> BlockColors = {
 };
 
 ///Board settings
-const int MaxBlocksPerRow = 4;
-const int MaxBlocksPerCol = 4;
-const int MaxBlocks = MaxBlocksPerCol * MaxBlocksPerRow;
-const QRect BoardGeometry = QRect(0, BlockSize, BlockSize * MaxBlocksPerRow + 1, BlockSize * MaxBlocksPerCol + 1);
+const QPoint BoardStart = QPoint(0, 100);
 
 ///Score weights for game state value calculations
 const int ScoreWeightNumMerges = 100;
