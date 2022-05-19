@@ -61,7 +61,7 @@ DLG_Home::~DLG_Home()
 //Reset game
 void DLG_Home::reset()
 {
-    resetUiLines();
+    resetUiLinesAndGeometry();
 
     m_blocksMutex.lock();
 
@@ -99,7 +99,7 @@ void DLG_Home::reset()
 }
 
 //Creates grid for UI
-void DLG_Home::resetUiLines()
+void DLG_Home::resetUiLinesAndGeometry()
 {
     //Uses existing line objects to create ui grid
     //If theres not enough line objects, creates more
@@ -158,6 +158,7 @@ void DLG_Home::resetUiLines()
     }
 
     ui->lbl_background->setGeometry(Constants::BoardStart.x(), Constants::BoardStart.y(), totalWidth, totalHeight);
+    setGeometry(geometry().x(), geometry().y(), Constants::BoardStart.x() + totalWidth, Constants::BoardStart.y() + totalHeight);
 }
 
 void DLG_Home::keyPressEvent(QKeyEvent *event)

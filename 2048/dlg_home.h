@@ -42,7 +42,7 @@ private:
 
     ///Resets game
     void reset();
-    void resetUiLines();//Creates grid for UI
+    void resetUiLinesAndGeometry();//Creates grid for UI
 
     ///Make a move human + AI
     void move(Direction direction);
