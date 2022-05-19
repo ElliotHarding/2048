@@ -57,15 +57,9 @@ const QPoint BoardStart = QPoint(0, 100);
 
 ///Score weights for game state value calculations
 const int ScoreWeightNumMerges = 100;
-const int ScoreWeightHighTopLeftN0 = 1000; //Reward % for having highest number in top left slot
-const int ScoreWeightHighTopLeftN1 = 600;
-const int ScoreWeightHighTopLeftN2 = 300;
-const int ScoreWeightNoneBottomRightN0 = 1000;
-const int ScoreWeightNoneBottomRightN1 = 600;
-const int ScoreWeightHighNumbersCloseN0 = 70; //Reward % for having high value blocks next to eachother
-const int ScoreWeightHighNumbersCloseN1 = 40;
-const int ScoreWeightHighestNumber = 10; //Reward % for having the highest number
-const int ScoreWeightNumberEmptySpots = 20;
+const int ScoreWeightSmoothness = 1;
+const int ScoreWeightHighestNumber = 1;
+const int ScoreWeightNumberEmptySpots = 100;
 
 ///Depth for best direction choice calcuations
 const int DirectionChoiceDepth = 3;
