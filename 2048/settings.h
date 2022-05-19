@@ -69,7 +69,7 @@ const int ScoreWeightHighestNumber = 10; //Reward % for having the highest numbe
 const int ScoreWeightNumberEmptySpots = 20;
 
 ///Depth for best direction choice calcuations
-const int DirectionChoiceDepth = 20;
+const int DirectionChoiceDepth = 10;
 
 ///Movement options
 const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};

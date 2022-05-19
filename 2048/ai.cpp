@@ -283,7 +283,18 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
             {
                 spawnState = map;
                 spawnState[x][y] = 2;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges))
+                    {
+                        highScore += gameStateScore(movedSpawnState, blockValues, numMerges);
+                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, blockValues);
+                    }
+                }
 
+                spawnState[x][y] = 4;
                 for(const Direction& direction : Constants::PossibleMoveDirections)
                 {
                     movedSpawnState = spawnState;
