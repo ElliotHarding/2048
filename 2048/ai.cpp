@@ -280,6 +280,23 @@ int gameStateScore(const QVector<QVector<int>>& map, QVector<NumberAndLocation>&
     return score > 0 ? score : 0;
 }
 
+int smoothGameStateScore(const QVector<QVector<int>>& map)
+{
+    int smoothness = 0;
+    for(int x = 1; x < map.size()-1; x++)
+    {
+        for(int y = 1; y < map[x].size()-1; y++)
+        {
+            const int mapVal = map[x][y];
+            smoothness -= abs(mapVal - map[x+1][y]);
+            smoothness -= abs(mapVal - map[x][y+1]);
+            smoothness -= abs(mapVal - map[x-1][y]);
+            smoothness -= abs(mapVal - map[x][y-1]);
+        }
+    }
+    return smoothness;
+}
+
 void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
                      QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState, QVector<NumberAndLocation>& blockValues)
 {
@@ -345,6 +362,31 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         {
             mapScore = gameStateScore(moveMap, blockValuesMem, numMerges);
             getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, blockValuesMem);
+            if(mapScore > score)
+            {
+                score = mapScore;
+                chosenDirection = direction;
+            }
+        }
+    }
+
+    return chosenDirection;
+}
+
+Direction AI::getBestSmoothnessDirection(const QVector<QVector<int> > &map)
+{
+    Direction chosenDirection = Constants::PossibleMoveDirections[0];
+
+    int score = -99999999;
+    int mapScore;
+    int numMerges;
+    for(const Direction& direction : Constants::PossibleMoveDirections)
+    {
+        QVector<QVector<int>> moveMap = map;
+        numMerges = 0;
+        if(mapMove(moveMap, direction, numMerges))
+        {
+            mapScore = smoothGameStateScore(moveMap);
             if(mapScore > score)
             {
                 score = mapScore;
