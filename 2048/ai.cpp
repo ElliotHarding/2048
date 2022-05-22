@@ -484,6 +484,9 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
 
     //Game state evaluation vars
     int numMerges;
+#ifdef NO_ADD_SCORES
+    int score;
+#endif
 
     //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
     // then evaluate spawnState (to a set depth of moves)
@@ -504,7 +507,15 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, width, height))
                     {
+#ifdef NO_ADD_SCORES
+                        score = gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block / (depth * 0.1);
+                        if(score > highScore)
+                        {
+                            highScore = score;
+                        }
+#else
                         highScore += gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block / (depth * 0.1);
+#endif
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
                     }
                 }
@@ -518,7 +529,15 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, width, height))
                     {
+#ifdef NO_ADD_SCORES
+                        score = gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block / (depth * 0.1);
+                        if(score > highScore)
+                        {
+                            highScore = score;
+                        }
+#else
                         highScore += gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn4Block / (depth * 0.1);
+#endif
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
                     }
                 }
@@ -949,6 +968,7 @@ int AI::runTests()
         while(true)
         {
             Direction dir = getBestDirection(map);
+            numMerges = 0;
             if(mapMove(map, dir, numMerges, width, height))
             {
                 //Spawn new tile

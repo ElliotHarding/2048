@@ -78,5 +78,6 @@ const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN,
 
 //#define AI_DEBUG
 //#define RUN_TESTS
+//#define NO_ADD_SCORES
 
 #endif // SETTINGS_H
