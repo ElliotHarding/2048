@@ -22,6 +22,20 @@ void debugMap(const QVector<QVector<int>>& map)
     }
 }
 
+void debugMap(const QVector<QVector<double>>& map)
+{
+    qDebug() << "----- Map ------";
+    for(int y = 0; y < map[0].size(); y++)
+    {
+        QString row = "";
+        for(int x = 0; x < map.size(); x++)
+        {
+            row+=QString::number(map[x][y]);
+        }
+        qDebug() << row;
+    }
+}
+
 void debugDirection(const Direction& direction)
 {
     switch (direction)
@@ -381,9 +395,13 @@ QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& wi
     {
         for(int y = 0; y < height; y++)
         {
-            returnMap[x][y] = log(map[x][y])/Log2;
+            if(map[x][y] != 0)
+            {
+                returnMap[x][y] = log(map[x][y])/Log2;
+            }
         }
     }
+
     return returnMap;
 }
 
