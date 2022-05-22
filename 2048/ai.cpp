@@ -943,6 +943,7 @@ int AI::runTests()
     int numMerges;
     while(true)
     {
+        qDebug() << "AI::runTests - Starting test";
         QVector<QVector<int>> map(width, QVector<int>(height, 0));
         map[0][0] = 2;
 
@@ -982,7 +983,7 @@ int AI::runTests()
             }
             else
             {
-                qDebug() << "AI::runTests: GAME OVER!";
+                qDebug() << "AI::runTests - GAME OVER!";
                 int highestNumber = 0;
                 for(int x = 0; x < width; x++)
                 {
@@ -994,7 +995,7 @@ int AI::runTests()
                         }
                     }
                 }
-                qDebug() << "AI::runTests: Score: " << highestNumber;
+                qDebug() << "AI::runTests - Score: " << highestNumber;
                 debugMap(map);
                 break;
             }
