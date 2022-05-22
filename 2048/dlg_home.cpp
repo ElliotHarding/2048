@@ -321,7 +321,6 @@ void DLG_Home::onAiThink()
         }
     }
 
-//#define AI_TIMING_DEBUG
 #ifdef AI_TIMING_DEBUG
     //Test map
     map[0][0] = 2;

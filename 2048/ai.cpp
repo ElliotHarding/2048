@@ -449,6 +449,13 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
     //Monoicity
     score += monotonicity(logMap, width, height) * Constants::ScoreWeight_Monoicity;
 
+#ifdef AI_TIMING_DEBUG
+    if(score < 0)
+    {
+        qDebug() << "gameStateScore_monoicity: score: " << score;
+    }
+#endif
+
     return score > 0 ? score : 0;
 }
 
