@@ -387,6 +387,57 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges, const
     return score > 0 ? score : 0;
 }
 
+int gameStateScore_snake(const QVector<QVector<int>>& map, const QVector<QVector<int>>& snakeGrid, const int& width, const int& height)
+{
+    int numZeroBlocks = 0;
+    int highestNumber = 0;
+    int smoothness = 0;
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            const int mapVal = map[x][y];
+            if(x < width-1)
+                smoothness -= abs(mapVal - map[x+1][y]);
+            if(y < height-1)
+                smoothness -= abs(mapVal - map[x][y+1]);
+
+            if(mapVal == 0)
+            {
+                numZeroBlocks++;
+            }
+            else if(highestNumber < mapVal)
+            {
+                highestNumber = mapVal;
+            }
+        }
+    }
+
+    const int maxBlocks = width * height;
+    if(numZeroBlocks == maxBlocks)
+    {
+        numZeroBlocks--;
+    }
+    else if(numZeroBlocks == 0)
+    {
+        return 0;
+    }
+
+    //Number of merges adds to score
+    int score = sumMerges * Constants::ScoreWeightSumMerges;
+
+    //Smoothness
+    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
+
+    //Highest number created
+    score += highestNumber * Constants::ScoreWeightHighestNumber;
+
+    //Add to score for number of 0 blocks
+    score += numZeroBlocks * Constants::ScoreWeightNumberEmptySpots;
+
+    return score > 0 ? score : 0;
+}
+
 int gameStateScore_cache(const QVector<QVector<int>>& map, const int& sumMerges, const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
 {
     QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(map);
@@ -666,6 +717,79 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                         highScore += gameStateScore(movedSpawnState, sumMerges, width, height) * Constants::RatioSpawn4Block / (depth * 0.1);
 #endif
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void getHighestScore_snake(const QVector<QVector<int>>& map, int& highScore, int depth,
+                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState,
+                     const int& width, const int& height, const QVector<QVector<int>>& snakeGrid)
+{
+    if(depth == 0)
+    {
+        return;
+    }
+
+    //Game state evaluation vars
+    int sumMerges;
+#ifdef NO_SUM_SCORES
+    int score;
+#endif
+
+    //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
+    // then evaluate spawnState (to a set depth of moves)
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            if(map[x][y] == 0)
+            {
+                spawnState = map;
+
+                //Add 2 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 2;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    sumMerges = 0;
+                    if(mapMove(movedSpawnState, direction, sumMerges, width, height))
+                    {
+#ifdef NO_SUM_SCORES
+                        score = gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        if(score > highScore)
+                        {
+                            highScore = score;
+                        }
+#else
+                        highScore += gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block / (depth * 0.1);
+#endif
+                        getHighestScore_snake(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, snakeGrid);
+                    }
+                }
+
+                //Add 4 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 4;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    sumMerges = 0;
+                    if(mapMove(movedSpawnState, direction, sumMerges, width, height))
+                    {
+#ifdef NO_SUM_SCORES
+                        score = gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        if(score > highScore)
+                        {
+                            highScore = score;
+                        }
+#else
+                        highScore += gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn4Block / (depth * 0.1);
+#endif
+                        getHighestScore_snake(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, snakeGrid);
                     }
                 }
             }
@@ -1035,6 +1159,44 @@ Direction AI::getBestDirection_monoicity_cache(const QVector<QVector<int> > &map
         {
             mapScore = gameStateScore_monoicity(moveMap, sumMerges, width, height);
             getHighestScore_monoicity_cache(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, cacheGameStates);
+            if(mapScore > score)
+            {
+                score = mapScore;
+                chosenDirection = direction;
+            }
+        }
+    }
+
+    return chosenDirection;
+}
+
+Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
+{
+    Direction chosenDirection = Constants::PossibleMoveDirections[0];
+
+    //Size of map, quicker to retrieve from const
+    const int width = map.size();
+    const int height = map[0].size();
+
+    //Reuseable memory for depth search
+    QVector<QVector<int>> spawnStateMem = map;
+    QVector<QVector<int>> movedSpawnStateMem = map;
+    QVector<QVector<int>> moveMap = map;
+
+    //Game state evaluation vars
+    int score = 0;
+    int mapScore;
+    int sumMerges;
+
+    //For each direction, evaluate its score (to a set depth of moves), choose best direction
+    for(const Direction& direction : Constants::PossibleMoveDirections)
+    {
+        moveMap = map;
+        sumMerges = 0;
+        if(mapMove(moveMap, direction, sumMerges, width, height))
+        {
+            mapScore = gameStateScore_snake(moveMap, sumMerges, width, height);
+            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height);
             if(mapScore > score)
             {
                 score = mapScore;
