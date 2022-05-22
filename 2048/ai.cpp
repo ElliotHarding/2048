@@ -81,7 +81,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
                             map[x+1][y] *= 2;
                             map[x][y] = 0;
                             moved = true;
-                            numMerges++;
+                            numMerges += map[x+1][y];
                         }
                     }
                 }
@@ -118,7 +118,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
                             map[x-1][y] *= 2;
                             map[x][y] = 0;
                             moved = true;
-                            numMerges++;
+                            numMerges += map[x-1][y];
                         }
                     }
                 }
@@ -155,7 +155,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
                             map[x][y+1] *= 2;
                             map[x][y] = 0;
                             moved = true;
-                            numMerges++;
+                            numMerges += map[x][y+1];
                         }
                     }
                 }
@@ -192,7 +192,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& numMer
                             map[x][y-1] *= 2;
                             map[x][y] = 0;
                             moved = true;
-                            numMerges++;
+                            numMerges += map[x][y-1];
                         }
                     }
                 }
@@ -350,10 +350,10 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
                 smoothness -= abs(mapVal - map[x+1][y]);
             if(y < height-1)
                 smoothness -= abs(mapVal - map[x][y+1]);
-            if(x > 0)
-                smoothness -= abs(mapVal - map[x-1][y]);
-            if(y > 0)
-                smoothness -= abs(mapVal- map[x][y-1]);
+            //if(x > 0)
+                //smoothness -= abs(mapVal - map[x-1][y]);
+            //if(y > 0)
+                //smoothness -= abs(mapVal- map[x][y-1]);
 
             if(mapVal == 0)
             {

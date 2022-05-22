@@ -56,7 +56,7 @@ const QMap<int, QColor> BlockColors = {
 const QPoint BoardStart = QPoint(0, 100);
 
 ///Score weights for game state valuation
-const int ScoreWeightNumMerges = 0;
+const int ScoreWeightNumMerges = 100;
 const int ScoreWeightSmoothness = 10;
 const int ScoreWeightHighestNumber = 100;
 const int ScoreWeightNumberEmptySpots = 100;
