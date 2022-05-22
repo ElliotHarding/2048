@@ -99,4 +99,12 @@ private:
     AI m_ai;//Probably could make a static function for AI
 };
 
+class TestThread : public QThread
+{
+    Q_OBJECT
+public:
+    TestThread();
+    void run();
+};
+
 #endif // DLG_HOME_H

@@ -409,6 +409,17 @@ void DLG_Home::updateScores()
 
 void DLG_Home::on_btn_restart_clicked()
 {
+#ifdef RUN_TESTS
+    TestThread* pTestThread1 = new TestThread();
+    TestThread* pTestThread2 = new TestThread();
+    TestThread* pTestThread3 = new TestThread();
+    TestThread* pTestThread4 = new TestThread();
+    pTestThread1->start(QThread::Priority::HighPriority);
+    pTestThread2->start(QThread::Priority::HighPriority);
+    pTestThread3->start(QThread::Priority::HighPriority);
+    pTestThread4->start(QThread::Priority::HighPriority);
+#endif
+
     reset();
 }
 
@@ -493,4 +504,17 @@ void AiThread::run()
         }
         m_mutex.unlock();
     }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///TestThread
+///
+TestThread::TestThread() : QThread()
+{
+}
+
+void TestThread::run()
+{
+    AI ai;
+    ai.runTests();
 }
