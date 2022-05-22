@@ -379,10 +379,10 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
     score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
 
     //Highest number created
-    score += (highestNumber * Constants::ScoreWeightHighestNumber)^2;
+    score += highestNumber * Constants::ScoreWeightHighestNumber;
 
     //Add to score for number of 0 blocks
-    score += (Constants::ScoreWeightNumberEmptySpots * numZeroBlocks)^2;
+    score += numZeroBlocks * Constants::ScoreWeightNumberEmptySpots;
 
     return score > 0 ? score : 0;
 }
@@ -433,10 +433,6 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
                     smoothness -= abs(mapVal - logMap[x+1][y]);
                 if(y < height-1 && logMap[x][y+1] != 0)
                     smoothness -= abs(mapVal - logMap[x][y+1]);
-                //if(x > 0 && map[x-1][y] != 0)
-                    //smoothness -= abs(mapVal - map[x-1][y]);
-                //if(y > 0 && map[x][y-1] != 0)
-                    //smoothness -= abs(mapVal - map[x][y-1]);
             }
         }
     }
