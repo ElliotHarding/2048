@@ -387,7 +387,7 @@ QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& wi
     return returnMap;
 }
 
-int gameStateScore_monoicity_log(const QVector<QVector<int>>& map, const int& width, const int& height)
+int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont do anything with merges atm*/, const int& width, const int& height)
 {
     //Returns map values after --> log(value)/log(2)
     QVector<QVector<double>> logMap = log2Map(map, width, height);
@@ -489,7 +489,61 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
     }
 }
 
-void getHighestScoreCacheValues(const QVector<QVector<int>>& map, int& highScore, int depth,
+void getHighestScore_monoicity(const QVector<QVector<int>>& map, int& highScore, int depth,
+                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState,
+                     const int& width, const int& height)
+{
+    if(depth == 0)
+    {
+        return;
+    }
+
+    //Game state evaluation vars
+    int numMerges;
+
+    //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
+    // then evaluate spawnState (to a set depth of moves)
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            if(map[x][y] == 0)
+            {
+                spawnState = map;
+
+                //Add 2 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 2;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges, width, height))
+                    {
+                        highScore += gameStateScore_monoicity(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block;
+                        getHighestScore_monoicity(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
+                    }
+                }
+
+                //Add 4 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 4;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges, width, height))
+                    {
+                        highScore += gameStateScore_monoicity(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn4Block;
+                        getHighestScore_monoicity(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void getHighestScore_cache(const QVector<QVector<int>>& map, int& highScore, int depth,
                      QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState,
                      const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
 {
@@ -531,7 +585,7 @@ void getHighestScoreCacheValues(const QVector<QVector<int>>& map, int& highScore
                         const int score = gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block;
                         cacheValues.insert(map, score);
                         highScore += score;
-                        getHighestScoreCacheValues(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
+                        getHighestScore_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
                     }
                 }
 
@@ -547,7 +601,73 @@ void getHighestScoreCacheValues(const QVector<QVector<int>>& map, int& highScore
                         const int score = gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn4Block;
                         cacheValues.insert(map, score);
                         highScore += score;
-                        getHighestScoreCacheValues(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
+                        getHighestScore_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void getHighestScore_monoicity_cache(const QVector<QVector<int>>& map, int& highScore, int depth,
+                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState,
+                     const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
+{
+    if(depth == 0)
+    {
+        return;
+    }
+
+    //Check cache of previously evaluated game states
+    QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(map);
+    if(it != cacheValues.end())
+    {
+        highScore += it.value();
+        return;
+    }
+
+    //Game state evaluation vars
+    int numMerges;
+
+    //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
+    // then evaluate spawnState (to a set depth of moves)
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            if(map[x][y] == 0)
+            {
+                spawnState = map;
+
+                //Add 2 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 2;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges, width, height))
+                    {
+                        const int score = gameStateScore_monoicity(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block;
+                        cacheValues.insert(map, score);
+                        highScore += score;
+                        getHighestScore_monoicity_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
+                    }
+                }
+
+                //Add 4 to empty spot to simulate spawn
+                //For each direction, add its score to current score (to a set depth of moves)
+                spawnState[x][y] = 4;
+                for(const Direction& direction : Constants::PossibleMoveDirections)
+                {
+                    movedSpawnState = spawnState;
+                    numMerges = 0;
+                    if(mapMove(movedSpawnState, direction, numMerges, width, height))
+                    {
+                        const int score = gameStateScore_monoicity(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn4Block;
+                        cacheValues.insert(map, score);
+                        highScore += score;
+                        getHighestScore_monoicity_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
                     }
                 }
             }
@@ -562,8 +682,6 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     //Size of map, quicker to retrieve from const
     const int width = map.size();
     const int height = map[0].size();
-
-    //clock_t start = clock();
 
     //Reuseable memory for depth search
     QVector<QVector<int>> spawnStateMem = map;
@@ -592,13 +710,48 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         }
     }
 
-    //clock_t end = clock();
-    //qDebug() << end - start;
+    return chosenDirection;
+}
+
+Direction AI::getBestDirection_monoicity(const QVector<QVector<int>>& map)
+{
+    Direction chosenDirection = Constants::PossibleMoveDirections[0];
+
+    //Size of map, quicker to retrieve from const
+    const int width = map.size();
+    const int height = map[0].size();
+
+    //Reuseable memory for depth search
+    QVector<QVector<int>> spawnStateMem = map;
+    QVector<QVector<int>> movedSpawnStateMem = map;
+    QVector<QVector<int>> moveMap = map;
+
+    //Game state evaluation vars
+    int score = 0;
+    int mapScore;
+    int numMerges;
+
+    //For each direction, evaluate its score (to a set depth of moves), choose best direction
+    for(const Direction& direction : Constants::PossibleMoveDirections)
+    {
+        moveMap = map;
+        numMerges = 0;
+        if(mapMove(moveMap, direction, numMerges, width, height))
+        {
+            mapScore = gameStateScore_monoicity(moveMap, numMerges, width, height);
+            getHighestScore_monoicity(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height);
+            if(mapScore > score)
+            {
+                score = mapScore;
+                chosenDirection = direction;
+            }
+        }
+    }
 
     return chosenDirection;
 }
 
-Direction AI::getBestDirectionCacheValues(const QVector<QVector<int> > &map)
+Direction AI::getBestDirection_cache(const QVector<QVector<int> > &map)
 {
     Direction chosenDirection = Constants::PossibleMoveDirections[0];
 
@@ -627,7 +780,48 @@ Direction AI::getBestDirectionCacheValues(const QVector<QVector<int> > &map)
         if(mapMove(moveMap, direction, numMerges, width, height))
         {
             mapScore = gameStateScore(moveMap, numMerges, width, height);
-            getHighestScoreCacheValues(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, cacheGameStates);
+            getHighestScore_cache(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, cacheGameStates);
+            if(mapScore > score)
+            {
+                score = mapScore;
+                chosenDirection = direction;
+            }
+        }
+    }
+
+    return chosenDirection;
+}
+
+Direction AI::getBestDirection_monoicity_cache(const QVector<QVector<int> > &map)
+{
+    Direction chosenDirection = Constants::PossibleMoveDirections[0];
+
+    //Size of map, quicker to retrieve from const
+    const int width = map.size();
+    const int height = map[0].size();
+
+    //Reuseable memory for depth search
+    QVector<QVector<int>> spawnStateMem = map;
+    QVector<QVector<int>> movedSpawnStateMem = map;
+    QVector<QVector<int>> moveMap = map;
+
+    //Previously evaluated game states
+    QMap<QVector<QVector<int>>, int> cacheGameStates;
+
+    //Game state evaluation vars
+    int score = 0;
+    int mapScore;
+    int numMerges;
+
+    //For each direction, evaluate its score (to a set depth of moves), choose best direction
+    for(const Direction& direction : Constants::PossibleMoveDirections)
+    {
+        moveMap = map;
+        numMerges = 0;
+        if(mapMove(moveMap, direction, numMerges, width, height))
+        {
+            mapScore = gameStateScore_monoicity(moveMap, numMerges, width, height);
+            getHighestScore_monoicity_cache(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, cacheGameStates);
             if(mapScore > score)
             {
                 score = mapScore;
