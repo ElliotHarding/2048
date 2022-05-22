@@ -332,15 +332,16 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
     {
         for(int y = 0; y < height; y++)
         {
-            const double mapVal = log(map[x][y]);
+            const int mapVal = map[x][y];
+            const double logMapVal = log(mapVal);
             if(x < width-1)
-                smoothness -= abs(mapVal - log(map[x+1][y]));
+                smoothness -= abs(logMapVal - log(map[x+1][y]));
             if(y < height-1)
-                smoothness -= abs(mapVal - log(map[x][y+1]));
+                smoothness -= abs(logMapVal - log(map[x][y+1]));
             if(x > 0)
-                smoothness -= abs(mapVal - log(map[x-1][y]));
+                smoothness -= abs(logMapVal - log(map[x-1][y]));
             if(y > 0)
-                smoothness -= abs(mapVal- log(map[x][y-1]));
+                smoothness -= abs(logMapVal- log(map[x][y-1]));
 
             if(mapVal == 0)
             {
