@@ -4,7 +4,7 @@
 #include <QList>
 #include "settings.h"
 
-class AI
+class AI//Probably could make a static function for AI
 {
 public:
     AI();

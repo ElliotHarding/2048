@@ -430,9 +430,13 @@ void DLG_Home::onAiFinished(AiThread* pAiThread)
 {
     m_blocksMutex.lock();
     m_aiThreads.removeOne(pAiThread);
+    delete pAiThread;
     m_blocksMutex.unlock();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///AiThread
+///
 AiThread::AiThread(const QVector<QVector<int>>& map) :
     QThread(),
     m_map(map)
@@ -445,6 +449,7 @@ void AiThread::run()
     clock_t start = clock();
 #endif
 
+    //Probably could make a static function for AI
     AI ai;
     const Direction bestDirection = ai.getBestDirection(m_map);
     emit foundBestDirection(bestDirection);
