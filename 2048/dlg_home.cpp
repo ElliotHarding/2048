@@ -320,6 +320,9 @@ void DLG_Home::onAiThink()
         return;
     }
 
+    //Block input until things have moved where they need to go
+    m_bAcceptInput = false;
+
     //Turn m_blocksGrid into something AI can understand
     QVector<QVector<int>> map(ui->sb_cols->value(), QVector<int>(ui->sb_rows->value(), 0));
     for(int x = 0; x < ui->sb_cols->value(); x++)

@@ -19,8 +19,8 @@ namespace Constants
 {
 
 ///Speed & movement
-const int AiThinkFrequency = 400;
-const int MoveAnimationMs = 250;
+const int AiThinkFrequency = 100;
+const int MoveAnimationMs = 150;
 
 ///Spawn block settings
 const int PercentageSpawn2block = 80;
@@ -56,7 +56,7 @@ const QMap<int, QColor> BlockColors = {
 const QPoint BoardStart = QPoint(0, 100);
 
 ///Score weights for game state valuation
-const int ScoreWeightNumMerges = 100;
+const int ScoreWeightNumMerges = 350;
 const int ScoreWeightSmoothness = 10;
 const int ScoreWeightHighestNumber = 100;
 const int ScoreWeightNumberEmptySpots = 100;
