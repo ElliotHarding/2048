@@ -248,14 +248,14 @@ int smooth2GameStateScore(const QVector<QVector<int>>& map)
     return smoothness;
 }
 
-int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& height)
+int monotonicity(const QVector<QVector<double>>& map, const int& width, const int& height)
 {
-    int totals[4] = {0,0,0,0};
+    double totals[4] = {0,0,0,0};
 
     int i;
     int iNext;
-    int val;
-    int valNext;
+    double val;
+    double valNext;
 
     //Cols
     for(int x = 0; x < width; x++)
@@ -417,7 +417,7 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
     {
         for(int y = 0; y < height; y++)
         {
-            const int mapVal = map[x][y];
+            const int mapVal = logMap[x][y];
             if(mapVal == 0)
             {
                 numZeroBlocks++;
@@ -429,10 +429,10 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
                     highestNumber = mapVal;
                 }
 
-                if(x < width-1 && map[x+1][y] != 0)
-                    smoothness -= abs(mapVal - map[x+1][y]);
-                if(y < height-1 && map[x][y+1] != 0)
-                    smoothness -= abs(mapVal - map[x][y+1]);
+                if(x < width-1 && logMap[x+1][y] != 0)
+                    smoothness -= abs(mapVal - logMap[x+1][y]);
+                if(y < height-1 && logMap[x][y+1] != 0)
+                    smoothness -= abs(mapVal - logMap[x][y+1]);
                 //if(x > 0 && map[x-1][y] != 0)
                     //smoothness -= abs(mapVal - map[x-1][y]);
                 //if(y > 0 && map[x][y-1] != 0)
@@ -451,7 +451,7 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
     score += log(numZeroBlocks) * Constants::ScoreWeight_Monoicity_NumberEmptySpots;
 
     //Monoicity
-    score += monotonicity(map, width, height) * Constants::ScoreWeight_Monoicity;
+    score += monotonicity(logMap, width, height) * Constants::ScoreWeight_Monoicity;
 
     return score > 0 ? score : 0;
 }
