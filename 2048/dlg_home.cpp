@@ -336,7 +336,7 @@ void DLG_Home::onAiThink()
     map[2][2] = 0;
     map[3][2] = 0;
     map[0][3] = 0;
-    map[1][3] = 2;
+    map[1][3] = 2048;
     map[2][3] = 0;
     map[3][3] = 0;
 
@@ -344,7 +344,7 @@ void DLG_Home::onAiThink()
 #endif
 
     //Ai determines best direction to move
-    const Direction bestDirection = m_ai.getBestDirection_monoicity(map);
+    const Direction bestDirection = m_ai.getBestDirection(map);
 
 #ifdef AI_DEBUG
     clock_t end = clock();

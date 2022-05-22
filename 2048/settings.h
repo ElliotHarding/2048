@@ -69,13 +69,13 @@ const int ScoreWeight_Monoicity_NumberEmptySpots = 270;
 const int BaseScore_Monoicity = 2000;
 
 ///Depth for best direction choice calcuations
-const int DirectionChoiceDepth = 5;
+const int DirectionChoiceDepth = 3;
 
 ///Movement options
 const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};
 
 }
 
-#define AI_DEBUG
+//#define AI_DEBUG
 
 #endif // SETTINGS_H
