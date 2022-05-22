@@ -16,7 +16,7 @@ void debugMap(const QVector<QVector<int>>& map)
         QString row = "";
         for(int x = 0; x < map.size(); x++)
         {
-            row+=QString::number(map[x][y]);
+            row+=QString::number(map[x][y])+":";
         }
         qDebug() << row;
     }
@@ -30,7 +30,7 @@ void debugMap(const QVector<QVector<double>>& map)
         QString row = "";
         for(int x = 0; x < map.size(); x++)
         {
-            row+=QString::number(map[x][y]);
+            row+=QString::number(map[x][y])+":";
         }
         qDebug() << row;
     }
