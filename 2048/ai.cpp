@@ -369,7 +369,11 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
     const int maxBlocks = width * height;
     if(numZeroBlocks == maxBlocks)
     {
-        numZeroBlocks = maxBlocks - 1;
+        numZeroBlocks--;
+    }
+    else if(numZeroBlocks == 0)
+    {
+        return 0;
     }
 
     //Number of merges adds to score
@@ -500,7 +504,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, width, height))
                     {
-                        highScore += gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block;
+                        highScore += gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn2Block / (depth * 0.1);
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
                     }
                 }
@@ -514,7 +518,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                     numMerges = 0;
                     if(mapMove(movedSpawnState, direction, numMerges, width, height))
                     {
-                        highScore += gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn4Block;
+                        highScore += gameStateScore(movedSpawnState, numMerges, width, height) * Constants::RatioSpawn4Block / (depth * 0.1);
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
                     }
                 }
