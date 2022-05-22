@@ -934,3 +934,72 @@ Direction AI::getBestSmoothness2Direction(const QVector<QVector<int>>& map)
 
     return chosenDirection;
 }
+
+#include <QRandomGenerator>
+int AI::runTests()
+{
+    const int width = 4;
+    const int height = 4;
+    int numMerges;
+    while(true)
+    {
+        QVector<QVector<int>> map(width, QVector<int>(height, 0));
+        map[0][0] = 2;
+
+        while(true)
+        {
+            Direction dir = getBestDirection(map);
+            if(mapMove(map, dir, numMerges, width, height))
+            {
+                //Spawn new tile
+
+                //Find empty spaces
+                QVector<QPoint> emptySpaces;
+                for(int x = 0; x < width; x++)
+                {
+                    for(int y = 0; y < height; y++)
+                    {
+                        if(map[x][y] == 0)
+                        {
+                            emptySpaces.push_back(QPoint(x,y));
+                        }
+                    }
+                }
+
+                //If cant find any empty spaces
+                if(emptySpaces.empty())
+                {
+                    qDebug() << "AI::runTests - Cant find empty space to spawn block, but game not over";
+                }
+
+                const int randomPosition = QRandomGenerator::global()->generateDouble() * emptySpaces.size() - 1;
+                const QPoint spawnPos = emptySpaces[randomPosition];
+
+                const int randomStartOption = QRandomGenerator::global()->generateDouble() * 100;
+                const int startValue = randomStartOption < Constants::PercentageSpawn2block ? 2 : 4;
+
+                map[spawnPos.x()][spawnPos.y()] = startValue;
+            }
+            else
+            {
+                qDebug() << "AI::runTests: GAME OVER!";
+                int highestNumber = 0;
+                for(int x = 0; x < width; x++)
+                {
+                    for(int y = 0; y < height; y++)
+                    {
+                        if(highestNumber < map[x][y])
+                        {
+                            highestNumber = map[x][y];
+                        }
+                    }
+                }
+                qDebug() << "AI::runTests: Score: " << highestNumber;
+                debugMap(map);
+                break;
+            }
+        }
+    }
+
+
+}
