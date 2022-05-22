@@ -321,7 +321,7 @@ void DLG_Home::onAiThink()
         }
     }
 
-    /* Test map
+    /* Test map*/
     map[0][0] = 2;
     map[1][0] = 0;
     map[2][0] = 0;
@@ -337,7 +337,7 @@ void DLG_Home::onAiThink()
     map[0][3] = 0;
     map[1][3] = 2;
     map[2][3] = 0;
-    map[3][3] = 0;*/
+    map[3][3] = 0;
 
     //Ai determines best direction to move
     const Direction bestDirection = m_ai.getBestDirection(map);

@@ -501,6 +501,8 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     const int width = map.size();
     const int height = map[0].size();
 
+    clock_t start = clock();
+
     //Reuseable memory for depth search
     QVector<QVector<int>> spawnStateMem = map;
     QVector<QVector<int>> movedSpawnStateMem = map;
@@ -527,6 +529,9 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
             }
         }
     }
+
+    clock_t end = clock();
+    qDebug() << end - start;
 
     return chosenDirection;
 }
