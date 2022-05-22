@@ -55,13 +55,16 @@ const QMap<int, QColor> BlockColors = {
 ///Board settings
 const QPoint BoardStart = QPoint(0, 100);
 
-///Score weights for game state valuation
+///Generic AI params
+const double DepthMultiplier = 0.1;
+
+///AI Score weights for game state valuation
 const int ScoreWeightSumMerges = 550;
 const int ScoreWeightSmoothness = 10;
 const int ScoreWeightHighestNumber = 100;
 const int ScoreWeightNumberEmptySpots = 100;
 
-///Score weights for monoicity game state valuation
+///AI Score weights for monoicity game state valuation
 const int ScoreWeight_Monoicity = 40;
 const int ScoreWeight_Monoicity_Smoothness = 10;
 const int ScoreWeight_Monoicity_HighestNumber = 150;
