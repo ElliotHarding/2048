@@ -721,13 +721,13 @@ void getHighestScore_snake(const QVector<QVector<int>>& map, int& highScore, int
                     if(mapMove(movedSpawnState, direction, sumMerges, width, height))
                     {
 #ifdef NO_SUM_SCORES
-                        score = gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        score = gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block;
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block / (depth * 0.1);
+                        highScore += gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block;
 #endif
                         getHighestScore_snake(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, snakeGrid);
                     }
@@ -743,13 +743,13 @@ void getHighestScore_snake(const QVector<QVector<int>>& map, int& highScore, int
                     if(mapMove(movedSpawnState, direction, sumMerges, width, height))
                     {
 #ifdef NO_SUM_SCORES
-                        score = gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        score = gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn2Block;
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn4Block / (depth * 0.1);
+                        highScore += gameStateScore_snake(movedSpawnState, snakeGrid, width, height) * Constants::RatioSpawn4Block;
 #endif
                         getHighestScore_snake(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, snakeGrid);
                     }
@@ -1168,8 +1168,6 @@ Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
         }
         startTop = !startTop;
     }
-
-    debugMap(snakeGrid);
 
     //Game state evaluation vars
     int score = 0;
