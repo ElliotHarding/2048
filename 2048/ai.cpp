@@ -230,6 +230,79 @@ int smooth2GameStateScore(const QVector<QVector<int>>& map)
     }
     return smoothness;
 }
+#include <math.h>
+int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& height)
+{
+    int totals[4] = {0,0,0,0};
+
+    //Cols
+    for(int x = 0; x < width; x++)
+    {
+        int current = 0;
+        int next = 1;
+        while(next < height)
+        {
+            while(next < height && map[x][next] == 0)
+            {
+                next++;
+            }
+            if(next > height-1)
+            {
+                next--;
+            }
+
+            int currentValue = map[x][current] != 0 ? log(map[x][current]) / log(2) : 0;
+            int nextValue = map[x][next] != 0 ? log(map[x][next]) / log(2) : 0;
+
+            if(currentValue > nextValue)
+            {
+                totals[0] += nextValue - currentValue;
+            }
+            else
+            {
+                totals[1] += currentValue - nextValue;
+            }
+
+            current = next;
+            next++;
+        }
+    }
+
+    //Rows
+    for(int y = 0; y < height; y++)
+    {
+        int current = 0;
+        int next = 1;
+        while(next < width)
+        {
+            while(next < width && map[next][y] == 0)
+            {
+                next++;
+            }
+            if(next > width-1)
+            {
+                next--;
+            }
+
+            int currentValue = map[current][y] != 0 ? log(map[current][y]) / log(2) : 0;
+            int nextValue = map[next][y] != 0 ? log(map[next][y]) / log(2) : 0;
+
+            if(currentValue > nextValue)
+            {
+                totals[2] += nextValue - currentValue;
+            }
+            else
+            {
+                totals[3] += currentValue - nextValue;
+            }
+
+            current = next;
+            next++;
+        }
+    }
+
+    return std::max(totals[0], totals[1]) + std::max(totals[2], totals[3]);
+}
 
 int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const int& width, const int& height)
 {
@@ -245,13 +318,13 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
         {
             const int mapVal = map[x][y];
             if(x < width-1)
-                smoothness -= abs(mapVal - map[x+1][y]);
+                smoothness -= abs(log(mapVal) - log(map[x+1][y]));
             if(y < height-1)
-                smoothness -= abs(mapVal - map[x][y+1]);
+                smoothness -= abs(log(mapVal) - log(map[x][y+1]));
             if(x > 0)
-                smoothness -= abs(mapVal - map[x-1][y]);
+                smoothness -= abs(log(mapVal) - log(map[x-1][y]));
             if(y > 0)
-                smoothness -= abs(mapVal - map[x][y-1]);
+                smoothness -= abs(log(mapVal)- log(map[x][y-1]));
 
             if(mapVal == 0)
             {
@@ -270,13 +343,15 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
         numZeroBlocks = maxBlocks - 1;
     }
 
-    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
+    score += (smoothness * Constants::ScoreWeightSmoothness);///(width*height-numZeroBlocks);
 
     //Highest number created
     score += highestNumber * Constants::ScoreWeightHighestNumber;
 
     //Add to score for number of 0 blocks
-    score += Constants::ScoreWeightNumberEmptySpots * numZeroBlocks;
+    score += Constants::ScoreWeightNumberEmptySpots * log(numZeroBlocks);
+
+    score += monotonicity(map, width, height) * Constants::ScoreWeightMonoicity;
 
     return score > 0 ? score : 0;
 }
