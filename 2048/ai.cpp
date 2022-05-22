@@ -1,6 +1,9 @@
 #include "ai.h"
 #include <QDebug>
 
+#include <math.h>
+const double Log2 = log(2);
+
 AI::AI()
 {
 }
@@ -230,8 +233,7 @@ int smooth2GameStateScore(const QVector<QVector<int>>& map)
     }
     return smoothness;
 }
-#include <math.h>
-const double Log2 = log(2);
+
 int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& height)
 {
     int totals[4] = {0,0,0,0};
@@ -248,7 +250,7 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
         iNext = 1;
         while(iNext < height)
         {
-            val = map[x][i] != 0 ? log(map[x][i]) / Log2 : 0;
+            val = map[x][i];
 
             //Find next value along col
             while(iNext < height && map[x][iNext] == 0)
@@ -263,7 +265,7 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
                 continue;
             }
 
-            valNext = log(map[x][iNext]) / Log2;
+            valNext = map[x][iNext];
 
             if(val > valNext)
             {
@@ -286,7 +288,7 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
         iNext = 1;
         while(iNext < width)
         {
-            val = map[i][y] != 0 ? log(map[i][y]) / Log2 : 0;
+            val = map[i][y];
 
             //Find next value along row
             while(iNext < width && map[iNext][y] == 0)
@@ -301,7 +303,7 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
                 continue;
             }
 
-            valNext = log(map[iNext][y]) / Log2;
+            valNext = map[iNext][y];
 
             if(val > valNext)
             {
@@ -322,9 +324,6 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
 
 int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const int& width, const int& height)
 {
-    //Number of merges adds to score
-    int score = numMerges * Constants::ScoreWeightNumMerges;
-
     int numZeroBlocks = 0;
     int highestNumber = 0;
     int smoothness = 0;
@@ -333,15 +332,14 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
         for(int y = 0; y < height; y++)
         {
             const int mapVal = map[x][y];
-            const double logMapVal = log(mapVal);
             if(x < width-1)
-                smoothness -= abs(logMapVal - log(map[x+1][y]));
+                smoothness -= abs(mapVal - map[x+1][y]);
             if(y < height-1)
-                smoothness -= abs(logMapVal - log(map[x][y+1]));
+                smoothness -= abs(mapVal - map[x][y+1]);
             if(x > 0)
-                smoothness -= abs(logMapVal - log(map[x-1][y]));
+                smoothness -= abs(mapVal - map[x-1][y]);
             if(y > 0)
-                smoothness -= abs(logMapVal- log(map[x][y-1]));
+                smoothness -= abs(mapVal- map[x][y-1]);
 
             if(mapVal == 0)
             {
@@ -360,14 +358,78 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
         numZeroBlocks = maxBlocks - 1;
     }
 
-    score += (smoothness * Constants::ScoreWeightSmoothness);///(width*height-numZeroBlocks);
+    //Number of merges adds to score
+    int score = numMerges * Constants::ScoreWeightNumMerges;
+
+    //Smoothness
+    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
+
+    //Highest number created
+    score += (highestNumber * Constants::ScoreWeightHighestNumber)^2;
+
+    //Add to score for number of 0 blocks
+    score += (Constants::ScoreWeightNumberEmptySpots * numZeroBlocks)^2;
+
+    return score > 0 ? score : 0;
+}
+
+//Returns map values after --> log(value)/log(2)
+QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& width, const int& height)
+{
+    QVector<QVector<double>> returnMap(width, QVector<double>(height, 0));;
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            returnMap[x][y] = log(map[x][y])/Log2;
+        }
+    }
+    return returnMap;
+}
+
+int gameStateScore_monoicity_log(const QVector<QVector<int>>& map, const int& width, const int& height)
+{
+    //Returns map values after --> log(value)/log(2)
+    QVector<QVector<double>> logMap = log2Map(map, width, height);
+
+    int numZeroBlocks = 0;
+    double highestNumber = 0;
+    double smoothness = 0;
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            const int mapVal = map[x][y];
+            if(x < width-1)
+                smoothness -= abs(mapVal - map[x+1][y]);
+            if(y < height-1)
+                smoothness -= abs(mapVal - map[x][y+1]);
+            if(x > 0)
+                smoothness -= abs(mapVal - map[x-1][y]);
+            if(y > 0)
+                smoothness -= abs(mapVal - map[x][y-1]);
+
+            if(mapVal == 0)
+            {
+                numZeroBlocks++;
+            }
+            else if(highestNumber < mapVal)
+            {
+                highestNumber = mapVal;
+            }
+        }
+    }
+
+    //Smoothness
+    int score = smoothness * Constants::ScoreWeightSmoothness;
 
     //Highest number created
     score += highestNumber * Constants::ScoreWeightHighestNumber;
 
     //Add to score for number of 0 blocks
-    score += Constants::ScoreWeightNumberEmptySpots * log(numZeroBlocks);
+    score += log(numZeroBlocks) * Constants::ScoreWeightNumberEmptySpots;
 
+    //Monoicity
     score += monotonicity(map, width, height) * Constants::ScoreWeightMonoicity;
 
     return score > 0 ? score : 0;
@@ -501,7 +563,7 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     const int width = map.size();
     const int height = map[0].size();
 
-    clock_t start = clock();
+    //clock_t start = clock();
 
     //Reuseable memory for depth search
     QVector<QVector<int>> spawnStateMem = map;
@@ -530,8 +592,8 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         }
     }
 
-    clock_t end = clock();
-    qDebug() << end - start;
+    //clock_t end = clock();
+    //qDebug() << end - start;
 
     return chosenDirection;
 }
