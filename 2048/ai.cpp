@@ -231,75 +231,89 @@ int smooth2GameStateScore(const QVector<QVector<int>>& map)
     return smoothness;
 }
 #include <math.h>
+const double Log2 = log(2);
 int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& height)
 {
     int totals[4] = {0,0,0,0};
 
-    const double log2 = log(2);
+    int i;
+    int iNext;
+    int val;
+    int valNext;
 
     //Cols
     for(int x = 0; x < width; x++)
     {
-        int current = 0;
-        int next = 1;
-        while(next < height)
+        i = 0;
+        iNext = 1;
+        while(iNext < height)
         {
-            while(next < height && map[x][next] == 0)
+            val = map[x][i] != 0 ? log(map[x][i]) / Log2 : 0;
+
+            //Find next value along col
+            while(iNext < height && map[x][iNext] == 0)
             {
-                next++;
-            }
-            if(next > height-1)
-            {
-                next--;
+                iNext++;
             }
 
-            int currentValue = map[x][current] != 0 ? log(map[x][current]) / log2 : 0;
-            int nextValue = map[x][next] != 0 ? log(map[x][next]) / log2 : 0;
-
-            if(currentValue > nextValue)
+            //If found no next value, continue to next row
+            if(iNext > height-1)
             {
-                totals[0] += nextValue - currentValue;
+                totals[0] -= val;
+                continue;
+            }
+
+            valNext = log(map[x][iNext]) / Log2;
+
+            if(val > valNext)
+            {
+                totals[0] += valNext - val;
             }
             else
             {
-                totals[1] += currentValue - nextValue;
+                totals[1] += val - valNext;
             }
 
-            current = next;
-            next++;
+            i = iNext;
+            iNext++;
         }
     }
 
     //Rows
     for(int y = 0; y < height; y++)
     {
-        int current = 0;
-        int next = 1;
-        while(next < width)
+        i = 0;
+        iNext = 1;
+        while(iNext < width)
         {
-            while(next < width && map[next][y] == 0)
+            val = map[i][y] != 0 ? log(map[i][y]) / Log2 : 0;
+
+            //Find next value along row
+            while(iNext < width && map[iNext][y] == 0)
             {
-                next++;
-            }
-            if(next > width-1)
-            {
-                next--;
+                iNext++;
             }
 
-            int currentValue = map[current][y] != 0 ? log(map[current][y]) / log2 : 0;
-            int nextValue = map[next][y] != 0 ? log(map[next][y]) / log2 : 0;
-
-            if(currentValue > nextValue)
+            //If found no next value, continue to next row
+            if(iNext > width-1)
             {
-                totals[2] += nextValue - currentValue;
+                totals[2] -= val;
+                continue;
+            }
+
+            valNext = log(map[iNext][y]) / Log2;
+
+            if(val > valNext)
+            {
+                totals[2] += valNext - val;
             }
             else
             {
-                totals[3] += currentValue - nextValue;
+                totals[3] += val - valNext;
             }
 
-            current = next;
-            next++;
+            i = iNext;
+            iNext++;
         }
     }
 
@@ -318,15 +332,15 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& numMerges, const
     {
         for(int y = 0; y < height; y++)
         {
-            const int mapVal = map[x][y];
+            const double mapVal = log(map[x][y]);
             if(x < width-1)
-                smoothness -= abs(log(mapVal) - log(map[x+1][y]));
+                smoothness -= abs(mapVal - log(map[x+1][y]));
             if(y < height-1)
-                smoothness -= abs(log(mapVal) - log(map[x][y+1]));
+                smoothness -= abs(mapVal - log(map[x][y+1]));
             if(x > 0)
-                smoothness -= abs(log(mapVal) - log(map[x-1][y]));
+                smoothness -= abs(mapVal - log(map[x-1][y]));
             if(y > 0)
-                smoothness -= abs(log(mapVal)- log(map[x][y-1]));
+                smoothness -= abs(mapVal- log(map[x][y-1]));
 
             if(mapVal == 0)
             {
