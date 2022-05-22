@@ -35,12 +35,23 @@ DLG_Home::DLG_Home(QWidget *parent)
 
 DLG_Home::~DLG_Home()
 {
-    delete ui;
-
     m_blocksMutex.lock();
 
     m_pAiTimer->stop();
     delete m_pAiTimer;
+
+    m_blocksMutex.unlock();
+
+    delete ui;
+
+    m_blocksMutex.lock();
+
+    while(m_aiThreads.size() > 0)
+    {
+        m_blocksMutex.unlock();
+        QThread::sleep(100);
+        m_blocksMutex.lock();
+    }
 
     m_pFinishAnimationTimer->stop();
     delete m_pFinishAnimationTimer;
@@ -321,8 +332,6 @@ void DLG_Home::onAiThink()
         }
     }
 
-    m_blocksMutex.unlock();
-
 #ifdef AI_DEBUG
     //Test map
     map[0][0] = 2;
@@ -341,19 +350,16 @@ void DLG_Home::onAiThink()
     map[1][3] = 2048;
     map[2][3] = 0;
     map[3][3] = 0;
-
-    clock_t start = clock();
 #endif
 
     //Ai determines best direction to move
-    const Direction bestDirection = m_ai.getBestDirection(map);
+    AiThread* pAiThread = new AiThread(map);
+    m_aiThreads.push_back(pAiThread);
+    connect(pAiThread, SIGNAL(foundBestDirection(int)), this, SLOT(onAiMove(int)));
+    connect(pAiThread, &QThread::finished, this, [this, pAiThread]{onAiFinished(pAiThread);});
+    pAiThread->start();
 
-#ifdef AI_DEBUG
-    clock_t end = clock();
-    qDebug() << "DLG_Home::onAiThink: Think time: " << end - start;
-#endif
-
-    move(bestDirection);
+    m_blocksMutex.unlock();
 }
 
 bool DLG_Home::trySpawnNewBlock()
@@ -413,4 +419,38 @@ void DLG_Home::on_cb_useAi_toggled(bool checked)
     {
         m_pAiTimer->stop();
     }
+}
+
+void DLG_Home::onAiMove(int direction)
+{
+    move((Direction)direction);
+}
+
+void DLG_Home::onAiFinished(AiThread* pAiThread)
+{
+    m_blocksMutex.lock();
+    m_aiThreads.removeOne(pAiThread);
+    m_blocksMutex.unlock();
+}
+
+AiThread::AiThread(const QVector<QVector<int>>& map) :
+    QThread(),
+    m_map(map)
+{
+}
+
+void AiThread::run()
+{
+#ifdef AI_DEBUG
+    clock_t start = clock();
+#endif
+
+    AI ai;
+    const Direction bestDirection = ai.getBestDirection(m_map);
+    emit foundBestDirection(bestDirection);
+
+#ifdef AI_DEBUG
+    clock_t end = clock();
+    qDebug() << "DLG_Home::onAiThink: Think time: " << end - start;
+#endif
 }

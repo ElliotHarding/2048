@@ -12,6 +12,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class DLG_Home; }
 QT_END_NAMESPACE
 
+class AiThread;
+
 class DLG_Home : public QMainWindow
 {
     Q_OBJECT
@@ -27,13 +29,15 @@ private slots:
     ///Game loop function
     void onUpdate();//Called once blocks move animations are finished
 
-    ///Ai loop function
+    ///Ai
     void onAiThink();
+    void onAiMove(int direction);
+    void onAiFinished(AiThread* pAiThread);
 
     ///UI slots
     void on_btn_restart_clicked();
-
     void on_cb_useAi_toggled(bool checked);
+
 
 private:
     ///UI
@@ -69,6 +73,23 @@ private:
     bool m_bGameOver = false;
 
     ///AI
-    AI m_ai;
+    QList<AiThread*> m_aiThreads;
 };
+
+#include <QThread>
+class AiThread : public QThread
+{
+        Q_OBJECT
+public:
+    AiThread(const QVector<QVector<int>>& map);
+
+    void run();
+
+signals:
+    void foundBestDirection(int direction);
+
+private:
+    const QVector<QVector<int>> m_map;
+};
+
 #endif // DLG_HOME_H
