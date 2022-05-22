@@ -20,7 +20,7 @@ namespace Constants
 
 ///Speed & movement
 const int AiThinkFrequency = 100;
-const int MoveAnimationMs = 150;
+const int MoveAnimationMs = 150; //Must be bigger than BlockPopTimeMs (below)
 
 ///Spawn block settings
 const int PercentageSpawn2block = 80;
@@ -29,7 +29,7 @@ const double RatioSpawn2Block = PercentageSpawn2block/100;
 const double RatioSpawn4Block = PercentageSpawn4block/100;
 
 ///Visual block settings
-const int BlockPopTimeMs = 100; //Block pops bigger when merging or spawning
+const int BlockPopTimeMs = 100; //Block pops bigger when merging or spawning //Must be smaller than MoveAnimationMs
 const int BlockSize = 100;
 const int BlockDrawMargin = 5;
 const int BlockRectRadius = 10;
