@@ -421,16 +421,16 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
     }
 
     //Smoothness
-    int score = smoothness * Constants::ScoreWeightSmoothness;
+    int score = smoothness * Constants::ScoreWeight_Monoicity_Smoothness;
 
     //Highest number created
-    score += highestNumber * Constants::ScoreWeightHighestNumber;
+    score += highestNumber * Constants::ScoreWeight_Monoicity_HighestNumber;
 
     //Add to score for number of 0 blocks
-    score += log(numZeroBlocks) * Constants::ScoreWeightNumberEmptySpots;
+    score += log(numZeroBlocks) * Constants::ScoreWeight_Monoicity_NumberEmptySpots;
 
     //Monoicity
-    score += monotonicity(map, width, height) * Constants::ScoreWeightMonoicity;
+    score += monotonicity(map, width, height) * Constants::ScoreWeight_Monoicity;
 
     return score > 0 ? score : 0;
 }
