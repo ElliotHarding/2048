@@ -321,7 +321,8 @@ void DLG_Home::onAiThink()
         }
     }
 
-    /* Test map
+#ifdef AI_TIMING_DEBUG
+    //Test map
     map[0][0] = 2;
     map[1][0] = 0;
     map[2][0] = 0;
@@ -337,10 +338,18 @@ void DLG_Home::onAiThink()
     map[0][3] = 0;
     map[1][3] = 2;
     map[2][3] = 0;
-    map[3][3] = 0;*/
+    map[3][3] = 0;
+
+    clock_t start = clock();
+#endif
 
     //Ai determines best direction to move
     const Direction bestDirection = m_ai.getBestDirection(map);
+
+#ifdef AI_TIMING_DEBUG
+    clock_t end = clock();
+    qDebug() << end - start;
+#endif
 
     m_blocksMutex.unlock();
     move(bestDirection);
