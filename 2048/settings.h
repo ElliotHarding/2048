@@ -56,7 +56,7 @@ const QMap<int, QColor> BlockColors = {
 const QPoint BoardStart = QPoint(0, 100);
 
 ///Score weights for game state valuation
-const int ScoreWeightNumMerges = 550;
+const int ScoreWeightSumMerges = 550;
 const int ScoreWeightSmoothness = 10;
 const int ScoreWeightHighestNumber = 100;
 const int ScoreWeightNumberEmptySpots = 100;
@@ -78,6 +78,6 @@ const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN,
 
 //#define AI_DEBUG
 //#define RUN_TESTS
-#define NO_ADD_SCORES
+#define NO_SUM_SCORES
 
 #endif // SETTINGS_H
