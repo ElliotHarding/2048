@@ -75,6 +75,6 @@ const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN,
 
 }
 
-#define AI_TIMING_DEBUG
+#define AI_DEBUG
 
 #endif // SETTINGS_H

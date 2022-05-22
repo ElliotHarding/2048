@@ -321,7 +321,7 @@ void DLG_Home::onAiThink()
         }
     }
 
-#ifdef AI_TIMING_DEBUG
+#ifdef AI_DEBUG
     //Test map
     map[0][0] = 2;
     map[1][0] = 0;
@@ -346,7 +346,7 @@ void DLG_Home::onAiThink()
     //Ai determines best direction to move
     const Direction bestDirection = m_ai.getBestDirection(map);
 
-#ifdef AI_TIMING_DEBUG
+#ifdef AI_DEBUG
     clock_t end = clock();
     qDebug() << end - start;
 #endif
