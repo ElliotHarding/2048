@@ -321,6 +321,8 @@ void DLG_Home::onAiThink()
         }
     }
 
+    m_blocksMutex.unlock();
+
 #ifdef AI_DEBUG
     //Test map
     map[0][0] = 2;
@@ -351,7 +353,6 @@ void DLG_Home::onAiThink()
     qDebug() << "DLG_Home::onAiThink: Think time: " << end - start;
 #endif
 
-    m_blocksMutex.unlock();
     move(bestDirection);
 }
 
