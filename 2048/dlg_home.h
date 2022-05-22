@@ -32,7 +32,6 @@ private slots:
     ///Ai
     void onAiThink();
     void onAiMove(int direction);
-    void onAiFinished(AiThread* pAiThread);
 
     ///UI slots
     void on_btn_restart_clicked();
@@ -73,7 +72,7 @@ private:
     bool m_bGameOver = false;
 
     ///AI
-    QList<AiThread*> m_aiThreads;
+    AiThread* m_pAiThread;
 };
 
 #include <QThread>
@@ -81,7 +80,11 @@ class AiThread : public QThread
 {
         Q_OBJECT
 public:
-    AiThread(const QVector<QVector<int>>& map);
+    AiThread();
+
+    void setMap(const QVector<QVector<int>>& map);
+    void setStop();
+    bool isSetStop();
 
     void run();
 
@@ -89,7 +92,11 @@ signals:
     void foundBestDirection(int direction);
 
 private:
-    const QVector<QVector<int>> m_map;
+    QMutex m_mutex;
+    QVector<QVector<int>> m_map;
+    bool m_bStop;
+    bool m_bWorkOnMap;
+    AI m_ai;//Probably could make a static function for AI
 };
 
 #endif // DLG_HOME_H

@@ -19,6 +19,10 @@ DLG_Home::DLG_Home(QWidget *parent)
 {
     ui->setupUi(this);
 
+    m_pAiThread = new AiThread();
+    connect(m_pAiThread, SIGNAL(foundBestDirection(int)), this, SLOT(onAiMove(int)));
+    m_pAiThread->start();
+
     //Calls AI movement decision slot every Constants::AiThinkFrequency ms
     m_pAiTimer = new QTimer(this);
     m_pAiTimer->setTimerType(Qt::PreciseTimer);
@@ -40,22 +44,21 @@ DLG_Home::~DLG_Home()
     m_pAiTimer->stop();
     delete m_pAiTimer;
 
-    m_blocksMutex.unlock();
+    m_pFinishAnimationTimer->stop();
+    delete m_pFinishAnimationTimer;
 
-    delete ui;
-
-    m_blocksMutex.lock();
+    m_pAiThread->setStop();
 
     //Terrible code
-    while(m_aiThreads.size() > 0)
+    while(!m_pAiThread->isSetStop())
     {
         m_blocksMutex.unlock();
         QThread::sleep(100);
         m_blocksMutex.lock();
     }
 
-    m_pFinishAnimationTimer->stop();
-    delete m_pFinishAnimationTimer;
+    m_pAiThread->terminate();
+    delete m_pAiThread;
 
     for(QVector<Block*> blockCol : m_blocksGrid)
     {
@@ -68,6 +71,7 @@ DLG_Home::~DLG_Home()
     m_blocksGrid.clear();
 
     m_blocksMutex.unlock();
+    delete ui;
 }
 
 //Reset game
@@ -356,12 +360,7 @@ void DLG_Home::onAiThink()
     map[3][3] = 0;
 #endif
 
-    //Ai determines best direction to move
-    AiThread* pAiThread = new AiThread(map);
-    m_aiThreads.push_back(pAiThread);
-    connect(pAiThread, SIGNAL(foundBestDirection(int)), this, SLOT(onAiMove(int)));
-    connect(pAiThread, &QThread::finished, this, [this, pAiThread]{onAiFinished(pAiThread);});
-    pAiThread->start();
+    m_pAiThread->setMap(map);
 
     m_blocksMutex.unlock();
 }
@@ -430,36 +429,68 @@ void DLG_Home::onAiMove(int direction)
     move((Direction)direction);
 }
 
-void DLG_Home::onAiFinished(AiThread* pAiThread)
-{
-    m_blocksMutex.lock();
-    m_aiThreads.removeOne(pAiThread);
-    delete pAiThread;
-    m_blocksMutex.unlock();
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///AiThread
 ///
-AiThread::AiThread(const QVector<QVector<int>>& map) :
+AiThread::AiThread() :
     QThread(),
-    m_map(map)
+    m_bStop(false),
+    m_bWorkOnMap(false)
 {
+}
+
+void AiThread::setMap(const QVector<QVector<int>>& map)
+{
+    m_mutex.lock();
+    m_map = map;
+    m_bWorkOnMap = true;
+    m_mutex.unlock();
+}
+
+void AiThread::setStop()
+{
+    m_mutex.lock();
+    m_bStop = true;
+    m_mutex.unlock();
+}
+
+bool AiThread::isSetStop()
+{
+    return m_bStop;
 }
 
 void AiThread::run()
 {
+    while(true)
+    {
+        m_mutex.lock();
+        if(m_bStop)
+        {
+            m_mutex.unlock();
+            return;
+        }
+
+        if(m_bWorkOnMap)
+        {
 #ifdef AI_DEBUG
     clock_t start = clock();
 #endif
+            m_bWorkOnMap = false;
+            const QVector<QVector<int>> map = m_map;
 
-    //Probably could make a static function for AI
-    AI ai;
-    const Direction bestDirection = ai.getBestDirection(m_map);
-    emit foundBestDirection(bestDirection);
+            m_mutex.unlock();
+
+            //Probably could make a static function for AI
+            const Direction bestDirection = m_ai.getBestDirection(map);
+            emit foundBestDirection(bestDirection);
 
 #ifdef AI_DEBUG
     clock_t end = clock();
     qDebug() << "DLG_Home::onAiThink: Think time: " << end - start;
 #endif
+
+            m_mutex.lock();
+        }
+        m_mutex.unlock();
+    }
 }
