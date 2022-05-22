@@ -654,7 +654,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(movedSpawnState, sumMerges, width, height) * Constants::RatioSpawn2Block / (depth * 0.1);
+                        highScore += gameStateScore(movedSpawnState, sumMerges, width, height) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
 #endif
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
                     }
@@ -676,7 +676,7 @@ void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(movedSpawnState, sumMerges, width, height) * Constants::RatioSpawn4Block / (depth * 0.1);
+                        highScore += gameStateScore(movedSpawnState, sumMerges, width, height) * Constants::RatioSpawn4Block / (depth * Constants::DepthMultiplier);
 #endif
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height);
                     }
