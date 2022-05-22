@@ -391,6 +391,65 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges, const
     return score > 0 ? score : 0;
 }
 
+int gameStateScore_cache(const QVector<QVector<int>>& map, const int& sumMerges, const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
+{
+    QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(map);
+    if(it != cacheValues.end())
+    {
+        return it.value();
+    }
+
+    int numZeroBlocks = 0;
+    int highestNumber = 0;
+    int smoothness = 0;
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            const int mapVal = map[x][y];
+            if(x < width-1)
+                smoothness -= abs(mapVal - map[x+1][y]);
+            if(y < height-1)
+                smoothness -= abs(mapVal - map[x][y+1]);
+
+            if(mapVal == 0)
+            {
+                numZeroBlocks++;
+            }
+            else if(highestNumber < mapVal)
+            {
+                highestNumber = mapVal;
+            }
+        }
+    }
+
+    const int maxBlocks = width * height;
+    if(numZeroBlocks == maxBlocks)
+    {
+        numZeroBlocks--;
+    }
+    else if(numZeroBlocks == 0)
+    {
+        return 0;
+    }
+
+    //Number of merges adds to score
+    int score = sumMerges * Constants::ScoreWeightSumMerges;
+
+    //Smoothness
+    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
+
+    //Highest number created
+    score += highestNumber * Constants::ScoreWeightHighestNumber;
+
+    //Add to score for number of 0 blocks
+    score += numZeroBlocks * Constants::ScoreWeightNumberEmptySpots;
+
+    const int finalScore = score > 0 ? score : 0;
+    cacheValues.insert(map, finalScore);
+    return finalScore;
+}
+
 //Returns map values after --> log(value)/log(2)
 QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& width, const int& height)
 {
@@ -471,6 +530,78 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
 #endif
 
     return score > 0 ? score : 0;
+}
+
+int gameStateScore_monoicity_cache(const QVector<QVector<int>>& map, const int&/*Dont do anything with merges atm*/, const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
+{
+    QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(map);
+    if(it != cacheValues.end())
+    {
+        return it.value();
+    }
+
+    //Returns map values after --> log(value)/log(2)
+    QVector<QVector<double>> logMap = log2Map(map, width, height);
+
+    int numZeroBlocks = 0;
+    double highestNumber = 0;
+    double smoothness = 0;
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            const int mapVal = logMap[x][y];
+            if(mapVal == 0)
+            {
+                numZeroBlocks++;
+            }
+            else
+            {
+                if(highestNumber < mapVal)
+                {
+                    highestNumber = mapVal;
+                }
+
+                if(x < width-1 && logMap[x+1][y] != 0)
+                    smoothness -= abs(mapVal - logMap[x+1][y]);
+                if(y < height-1 && logMap[x][y+1] != 0)
+                    smoothness -= abs(mapVal - logMap[x][y+1]);
+            }
+        }
+    }
+
+    int score = Constants::BaseScore_Monoicity;
+
+    //Smoothness
+#ifdef AI_DEBUG
+    const int smooth = smoothness * Constants::ScoreWeight_Monoicity_Smoothness;
+#endif
+    score += smoothness * Constants::ScoreWeight_Monoicity_Smoothness;
+
+    //Highest number created
+    score += highestNumber * Constants::ScoreWeight_Monoicity_HighestNumber;
+
+    //Add to score for number of 0 blocks
+    score += log(numZeroBlocks) * Constants::ScoreWeight_Monoicity_NumberEmptySpots;
+
+    //Monoicity
+#ifdef AI_DEBUG
+    const int monoton = monotonicity(logMap, width, height) * Constants::ScoreWeight_Monoicity;
+#endif
+    score += monotonicity(logMap, width, height) * Constants::ScoreWeight_Monoicity;
+
+#ifdef AI_DEBUG
+    if(score < 0)
+    {
+        qDebug() << "gameStateScore_monoicity: score: " << score;
+        qDebug() << "Smooth: " << smooth;
+        qDebug() << "Monton: " << monoton;
+    }
+#endif
+
+    const int finalScore = score > 0 ? score : 0;
+    cacheValues.insert(map, finalScore);
+    return finalScore;
 }
 
 void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
@@ -651,32 +782,15 @@ void getHighestScore_cache(const QVector<QVector<int>>& map, int& highScore, int
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, width, height))
                     {
-                        QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(movedSpawnState);
-                        if(it != cacheValues.end())
-                        {
+                        score = gameStateScore_cache(movedSpawnState, sumMerges, width, height, cacheValues) * Constants::RatioSpawn2Block;
 #ifdef NO_SUM_SCORES
-                            if(it.value() > highScore)
-                            {
-                                highScore = it.value() * Constants::RatioSpawn2Block;
-                            }
-#else
-                            highScore += it.value() * Constants::RatioSpawn2Block;
-#endif
-                        }
-                        else
+                        if(score > highScore)
                         {
-                            score = gameStateScore(movedSpawnState, sumMerges, width, height);
-                            cacheValues.insert(movedSpawnState, score);
-                            score *= Constants::RatioSpawn2Block;
-#ifdef NO_SUM_SCORES
-                            if(score > highScore)
-                            {
-                                highScore = score;
-                            }
-#else
-                            highScore += score;
-#endif
+                            highScore = score;
                         }
+#else
+                        highScore += score;
+#endif
                         getHighestScore_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
                     }
                 }
@@ -689,33 +803,16 @@ void getHighestScore_cache(const QVector<QVector<int>>& map, int& highScore, int
                     movedSpawnState = spawnState;
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, width, height))
-                    {                        
-                        QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(movedSpawnState);
-                        if(it != cacheValues.end())
-                        {
+                    {
+                        score = gameStateScore_cache(movedSpawnState, sumMerges, width, height, cacheValues) * Constants::RatioSpawn4Block;
 #ifdef NO_SUM_SCORES
-                            if(it.value() > highScore)
-                            {
-                                highScore = it.value() * Constants::RatioSpawn4Block;
-                            }
-#else
-                            highScore += it.value() * Constants::RatioSpawn4Block;
-#endif
-                        }
-                        else
+                        if(score > highScore)
                         {
-                            score = gameStateScore(movedSpawnState, sumMerges, width, height);
-                            cacheValues.insert(movedSpawnState, score);
-                            score *= Constants::RatioSpawn4Block;
-#ifdef NO_SUM_SCORES
-                            if(score > highScore)
-                            {
-                                highScore = score;
-                            }
-#else
-                            highScore += score;
-#endif
+                            highScore = score;
                         }
+#else
+                        highScore += score;
+#endif
                         getHighestScore_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
                     }
                 }
@@ -756,32 +853,15 @@ void getHighestScore_monoicity_cache(const QVector<QVector<int>>& map, int& high
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, width, height))
                     {
-                        QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(movedSpawnState);
-                        if(it != cacheValues.end())
-                        {
+                        score = gameStateScore_monoicity_cache(movedSpawnState, sumMerges, width, height, cacheValues) * Constants::RatioSpawn2Block;
 #ifdef NO_SUM_SCORES
-                            if(it.value() > highScore)
-                            {
-                                highScore = it.value() * Constants::RatioSpawn2Block;
-                            }
-#else
-                            highScore += it.value() * Constants::RatioSpawn2Block;
-#endif
-                        }
-                        else
+                        if(score > highScore)
                         {
-                            score = gameStateScore_monoicity(movedSpawnState, sumMerges, width, height);
-                            cacheValues.insert(movedSpawnState, score);
-                            score *= Constants::RatioSpawn2Block;
-#ifdef NO_SUM_SCORES
-                            if(score > highScore)
-                            {
-                                highScore = score;
-                            }
-#else
-                            highScore += score;
-#endif
+                            highScore = score;
                         }
+#else
+                        highScore += score;
+#endif
                         getHighestScore_monoicity_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
                     }
                 }
@@ -795,32 +875,15 @@ void getHighestScore_monoicity_cache(const QVector<QVector<int>>& map, int& high
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, width, height))
                     {
-                        QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(movedSpawnState);
-                        if(it != cacheValues.end())
-                        {
+                        score = gameStateScore_monoicity_cache(movedSpawnState, sumMerges, width, height, cacheValues) * Constants::RatioSpawn4Block;
 #ifdef NO_SUM_SCORES
-                            if(it.value() > highScore)
-                            {
-                                highScore = it.value() * Constants::RatioSpawn4Block;
-                            }
-#else
-                            highScore += it.value() * Constants::RatioSpawn4Block;
-#endif
-                        }
-                        else
+                        if(score > highScore)
                         {
-                            score = gameStateScore_monoicity(movedSpawnState, sumMerges, width, height);
-                            cacheValues.insert(movedSpawnState, score);
-                            score *= Constants::RatioSpawn4Block;
-#ifdef NO_SUM_SCORES
-                            if(score > highScore)
-                            {
-                                highScore = score;
-                            }
-#else
-                            highScore += score;
-#endif
+                            highScore = score;
                         }
+#else
+                        highScore += score;
+#endif
                         getHighestScore_monoicity_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
                     }
                 }
