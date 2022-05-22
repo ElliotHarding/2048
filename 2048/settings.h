@@ -62,10 +62,11 @@ const int ScoreWeightHighestNumber = 100;
 const int ScoreWeightNumberEmptySpots = 100;
 
 ///Score weights for monoicity game state valuation
-const int ScoreWeight_Monoicity = 100;
-const int ScoreWeight_Monoicity_Smoothness = 50;
-const int ScoreWeight_Monoicity_HighestNumber = 100;
+const int ScoreWeight_Monoicity = 40;
+const int ScoreWeight_Monoicity_Smoothness = 10;
+const int ScoreWeight_Monoicity_HighestNumber = 150;
 const int ScoreWeight_Monoicity_NumberEmptySpots = 270;
+const int BaseScore_Monoicity = 2000;
 
 ///Depth for best direction choice calcuations
 const int DirectionChoiceDepth = 5;
