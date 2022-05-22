@@ -46,6 +46,7 @@ DLG_Home::~DLG_Home()
 
     m_blocksMutex.lock();
 
+    //Terrible code
     while(m_aiThreads.size() > 0)
     {
         m_blocksMutex.unlock();
