@@ -1,6 +1,6 @@
 #include "ai.h"
 #include <QDebug>
-
+#include <QRandomGenerator>
 #include <math.h>
 const double Log2 = log(2);
 
@@ -935,7 +935,6 @@ Direction AI::getBestSmoothness2Direction(const QVector<QVector<int>>& map)
     return chosenDirection;
 }
 
-#include <QRandomGenerator>
 int AI::runTests()
 {
     const int width = 4;
@@ -995,7 +994,20 @@ int AI::runTests()
                         }
                     }
                 }
-                qDebug() << "AI::runTests - Score: " << highestNumber;
+
+                if(highestNumber >= 2048)
+                {
+                    qDebug() << "------ 2048 REACHED! ------------";
+                    qDebug() << "------ 2048 REACHED! ------------";
+                    qDebug() << "------ 2048 REACHED! ------------";
+                    qDebug() << "------ 2048 REACHED! ------------";
+                    qDebug() << "------ 2048 REACHED! ------------";
+                    qDebug() << "------ 2048 REACHED! ------------";
+                }
+                else
+                {
+                    qDebug() << "AI::runTests - Score: " << highestNumber;
+                }
                 debugMap(map);
                 break;
             }
