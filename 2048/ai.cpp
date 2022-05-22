@@ -418,22 +418,25 @@ int gameStateScore_monoicity(const QVector<QVector<int>>& map, const int&/*Dont 
         for(int y = 0; y < height; y++)
         {
             const int mapVal = map[x][y];
-            if(x < width-1)
-                smoothness -= abs(mapVal - map[x+1][y]);
-            if(y < height-1)
-                smoothness -= abs(mapVal - map[x][y+1]);
-            if(x > 0)
-                smoothness -= abs(mapVal - map[x-1][y]);
-            if(y > 0)
-                smoothness -= abs(mapVal - map[x][y-1]);
-
             if(mapVal == 0)
             {
                 numZeroBlocks++;
             }
-            else if(highestNumber < mapVal)
+            else
             {
-                highestNumber = mapVal;
+                if(highestNumber < mapVal)
+                {
+                    highestNumber = mapVal;
+                }
+
+                if(x < width-1 && map[x+1][y] != 0)
+                    smoothness -= abs(mapVal - map[x+1][y]);
+                if(y < height-1 && map[x][y+1] != 0)
+                    smoothness -= abs(mapVal - map[x][y+1]);
+                //if(x > 0 && map[x-1][y] != 0)
+                    //smoothness -= abs(mapVal - map[x-1][y]);
+                //if(y > 0 && map[x][y-1] != 0)
+                    //smoothness -= abs(mapVal - map[x][y-1]);
             }
         }
     }
