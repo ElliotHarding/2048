@@ -235,6 +235,8 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
 {
     int totals[4] = {0,0,0,0};
 
+    const double log2 = log(2);
+
     //Cols
     for(int x = 0; x < width; x++)
     {
@@ -251,8 +253,8 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
                 next--;
             }
 
-            int currentValue = map[x][current] != 0 ? log(map[x][current]) / log(2) : 0;
-            int nextValue = map[x][next] != 0 ? log(map[x][next]) / log(2) : 0;
+            int currentValue = map[x][current] != 0 ? log(map[x][current]) / log2 : 0;
+            int nextValue = map[x][next] != 0 ? log(map[x][next]) / log2 : 0;
 
             if(currentValue > nextValue)
             {
@@ -284,8 +286,8 @@ int monotonicity(const QVector<QVector<int>>& map, const int& width, const int& 
                 next--;
             }
 
-            int currentValue = map[current][y] != 0 ? log(map[current][y]) / log(2) : 0;
-            int nextValue = map[next][y] != 0 ? log(map[next][y]) / log(2) : 0;
+            int currentValue = map[current][y] != 0 ? log(map[current][y]) / log2 : 0;
+            int nextValue = map[next][y] != 0 ? log(map[next][y]) / log2 : 0;
 
             if(currentValue > nextValue)
             {
