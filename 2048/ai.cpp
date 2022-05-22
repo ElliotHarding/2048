@@ -389,53 +389,15 @@ int gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges, const
 
 int gameStateScore_snake(const QVector<QVector<int>>& map, const QVector<QVector<int>>& snakeGrid, const int& width, const int& height)
 {
-    int numZeroBlocks = 0;
-    int highestNumber = 0;
-    int smoothness = 0;
+    int score = 0;
     for(int x = 0; x < width; x++)
     {
         for(int y = 0; y < height; y++)
         {
-            const int mapVal = map[x][y];
-            if(x < width-1)
-                smoothness -= abs(mapVal - map[x+1][y]);
-            if(y < height-1)
-                smoothness -= abs(mapVal - map[x][y+1]);
-
-            if(mapVal == 0)
-            {
-                numZeroBlocks++;
-            }
-            else if(highestNumber < mapVal)
-            {
-                highestNumber = mapVal;
-            }
+            score += map[x][y] * snakeGrid[x][y];
         }
     }
-
-    const int maxBlocks = width * height;
-    if(numZeroBlocks == maxBlocks)
-    {
-        numZeroBlocks--;
-    }
-    else if(numZeroBlocks == 0)
-    {
-        return 0;
-    }
-
-    //Number of merges adds to score
-    int score = sumMerges * Constants::ScoreWeightSumMerges;
-
-    //Smoothness
-    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
-
-    //Highest number created
-    score += highestNumber * Constants::ScoreWeightHighestNumber;
-
-    //Add to score for number of 0 blocks
-    score += numZeroBlocks * Constants::ScoreWeightNumberEmptySpots;
-
-    return score > 0 ? score : 0;
+    return score;
 }
 
 int gameStateScore_cache(const QVector<QVector<int>>& map, const int& sumMerges, const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
@@ -1183,6 +1145,32 @@ Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
     QVector<QVector<int>> movedSpawnStateMem = map;
     QVector<QVector<int>> moveMap = map;
 
+    QVector<QVector<int>> snakeGrid(width, QVector<int>(height, 0));
+    bool startTop = true;
+    int startVal = 1;
+    for(int x = 0; x < width; x++)
+    {
+        if(startTop)
+        {
+            for(int y = 0; y < height; y++)
+            {
+                snakeGrid[x][y] = startVal;
+                startVal*=2;
+            }
+        }
+        else
+        {
+            for(int y = height-1; y > -1; y--)
+            {
+                snakeGrid[x][y] = startVal;
+                startVal*=2;
+            }
+        }
+        startTop = !startTop;
+    }
+
+    debugMap(snakeGrid);
+
     //Game state evaluation vars
     int score = 0;
     int mapScore;
@@ -1195,8 +1183,8 @@ Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
         sumMerges = 0;
         if(mapMove(moveMap, direction, sumMerges, width, height))
         {
-            mapScore = gameStateScore_snake(moveMap, sumMerges, width, height);
-            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height);
+            mapScore = gameStateScore_snake(moveMap, snakeGrid, width, height);
+            getHighestScore_snake(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, snakeGrid);
             if(mapScore > score)
             {
                 score = mapScore;
