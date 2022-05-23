@@ -83,4 +83,12 @@ const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN,
 //#define RUN_TESTS
 #define NO_SUM_SCORES
 
+///AI Algorithms
+//#define AI_CACHE
+#define AI_NORMAL
+//#define AI_MONOICITY
+//#define AI_SNAKE
+//#define AI_SMOOTH_1
+//#define AI_SMOOTH_2
+
 #endif // SETTINGS_H
