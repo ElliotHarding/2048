@@ -27,6 +27,8 @@ private:
     QVector<QVector<int>> m_spawnStateMem;
     QVector<QVector<int>> m_movedSpawnStateMem;
     QVector<QVector<int>> m_moveMap;
+
+    QVector<QVector<int>> m_snakeGrid;
 };
 
 #endif // AI_H

@@ -1112,7 +1112,7 @@ Direction AI::getBestDirection_monoicity_cache(const QVector<QVector<int> > &map
     return chosenDirection;
 }
 
-Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
+Direction AI::getBestDirection_snake(const QVector<QVector<int>>& map)
 {
     Direction chosenDirection = Constants::PossibleMoveDirections[0];
 
@@ -1120,28 +1120,33 @@ Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
     const int width = map.size();
     const int height = map[0].size();
 
-    QVector<QVector<int>> snakeGrid(width, QVector<int>(height, 0));
-    bool startTop = true;
-    int startVal = 1;
-    for(int x = 0; x < width; x++)
+    //Create snake grid
+    if(m_snakeGrid.size() != width || m_snakeGrid[0].size() != height)
     {
-        if(startTop)
+        m_snakeGrid = QVector<QVector<int>>(width, QVector<int>(height, 0));
+
+        bool startTop = true;
+        int startVal = 1;
+        for(int x = 0; x < width; x++)
         {
-            for(int y = 0; y < height; y++)
+            if(startTop)
             {
-                snakeGrid[x][y] = startVal;
-                startVal*=2;
+                for(int y = 0; y < height; y++)
+                {
+                    m_snakeGrid[x][y] = startVal;
+                    startVal*=2;
+                }
             }
-        }
-        else
-        {
-            for(int y = height-1; y > -1; y--)
+            else
             {
-                snakeGrid[x][y] = startVal;
-                startVal*=2;
+                for(int y = height-1; y > -1; y--)
+                {
+                    m_snakeGrid[x][y] = startVal;
+                    startVal*=2;
+                }
             }
+            startTop = !startTop;
         }
-        startTop = !startTop;
     }
 
     //Game state evaluation vars
@@ -1156,8 +1161,8 @@ Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
         sumMerges = 0;
         if(mapMove(m_moveMap, direction, sumMerges, width, height))
         {
-            mapScore = gameStateScore_snake(m_moveMap, snakeGrid, width, height);
-            getHighestScore_snake(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height, snakeGrid);
+            mapScore = gameStateScore_snake(m_moveMap, m_snakeGrid, width, height);
+            getHighestScore_snake(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height, m_snakeGrid);
             if(mapScore > score)
             {
                 score = mapScore;
@@ -1312,6 +1317,4 @@ int AI::runTests()
             }
         }
     }
-
-
 }
