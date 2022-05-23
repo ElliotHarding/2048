@@ -79,16 +79,41 @@ const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN,
 
 }
 
+///Test timing & algorithm of AI
 //#define AI_DEBUG
-//#define RUN_TESTS
-#define NO_SUM_SCORES
 
-///AI Algorithms
+///Run multiple games simutaneously, outputting end score
+/// - Triggerd by pressing reset UI button
+//#define RUN_TESTS
+
+///Sum method
+/// - Just find highest scoring move, dont sum move scores with depth
+#define AI_NO_SUM_SCORES
+
+///Sum method
+/// - A messed up method, but got to 2048
+#ifdef AI_NO_SUM_SCORES
+#define AI_NO_SUM_WINNER_1
+#endif
+
+///AI Algorithm method
 //#define AI_CACHE
+
+///AI Algorithm method
 #define AI_NORMAL
+
+///AI Algorithm method
+#ifndef AI_NORMAL
 //#define AI_MONOICITY
+#endif
+
+///AI Algorithm method
 //#define AI_SNAKE
+
+///AI Algorithm method
 //#define AI_SMOOTH_1
+
+///AI Algorithm method
 //#define AI_SMOOTH_2
 
 #endif // SETTINGS_H

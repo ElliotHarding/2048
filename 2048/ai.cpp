@@ -364,7 +364,7 @@ void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int d
 
     //Game state evaluation vars
     int sumMerges;
-#ifdef NO_SUM_SCORES
+#ifdef AI_NO_SUM_SCORES
     int score;
 #endif
 
@@ -387,14 +387,19 @@ void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int d
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, m_width, m_height))
                     {
-#ifdef NO_SUM_SCORES
+#ifdef AI_NO_SUM_SCORES
+    #ifdef AI_NO_SUM_WINNER_1
+                        //Strange method of dividing by depth (which decrements) but got to 2048...
                         score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+    #else
+                        score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block;
+    #endif
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block;
 #endif
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState);
                     }
@@ -409,14 +414,19 @@ void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int d
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, m_width, m_height))
                     {
-#ifdef NO_SUM_SCORES
+#ifdef AI_NO_SUM_SCORES
+    #ifdef AI_NO_SUM_WINNER_1
+                        //Strange method of dividing by depth (which decrements) & also using spawn2block instead of 4, but got to 2048...
                         score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+    #else
+                        score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn4Block;
+    #endif
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn4Block / (depth * Constants::DepthMultiplier);
+                        highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn4Block;
 #endif
                         getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState);
                     }
