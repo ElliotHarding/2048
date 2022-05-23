@@ -4,7 +4,7 @@
 #include <QList>
 #include "settings.h"
 
-class AI//Probably could make a static function for AI
+class AI
 {
 public:
     AI();
@@ -12,12 +12,6 @@ public:
     //Main algorithm - got 2048
     Direction getBestDirection(const QVector<QVector<int>>& map);
     int runTests();
-
-
-    //Other algorithms
-    Direction getBestDirection_snake(const QVector<QVector<int>>& map);
-    Direction getBestSmoothnessDirection(const QVector<QVector<int>>& map);
-    Direction getBestSmoothness2Direction(const QVector<QVector<int>>& map);
 
 private:
     int gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges);
@@ -28,10 +22,10 @@ private:
     QVector<QVector<int>> m_spawnStateMem;
     QVector<QVector<int>> m_movedSpawnStateMem;
     QVector<QVector<int>> m_moveMap;
-
-    QVector<QVector<int>> m_snakeGrid;
-
     QMap<QVector<QVector<int>>, int> m_cacheGameStates;
+
+    ///Snake AI
+    QVector<QVector<int>> m_snakeGrid;
 
     ///Map size
     int m_width;
