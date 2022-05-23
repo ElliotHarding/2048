@@ -982,11 +982,6 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     const int width = map.size();
     const int height = map[0].size();
 
-    //Reuseable memory for depth search
-    QVector<QVector<int>> spawnStateMem = map;
-    QVector<QVector<int>> movedSpawnStateMem = map;
-    QVector<QVector<int>> moveMap = map;
-
     //Game state evaluation vars
     int score = 0;
     int mapScore;
@@ -995,12 +990,12 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     //For each direction, evaluate its score (to a set depth of moves), choose best direction
     for(const Direction& direction : Constants::PossibleMoveDirections)
     {
-        moveMap = map;
+        m_moveMap = map;
         sumMerges = 0;
-        if(mapMove(moveMap, direction, sumMerges, width, height))
+        if(mapMove(m_moveMap, direction, sumMerges, width, height))
         {
-            mapScore = gameStateScore(moveMap, sumMerges, width, height);
-            getHighestScore(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height);
+            mapScore = gameStateScore(m_moveMap, sumMerges, width, height);
+            getHighestScore(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height);
             if(mapScore > score)
             {
                 score = mapScore;

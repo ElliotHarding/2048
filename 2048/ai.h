@@ -21,6 +21,12 @@ public:
     Direction getBestDirection_snake(const QVector<QVector<int>>& map);
     Direction getBestSmoothnessDirection(const QVector<QVector<int>>& map);
     Direction getBestSmoothness2Direction(const QVector<QVector<int>>& map);
+
+private:
+    ///Reuseable memory for depth search
+    QVector<QVector<int>> m_spawnStateMem;
+    QVector<QVector<int>> m_movedSpawnStateMem;
+    QVector<QVector<int>> m_moveMap;
 };
 
 #endif // AI_H
