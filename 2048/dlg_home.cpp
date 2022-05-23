@@ -205,13 +205,7 @@ bool inRange(const int& value, const int& min, const int& max)
     return value >= min && value <= max;
 }
 
-bool inRange(const int& value, const int& min, const int& max, const int& inc)
-{
-    return inRange(value, min, max) && inRange(value + inc, min, max);
-}
-
 typedef QPointF Vector2;
-
 Vector2 directionToVector(Direction direction)
 {
     switch (direction)
