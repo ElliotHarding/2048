@@ -1015,11 +1015,6 @@ Direction AI::getBestDirection_monoicity(const QVector<QVector<int>>& map)
     const int width = map.size();
     const int height = map[0].size();
 
-    //Reuseable memory for depth search
-    QVector<QVector<int>> spawnStateMem = map;
-    QVector<QVector<int>> movedSpawnStateMem = map;
-    QVector<QVector<int>> moveMap = map;
-
     //Game state evaluation vars
     int score = 0;
     int mapScore;
@@ -1028,12 +1023,12 @@ Direction AI::getBestDirection_monoicity(const QVector<QVector<int>>& map)
     //For each direction, evaluate its score (to a set depth of moves), choose best direction
     for(const Direction& direction : Constants::PossibleMoveDirections)
     {
-        moveMap = map;
+        m_moveMap = map;
         sumMerges = 0;
-        if(mapMove(moveMap, direction, sumMerges, width, height))
+        if(mapMove(m_moveMap, direction, sumMerges, width, height))
         {
-            mapScore = gameStateScore_monoicity(moveMap, sumMerges, width, height);
-            getHighestScore_monoicity(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height);
+            mapScore = gameStateScore_monoicity(m_moveMap, sumMerges, width, height);
+            getHighestScore_monoicity(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height);
             if(mapScore > score)
             {
                 score = mapScore;
@@ -1053,11 +1048,6 @@ Direction AI::getBestDirection_cache(const QVector<QVector<int> > &map)
     const int width = map.size();
     const int height = map[0].size();
 
-    //Reuseable memory for depth search
-    QVector<QVector<int>> spawnStateMem = map;
-    QVector<QVector<int>> movedSpawnStateMem = map;
-    QVector<QVector<int>> moveMap = map;
-
     //Previously evaluated game states
     QMap<QVector<QVector<int>>, int> cacheGameStates;
 
@@ -1069,12 +1059,12 @@ Direction AI::getBestDirection_cache(const QVector<QVector<int> > &map)
     //For each direction, evaluate its score (to a set depth of moves), choose best direction
     for(const Direction& direction : Constants::PossibleMoveDirections)
     {
-        moveMap = map;
+        m_moveMap = map;
         sumMerges = 0;
-        if(mapMove(moveMap, direction, sumMerges, width, height))
+        if(mapMove(m_moveMap, direction, sumMerges, width, height))
         {
-            mapScore = gameStateScore(moveMap, sumMerges, width, height);
-            getHighestScore_cache(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, cacheGameStates);
+            mapScore = gameStateScore(m_moveMap, sumMerges, width, height);
+            getHighestScore_cache(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height, cacheGameStates);
             if(mapScore > score)
             {
                 score = mapScore;
@@ -1094,11 +1084,6 @@ Direction AI::getBestDirection_monoicity_cache(const QVector<QVector<int> > &map
     const int width = map.size();
     const int height = map[0].size();
 
-    //Reuseable memory for depth search
-    QVector<QVector<int>> spawnStateMem = map;
-    QVector<QVector<int>> movedSpawnStateMem = map;
-    QVector<QVector<int>> moveMap = map;
-
     //Previously evaluated game states
     QMap<QVector<QVector<int>>, int> cacheGameStates;
 
@@ -1110,12 +1095,12 @@ Direction AI::getBestDirection_monoicity_cache(const QVector<QVector<int> > &map
     //For each direction, evaluate its score (to a set depth of moves), choose best direction
     for(const Direction& direction : Constants::PossibleMoveDirections)
     {
-        moveMap = map;
+        m_moveMap = map;
         sumMerges = 0;
-        if(mapMove(moveMap, direction, sumMerges, width, height))
+        if(mapMove(m_moveMap, direction, sumMerges, width, height))
         {
-            mapScore = gameStateScore_monoicity(moveMap, sumMerges, width, height);
-            getHighestScore_monoicity_cache(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, cacheGameStates);
+            mapScore = gameStateScore_monoicity(m_moveMap, sumMerges, width, height);
+            getHighestScore_monoicity_cache(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height, cacheGameStates);
             if(mapScore > score)
             {
                 score = mapScore;
@@ -1134,11 +1119,6 @@ Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
     //Size of map, quicker to retrieve from const
     const int width = map.size();
     const int height = map[0].size();
-
-    //Reuseable memory for depth search
-    QVector<QVector<int>> spawnStateMem = map;
-    QVector<QVector<int>> movedSpawnStateMem = map;
-    QVector<QVector<int>> moveMap = map;
 
     QVector<QVector<int>> snakeGrid(width, QVector<int>(height, 0));
     bool startTop = true;
@@ -1172,12 +1152,12 @@ Direction AI::getBestDirection_snake(const QVector<QVector<int> > &map)
     //For each direction, evaluate its score (to a set depth of moves), choose best direction
     for(const Direction& direction : Constants::PossibleMoveDirections)
     {
-        moveMap = map;
+        m_moveMap = map;
         sumMerges = 0;
-        if(mapMove(moveMap, direction, sumMerges, width, height))
+        if(mapMove(m_moveMap, direction, sumMerges, width, height))
         {
-            mapScore = gameStateScore_snake(moveMap, snakeGrid, width, height);
-            getHighestScore_snake(moveMap, mapScore, Constants::DirectionChoiceDepth, spawnStateMem, movedSpawnStateMem, width, height, snakeGrid);
+            mapScore = gameStateScore_snake(m_moveMap, snakeGrid, width, height);
+            getHighestScore_snake(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height, snakeGrid);
             if(mapScore > score)
             {
                 score = mapScore;
