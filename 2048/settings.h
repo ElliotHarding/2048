@@ -93,14 +93,14 @@ const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN,
 ///Sum method
 /// - A messed up method, but got to 2048
 #ifdef AI_NO_SUM_SCORES
-#define AI_NO_SUM_WINNER_1
+//#define AI_NO_SUM_WINNER_1
 #endif
 
 ///AI Algorithm method
 //#define AI_CACHE
 
 ///AI Algorithm method
-#define AI_NORMAL
+#define AI_NORMAL //Reached 2048
 
 ///AI Algorithm method
 #ifndef AI_NORMAL
