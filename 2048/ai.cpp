@@ -400,65 +400,6 @@ int gameStateScore_snake(const QVector<QVector<int>>& map, const QVector<QVector
     return score;
 }
 
-int gameStateScore_cache(const QVector<QVector<int>>& map, const int& sumMerges, const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
-{
-    QMap<QVector<QVector<int>>, int>::ConstIterator it = cacheValues.find(map);
-    if(it != cacheValues.end())
-    {
-        return it.value();
-    }
-
-    int numZeroBlocks = 0;
-    int highestNumber = 0;
-    int smoothness = 0;
-    for(int x = 0; x < width; x++)
-    {
-        for(int y = 0; y < height; y++)
-        {
-            const int mapVal = map[x][y];
-            if(x < width-1)
-                smoothness -= abs(mapVal - map[x+1][y]);
-            if(y < height-1)
-                smoothness -= abs(mapVal - map[x][y+1]);
-
-            if(mapVal == 0)
-            {
-                numZeroBlocks++;
-            }
-            else if(highestNumber < mapVal)
-            {
-                highestNumber = mapVal;
-            }
-        }
-    }
-
-    const int maxBlocks = width * height;
-    if(numZeroBlocks == maxBlocks)
-    {
-        numZeroBlocks--;
-    }
-    else if(numZeroBlocks == 0)
-    {
-        return 0;
-    }
-
-    //Number of merges adds to score
-    int score = sumMerges * Constants::ScoreWeightSumMerges;
-
-    //Smoothness
-    score += (smoothness * Constants::ScoreWeightSmoothness)/(width*height-numZeroBlocks);
-
-    //Highest number created
-    score += highestNumber * Constants::ScoreWeightHighestNumber;
-
-    //Add to score for number of 0 blocks
-    score += numZeroBlocks * Constants::ScoreWeightNumberEmptySpots;
-
-    const int finalScore = score > 0 ? score : 0;
-    cacheValues.insert(map, finalScore);
-    return finalScore;
-}
-
 //Returns map values after --> log(value)/log(2)
 QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& width, const int& height)
 {
@@ -831,77 +772,6 @@ void getHighestScore_monoicity(const QVector<QVector<int>>& map, int& highScore,
     }
 }
 
-void getHighestScore_cache(const QVector<QVector<int>>& map, int& highScore, int depth,
-                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState,
-                     const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
-{
-    if(depth == 0)
-    {
-        return;
-    }
-
-    //Game state evaluation vars
-    int sumMerges;
-    int score;
-
-    //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
-    // then evaluate spawnState (to a set depth of moves)
-    for(int x = 0; x < width; x++)
-    {
-        for(int y = 0; y < height; y++)
-        {
-            if(map[x][y] == 0)
-            {
-                spawnState = map;
-
-                //Add 2 to empty spot to simulate spawn
-                //For each direction, add its score to current score (to a set depth of moves)
-                spawnState[x][y] = 2;
-                for(const Direction& direction : Constants::PossibleMoveDirections)
-                {
-                    movedSpawnState = spawnState;
-                    sumMerges = 0;
-                    if(mapMove(movedSpawnState, direction, sumMerges, width, height))
-                    {
-                        score = gameStateScore_cache(movedSpawnState, sumMerges, width, height, cacheValues) * Constants::RatioSpawn2Block;
-#ifdef NO_SUM_SCORES
-                        if(score > highScore)
-                        {
-                            highScore = score;
-                        }
-#else
-                        highScore += score;
-#endif
-                        getHighestScore_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
-                    }
-                }
-
-                //Add 4 to empty spot to simulate spawn
-                //For each direction, add its score to current score (to a set depth of moves)
-                spawnState[x][y] = 4;
-                for(const Direction& direction : Constants::PossibleMoveDirections)
-                {
-                    movedSpawnState = spawnState;
-                    sumMerges = 0;
-                    if(mapMove(movedSpawnState, direction, sumMerges, width, height))
-                    {
-                        score = gameStateScore_cache(movedSpawnState, sumMerges, width, height, cacheValues) * Constants::RatioSpawn4Block;
-#ifdef NO_SUM_SCORES
-                        if(score > highScore)
-                        {
-                            highScore = score;
-                        }
-#else
-                        highScore += score;
-#endif
-                        getHighestScore_cache(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState, width, height, cacheValues);
-                    }
-                }
-            }
-        }
-    }
-}
-
 void getHighestScore_monoicity_cache(const QVector<QVector<int>>& map, int& highScore, int depth,
                      QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState,
                      const int& width, const int& height, QMap<QVector<QVector<int>>, int>& cacheValues)
@@ -1003,6 +873,8 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         }
     }
 
+    m_cacheGameStates.clear();
+
     return chosenDirection;
 }
 
@@ -1028,42 +900,6 @@ Direction AI::getBestDirection_monoicity(const QVector<QVector<int>>& map)
         {
             mapScore = gameStateScore_monoicity(m_moveMap, sumMerges, width, height);
             getHighestScore_monoicity(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height);
-            if(mapScore > score)
-            {
-                score = mapScore;
-                chosenDirection = direction;
-            }
-        }
-    }
-
-    return chosenDirection;
-}
-
-Direction AI::getBestDirection_cache(const QVector<QVector<int> > &map)
-{
-    Direction chosenDirection = Constants::PossibleMoveDirections[0];
-
-    //Size of map, quicker to retrieve from const
-    const int width = map.size();
-    const int height = map[0].size();
-
-    //Previously evaluated game states
-    QMap<QVector<QVector<int>>, int> cacheGameStates;
-
-    //Game state evaluation vars
-    int score = 0;
-    int mapScore;
-    int sumMerges;
-
-    //For each direction, evaluate its score (to a set depth of moves), choose best direction
-    for(const Direction& direction : Constants::PossibleMoveDirections)
-    {
-        m_moveMap = map;
-        sumMerges = 0;
-        if(mapMove(m_moveMap, direction, sumMerges, width, height))
-        {
-            mapScore = gameStateScore_cache(m_moveMap, sumMerges, width, height, cacheGameStates);
-            getHighestScore_cache(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem, width, height, cacheGameStates);
             if(mapScore > score)
             {
                 score = mapScore;
@@ -1239,6 +1075,12 @@ Direction AI::getBestSmoothness2Direction(const QVector<QVector<int>>& map)
 
 int AI::gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges)
 {
+    QMap<QVector<QVector<int>>, int>::ConstIterator it = m_cacheGameStates.find(map);
+    if(it != m_cacheGameStates.end())
+    {
+        return it.value();
+    }
+
     int numZeroBlocks = 0;
     int highestNumber = 0;
     int smoothness = 0;
@@ -1285,7 +1127,9 @@ int AI::gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges)
     //Add to score for number of 0 blocks
     score += numZeroBlocks * Constants::ScoreWeightNumberEmptySpots;
 
-    return score > 0 ? score : 0;
+    const int finalScore = score > 0 ? score : 0;
+    m_cacheGameStates.insert(map, finalScore);
+    return finalScore;
 }
 
 int AI::runTests()

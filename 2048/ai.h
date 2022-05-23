@@ -34,6 +34,8 @@ private:
 
     QVector<QVector<int>> m_snakeGrid;
 
+    QMap<QVector<QVector<int>>, int> m_cacheGameStates;
+
     ///Map size
     int m_width;
     int m_height;
