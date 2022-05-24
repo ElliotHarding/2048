@@ -354,7 +354,7 @@ QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& wi
     return returnMap;
 }
 
-void AI::getHighestScore(QVector<QVector<int>>& map, int& highScore, int depth)
+void AI::getHighestScore(int& highScore, int depth)
 {
     if(depth == 0)
     {
@@ -367,73 +367,71 @@ void AI::getHighestScore(QVector<QVector<int>>& map, int& highScore, int depth)
     int score;
 #endif
 
-    QVector<QVector<int>> movedSpawnState = map;
-
     //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
     // then evaluate spawnState (to a set depth of moves)
     for(int x = 0; x < m_width; x++)
     {
         for(int y = 0; y < m_height; y++)
         {
-            if(map[x][y] == 0)
+            if(m_mapsAtDepths[depth][x][y] == 0)
             {
                 //QVector<QVector<int>> spawnState = map;
 
                 //Add 2 to empty spot to simulate spawn
                 //For each direction, add its score to current score (to a set depth of moves)
-                map[x][y] = 2;
+                m_mapsAtDepths[depth][x][y] = 2;
                 for(const Direction& direction : Constants::PossibleMoveDirections)
                 {
-                    movedSpawnState = map;
+                    m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     sumMerges = 0;
-                    if(mapMove(movedSpawnState, direction, sumMerges, m_width, m_height))
+                    if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
                     {
 #ifdef AI_NO_SUM_SCORES
     #ifdef AI_NO_SUM_WINNER_1
                         //Strange method of dividing by depth (which decrements) but got to 2048...
-                        score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
     #else
-                        score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block;
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block;
     #endif
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block;
+                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block;
 #endif
-                        getHighestScore(movedSpawnState, highScore, depth - 1);
+                        getHighestScore(highScore, depth - 1);
                     }
                 }
 
                 //Add 4 to empty spot to simulate spawn
                 //For each direction, add its score to current score (to a set depth of moves)
-                map[x][y] = 4;
+                m_mapsAtDepths[depth][x][y] = 4;
                 for(const Direction& direction : Constants::PossibleMoveDirections)
                 {
-                    movedSpawnState = map;
+                    m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     sumMerges = 0;
-                    if(mapMove(movedSpawnState, direction, sumMerges, m_width, m_height))
+                    if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
                     {
 #ifdef AI_NO_SUM_SCORES
     #ifdef AI_NO_SUM_WINNER_1
                         //Strange method of dividing by depth (which decrements) & also using spawn2block instead of 4, but got to 2048...
-                        score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
     #else
-                        score = gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn4Block;
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn4Block;
     #endif
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn4Block;
+                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn4Block;
 #endif
-                        getHighestScore(movedSpawnState, highScore, depth - 1);
+                        getHighestScore(highScore, depth - 1);
                     }
                 }
 
-                map[x][y] = 0;
+                m_mapsAtDepths[depth][x][y] = 0;
             }
         }
     }
@@ -478,6 +476,14 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     }
 #endif
 
+    if(m_mapsAtDepths.size() == 0)
+    {
+        for(int i = 0; i < Constants::DirectionChoiceDepth+1; i++)
+        {
+            m_mapsAtDepths.push_back(map);
+        }
+    }
+
     //Game state evaluation vars
     int score = -9999999;
     int mapScore;
@@ -486,12 +492,12 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     //For each direction, evaluate its score (to a set depth of moves), choose best direction
     for(const Direction& direction : Constants::PossibleMoveDirections)
     {
-        m_moveMap = map;
+        m_mapsAtDepths[Constants::DirectionChoiceDepth] = map;
         sumMerges = 0;
-        if(mapMove(m_moveMap, direction, sumMerges, m_width, m_height))
+        if(mapMove(m_mapsAtDepths[Constants::DirectionChoiceDepth], direction, sumMerges, m_width, m_height))
         {
-            mapScore = gameStateScore(m_moveMap, sumMerges);
-            getHighestScore(m_moveMap, mapScore, Constants::DirectionChoiceDepth);
+            mapScore = gameStateScore(m_mapsAtDepths[Constants::DirectionChoiceDepth], sumMerges);
+            getHighestScore(mapScore, Constants::DirectionChoiceDepth);
             if(mapScore > score)
             {
                 score = mapScore;
