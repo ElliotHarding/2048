@@ -495,7 +495,7 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         if(mapMove(m_mapsAtDepths[Constants::DirectionChoiceDepth], direction, sumMerges, m_width, m_height))
         {
             mapScore = gameStateScore(m_mapsAtDepths[Constants::DirectionChoiceDepth], sumMerges);
-            getHighestScore(m_mapsAtDepths[Constants::DirectionChoiceDepth], mapScore, Constants::DirectionChoiceDepth);
+            getHighestScore(mapScore, Constants::DirectionChoiceDepth);
             if(mapScore > score)
             {
                 score = mapScore;
