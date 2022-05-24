@@ -15,10 +15,11 @@ public:
 
 private:
     int gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges);
-    void getHighestScore(int& highScore, int depth);
+    void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth);
 
     ///Reuseable memory for depth search
     QVector<QVector<QVector<int>>> m_mapsAtDepths;
+    QVector<QVector<QVector<int>>> m_spawnMapsAtDepths;
     QVector<QVector<int>> m_moveMap;
     QMap<QVector<QVector<int>>, int> m_cacheGameStates;
 
