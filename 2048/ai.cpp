@@ -549,21 +549,11 @@ int AI::gameStateScore(const std::vector<std::vector<int>>& map, const int& sumM
         }
     }
 
-    const int maxBlocks = m_width * m_height;
-    if(numZeroBlocks == maxBlocks)
-    {
-        numZeroBlocks--;
-    }
-    else if(numZeroBlocks == 0)
-    {
-        return 0;
-    }
-
     //Number of merges adds to score
     score += sumMerges * Constants::ScoreWeightSumMerges;
 
     //Smoothness
-    score += (smoothness * Constants::ScoreWeightSmoothness)/(m_width*m_height-numZeroBlocks);
+    score += (smoothness * Constants::ScoreWeightSmoothness)/(m_width*m_height-numZeroBlocks); //num zero block is never max
 
     //Highest number created
     score += highestNumber * Constants::ScoreWeightHighestNumber;
