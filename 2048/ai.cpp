@@ -354,8 +354,7 @@ QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& wi
     return returnMap;
 }
 
-void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
-                     QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState)
+void AI::getHighestScore(QVector<QVector<int>>& map, int& highScore, int depth)
 {
     if(depth == 0)
     {
@@ -368,6 +367,8 @@ void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int d
     int score;
 #endif
 
+    QVector<QVector<int>> movedSpawnState = map;
+
     //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
     // then evaluate spawnState (to a set depth of moves)
     for(int x = 0; x < m_width; x++)
@@ -376,14 +377,14 @@ void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int d
         {
             if(map[x][y] == 0)
             {
-                spawnState = map;
+                //QVector<QVector<int>> spawnState = map;
 
                 //Add 2 to empty spot to simulate spawn
                 //For each direction, add its score to current score (to a set depth of moves)
-                spawnState[x][y] = 2;
+                map[x][y] = 2;
                 for(const Direction& direction : Constants::PossibleMoveDirections)
                 {
-                    movedSpawnState = spawnState;
+                    movedSpawnState = map;
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, m_width, m_height))
                     {
@@ -401,16 +402,16 @@ void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int d
 #else
                         highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn2Block;
 #endif
-                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState);
+                        getHighestScore(movedSpawnState, highScore, depth - 1);
                     }
                 }
 
                 //Add 4 to empty spot to simulate spawn
                 //For each direction, add its score to current score (to a set depth of moves)
-                spawnState[x][y] = 4;
+                map[x][y] = 4;
                 for(const Direction& direction : Constants::PossibleMoveDirections)
                 {
-                    movedSpawnState = spawnState;
+                    movedSpawnState = map;
                     sumMerges = 0;
                     if(mapMove(movedSpawnState, direction, sumMerges, m_width, m_height))
                     {
@@ -428,9 +429,11 @@ void AI::getHighestScore(const QVector<QVector<int>>& map, int& highScore, int d
 #else
                         highScore += gameStateScore(movedSpawnState, sumMerges) * Constants::RatioSpawn4Block;
 #endif
-                        getHighestScore(movedSpawnState, highScore, depth - 1, spawnState, movedSpawnState);
+                        getHighestScore(movedSpawnState, highScore, depth - 1);
                     }
                 }
+
+                map[x][y] = 0;
             }
         }
     }
@@ -488,7 +491,7 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
         if(mapMove(m_moveMap, direction, sumMerges, m_width, m_height))
         {
             mapScore = gameStateScore(m_moveMap, sumMerges);
-            getHighestScore(m_moveMap, mapScore, Constants::DirectionChoiceDepth, m_spawnStateMem, m_movedSpawnStateMem);
+            getHighestScore(m_moveMap, mapScore, Constants::DirectionChoiceDepth);
             if(mapScore > score)
             {
                 score = mapScore;

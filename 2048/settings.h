@@ -80,7 +80,7 @@ const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN,
 }
 
 ///Test timing & algorithm of AI
-//#define AI_DEBUG
+#define AI_DEBUG
 
 ///Run multiple games simutaneously, outputting end score
 /// - Triggerd by pressing reset UI button

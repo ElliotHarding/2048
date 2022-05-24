@@ -15,8 +15,7 @@ public:
 
 private:
     int gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges);
-    void getHighestScore(const QVector<QVector<int>>& map, int& highScore, int depth,
-                         QVector<QVector<int>>& spawnState, QVector<QVector<int>>& movedSpawnState);
+    void getHighestScore(QVector<QVector<int>>& map, int& highScore, int depth);
 
     ///Reuseable memory for depth search
     QVector<QVector<int>> m_spawnStateMem;
