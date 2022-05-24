@@ -322,7 +322,7 @@ void DLG_Home::onAiThink()
     m_bAcceptInput = false;
 
     //Turn m_blocksGrid into something AI can understand
-    QVector<QVector<int>> map(ui->sb_cols->value(), QVector<int>(ui->sb_rows->value(), 0));
+    std::vector<std::vector<int>> map(ui->sb_cols->value(), std::vector<int>(ui->sb_rows->value(), 0));
     for(int x = 0; x < ui->sb_cols->value(); x++)
     {
         for(int y = 0; y < ui->sb_rows->value(); y++)
@@ -444,7 +444,7 @@ AiThread::AiThread() :
 {
 }
 
-void AiThread::setMap(const QVector<QVector<int>>& map)
+void AiThread::setMap(const std::vector<std::vector<int>>& map)
 {
     m_mutex.lock();
     m_map = map;
@@ -481,7 +481,7 @@ void AiThread::run()
     clock_t start = clock();
 #endif
             m_bWorkOnMap = false;
-            const QVector<QVector<int>> map = m_map;
+            const std::vector<std::vector<int>> map = m_map;
 
             m_mutex.unlock();
 

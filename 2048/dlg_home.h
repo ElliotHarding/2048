@@ -82,7 +82,7 @@ class AiThread : public QThread
 public:
     AiThread();
 
-    void setMap(const QVector<QVector<int>>& map);
+    void setMap(const std::vector<std::vector<int>>& map);
     void setStop();
     bool isSetStop();
 
@@ -93,7 +93,7 @@ signals:
 
 private:
     QMutex m_mutex;
-    QVector<QVector<int>> m_map;
+    std::vector<std::vector<int>> m_map;
     bool m_bStop;
     bool m_bWorkOnMap;
     AI m_ai;//Probably could make a static function for AI

@@ -8,7 +8,7 @@ AI::AI()
 {
 }
 
-void debugMap(const QVector<QVector<int>>& map)
+void debugMap(const std::vector<std::vector<int>>& map)
 {
     qDebug() << "----- Map ------";
     for(int y = 0; y < map[0].size(); y++)
@@ -22,7 +22,7 @@ void debugMap(const QVector<QVector<int>>& map)
     }
 }
 
-void debugMap(const QVector<QVector<double>>& map)
+void debugMap(const std::vector<std::vector<double>>& map)
 {
     qDebug() << "----- Map ------";
     for(int y = 0; y < map[0].size(); y++)
@@ -56,7 +56,7 @@ void debugDirection(const Direction& direction)
 }
 
 //Returns true if anything moved
-bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& sumMerges, const int& width, const int& height)
+bool mapMove(std::vector<std::vector<int>>& map, const Direction& direction, int& sumMerges, const int& width, const int& height)
 {
     bool anyMoved = false;
     if(direction == RIGHT)
@@ -210,7 +210,7 @@ bool mapMove(QVector<QVector<int>>& map, const Direction& direction, int& sumMer
     return anyMoved;
 }
 
-int smoothGameStateScore(const QVector<QVector<int>>& map, const int& width, const int& height)
+int smoothGameStateScore(const std::vector<std::vector<int>>& map, const int& width, const int& height)
 {
     int smoothness = 0;
     for(int x = 1; x < width-1; x++)
@@ -227,7 +227,7 @@ int smoothGameStateScore(const QVector<QVector<int>>& map, const int& width, con
     return smoothness;
 }
 
-int smooth2GameStateScore(const QVector<QVector<int>>& map, const int& width, const int& height)
+int smooth2GameStateScore(const std::vector<std::vector<int>>& map, const int& width, const int& height)
 {
     int smoothness = 0;
     for(int x = 0; x < width; x++)
@@ -248,7 +248,7 @@ int smooth2GameStateScore(const QVector<QVector<int>>& map, const int& width, co
     return smoothness;
 }
 
-int monotonicity(const QVector<QVector<double>>& map, const int& width, const int& height)
+int monotonicity(const std::vector<std::vector<double>>& map, const int& width, const int& height)
 {
     double totals[4] = {0,0,0,0};
 
@@ -337,9 +337,9 @@ int monotonicity(const QVector<QVector<double>>& map, const int& width, const in
 }
 
 //Returns map values after --> log(value)/log(2)
-QVector<QVector<double>> log2Map(const QVector<QVector<int>>& map, const int& width, const int& height)
+std::vector<std::vector<double>> log2Map(const std::vector<std::vector<int>>& map, const int& width, const int& height)
 {
-    QVector<QVector<double>> returnMap(width, QVector<double>(height, 0));;
+    std::vector<std::vector<double>> returnMap(width, std::vector<double>(height, 0));;
     for(int x = 0; x < width; x++)
     {
         for(int y = 0; y < height; y++)
@@ -435,7 +435,7 @@ void AI::getHighestScore(int& highScore, int depth)
     }
 }
 
-Direction AI::getBestDirection(const QVector<QVector<int>>& map)
+Direction AI::getBestDirection(const std::vector<std::vector<int>>& map)
 {
     Direction chosenDirection = Constants::PossibleMoveDirections[0];
 
@@ -447,7 +447,7 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     //Create snake grid
     if(m_snakeGrid.size() != m_width || m_snakeGrid[0].size() != m_height)
     {
-        m_snakeGrid = QVector<QVector<int>>(m_width, QVector<int>(m_height, 0));
+        m_snakeGrid = std::vector<std::vector<int>>(m_width, std::vector<int>(m_height, 0));
 
         bool startTop = true;
         int startVal = 1;
@@ -511,10 +511,10 @@ Direction AI::getBestDirection(const QVector<QVector<int>>& map)
     return chosenDirection;
 }
 
-int AI::gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges)
+int AI::gameStateScore(const std::vector<std::vector<int>>& map, const int& sumMerges)
 {
 #ifdef AI_CACHE
-    QMap<QVector<QVector<int>>, int>::ConstIterator it = m_cacheGameStates.find(map);
+    QMap<std::vector<std::vector<int>>, int>::ConstIterator it = m_cacheGameStates.find(map);
     if(it != m_cacheGameStates.end())
     {
         return it.value();
@@ -576,7 +576,7 @@ int AI::gameStateScore(const QVector<QVector<int>>& map, const int& sumMerges)
 #ifdef AI_MONOICITY
 
     //Returns map values after --> log(value)/log(2)
-    QVector<QVector<double>> logMap = log2Map(map, m_width, m_height);
+    std::vector<std::vector<double>> logMap = log2Map(map, m_width, m_height);
 
     int numZeroBlocks = 0;
     double highestNumber = 0;
@@ -676,7 +676,7 @@ int AI::runTests()
     while(true)
     {
         qDebug() << "AI::runTests - Starting test";
-        QVector<QVector<int>> map(width, QVector<int>(height, 0));
+        std::vector<std::vector<int>> map(width, std::vector<int>(height, 0));
         map[0][0] = 2;
 
         while(true)
@@ -688,7 +688,7 @@ int AI::runTests()
                 //Spawn new tile
 
                 //Find empty spaces
-                QVector<QPoint> emptySpaces;
+                std::vector<QPoint> emptySpaces;
                 for(int x = 0; x < width; x++)
                 {
                     for(int y = 0; y < height; y++)
