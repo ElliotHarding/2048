@@ -356,11 +356,6 @@ std::vector<std::vector<double>> log2Map(const std::vector<std::vector<int>>& ma
 
 void AI::getHighestScore(int& highScore, int depth)
 {
-    if(depth == 0)
-    {
-        return;
-    }
-
     //Game state evaluation vars
     int sumMerges;
 #ifdef AI_NO_SUM_SCORES
@@ -398,7 +393,11 @@ void AI::getHighestScore(int& highScore, int depth)
 #else
                         highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block;
 #endif
-                        getHighestScore(highScore, depth - 1);
+
+                        if(depth > 1)
+                        {
+                            getHighestScore(highScore, depth - 1);
+                        }
                     }
                 }
 
@@ -425,7 +424,10 @@ void AI::getHighestScore(int& highScore, int depth)
 #else
                         highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn4Block;
 #endif
-                        getHighestScore(highScore, depth - 1);
+                        if(depth > 1)
+                        {
+                            getHighestScore(highScore, depth - 1);
+                        }
                     }
                 }
 
