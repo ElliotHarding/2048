@@ -362,6 +362,10 @@ void AI::getHighestScore(int& highScore, int depth)
     int score;
 #endif
 
+    static const int ratioSpawn2Block = Constants::RatioSpawn2Block;
+    static const int ratioSpawn4Block = Constants::RatioSpawn4Block;
+    static const std::vector<Direction> possbileDirections = Constants::PossibleMoveDirections;
+
     //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
     // then evaluate spawnState (to a set depth of moves)
     for(int x = 0; x < m_width; x++)
@@ -372,9 +376,10 @@ void AI::getHighestScore(int& highScore, int depth)
             {
                 //Add 2 to empty spot to simulate spawn
                 //For each direction, add its score to current score (to a set depth of moves)
-                m_mapsAtDepths[depth][x][y] = 2;
-                for(const Direction& direction : Constants::PossibleMoveDirections)
+                //Then add 4 and do the same
+                for(const Direction& direction : possbileDirections)
                 {
+                    m_mapsAtDepths[depth][x][y] = 2;
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     sumMerges = 0;
                     if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
@@ -382,16 +387,16 @@ void AI::getHighestScore(int& highScore, int depth)
 #ifdef AI_NO_SUM_SCORES
     #ifdef AI_NO_SUM_WINNER_1
                         //Strange method of dividing by depth (which decrements) but got to 2048...
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn2Block / (depth * Constants::DepthMultiplier);
     #else
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block;
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn2Block;
     #endif
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block;
+                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn2Block;
 #endif
 
                         if(depth > 1)
@@ -399,13 +404,8 @@ void AI::getHighestScore(int& highScore, int depth)
                             getHighestScore(highScore, depth - 1);
                         }
                     }
-                }
 
-                //Add 4 to empty spot to simulate spawn
-                //For each direction, add its score to current score (to a set depth of moves)
-                m_mapsAtDepths[depth][x][y] = 4;
-                for(const Direction& direction : Constants::PossibleMoveDirections)
-                {
+                    m_mapsAtDepths[depth][x][y] = 4;
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     sumMerges = 0;
                     if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
@@ -413,22 +413,23 @@ void AI::getHighestScore(int& highScore, int depth)
 #ifdef AI_NO_SUM_SCORES
     #ifdef AI_NO_SUM_WINNER_1
                         //Strange method of dividing by depth (which decrements) & also using spawn2block instead of 4, but got to 2048...
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn2Block / (depth * Constants::DepthMultiplier);
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn4Block / (depth * Constants::DepthMultiplier);
     #else
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn4Block;
+                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn4Block;
     #endif
                         if(score > highScore)
                         {
                             highScore = score;
                         }
 #else
-                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * Constants::RatioSpawn4Block;
+                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn4Block;
 #endif
                         if(depth > 1)
                         {
                             getHighestScore(highScore, depth - 1);
                         }
                     }
+
                 }
 
                 m_mapsAtDepths[depth][x][y] = 0;

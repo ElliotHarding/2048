@@ -75,7 +75,7 @@ const int BaseScore_Monoicity = 2000;
 const int DirectionChoiceDepth = 3;
 
 ///Movement options
-const QList<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};
+const std::vector<Direction> PossibleMoveDirections = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};
 
 }
 
