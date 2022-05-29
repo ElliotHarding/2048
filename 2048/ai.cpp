@@ -354,14 +354,40 @@ std::vector<std::vector<double>> log2Map(const std::vector<std::vector<int>>& ma
     return returnMap;
 }
 
-void AI::getHighestScore(int& highScore, int depth)
+void AI::getSpawnStateHighestScore(int& highScore, int depth, const Direction& direction, const double& spawnBlockRatio)
 {
-    //Game state evaluation vars
-    int sumMerges;
+    int sumMerges = 0;
 #ifdef AI_NO_SUM_SCORES
     int score;
 #endif
 
+    if(mapMove(m_mapsAtDepths[depth], direction, sumMerges, m_width, m_height))
+    {
+#ifdef AI_NO_SUM_SCORES
+#ifdef AI_NO_SUM_WINNER_1
+        //Strange method of dividing by depth (which decrements) but got to 2048...
+        score = gameStateScore(m_mapsAtDepths[depth], sumMerges) * spawnBlockRatio / (depth * Constants::DepthMultiplier);
+#else
+        score = gameStateScore(m_mapsAtDepths[depth], sumMerges) * spawnBlockRatio;
+#endif
+        if(score > highScore)
+        {
+            highScore = score;
+        }
+#else
+        highScore += gameStateScore(m_mapsAtDepths[depth], sumMerges) * spawnBlockRatio;
+#endif
+
+        if(depth > 1)
+        {
+            getHighestScore(highScore, depth);
+        }
+    }
+
+}
+
+void AI::getHighestScore(int& highScore, int depth)
+{
     static const double ratioSpawn2Block = Constants::RatioSpawn2Block;
     static const double ratioSpawn4Block = Constants::RatioSpawn4Block;
     static const std::vector<Direction> possbileDirections = Constants::PossibleMoveDirections;
@@ -381,54 +407,13 @@ void AI::getHighestScore(int& highScore, int depth)
                 {
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     m_mapsAtDepths[depth-1][x][y] = 2;
-                    sumMerges = 0;
-                    if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
-                    {
-#ifdef AI_NO_SUM_SCORES
-    #ifdef AI_NO_SUM_WINNER_1
-                        //Strange method of dividing by depth (which decrements) but got to 2048...
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn2Block / (depth * Constants::DepthMultiplier);
-    #else
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn2Block;
-    #endif
-                        if(score > highScore)
-                        {
-                            highScore = score;
-                        }
-#else
-                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn2Block;
-#endif
 
-                        if(depth > 1)
-                        {
-                            getHighestScore(highScore, depth - 1);
-                        }
-                    }
+                    getSpawnStateHighestScore(highScore, depth-1, direction, ratioSpawn2Block);
 
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     m_mapsAtDepths[depth-1][x][y] = 4;
-                    sumMerges = 0;
-                    if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
-                    {
-#ifdef AI_NO_SUM_SCORES
-    #ifdef AI_NO_SUM_WINNER_1
-                        //Strange method of dividing by depth (which decrements) & also using spawn2block instead of 4, but got to 2048...
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn4Block / (depth * Constants::DepthMultiplier);
-    #else
-                        score = gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn4Block;
-    #endif
-                        if(score > highScore)
-                        {
-                            highScore = score;
-                        }
-#else
-                        highScore += gameStateScore(m_mapsAtDepths[depth-1], sumMerges) * ratioSpawn4Block;
-#endif
-                        if(depth > 1)
-                        {
-                            getHighestScore(highScore, depth - 1);
-                        }
-                    }
+
+                    getSpawnStateHighestScore(highScore, depth-1, direction, ratioSpawn4Block);
                 }
             }
         }
