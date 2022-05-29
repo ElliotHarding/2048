@@ -354,7 +354,7 @@ std::vector<std::vector<double>> log2Map(const std::vector<std::vector<int>>& ma
     return returnMap;
 }
 
-void AI::getSpawnStateHighestScore(int& highScore, int depth, const Direction& direction, const double& spawnBlockRatio)
+void AI::getSpawnStateMoveHighestScore(int& highScore, int depth, const Direction& direction, const double& spawnBlockRatio)
 {
     int sumMerges = 0;
 #ifdef AI_NO_SUM_SCORES
@@ -383,13 +383,11 @@ void AI::getSpawnStateHighestScore(int& highScore, int depth, const Direction& d
             getHighestScore(highScore, depth);
         }
     }
-
 }
 
 void AI::getHighestScore(int& highScore, int depth)
 {
     static const double ratioSpawn2Block = Constants::RatioSpawn2Block;
-
     static const double ratioSpawn4Block =
     #ifdef AI_NO_SUM_WINNER_1
             Constants::RatioSpawn2Block;
@@ -415,12 +413,12 @@ void AI::getHighestScore(int& highScore, int depth)
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     m_mapsAtDepths[depth-1][x][y] = 2;
 
-                    getSpawnStateHighestScore(highScore, depth-1, direction, ratioSpawn2Block);
+                    getSpawnStateMoveHighestScore(highScore, depth-1, direction, ratioSpawn2Block);
 
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
                     m_mapsAtDepths[depth-1][x][y] = 4;
 
-                    getSpawnStateHighestScore(highScore, depth-1, direction, ratioSpawn4Block);
+                    getSpawnStateMoveHighestScore(highScore, depth-1, direction, ratioSpawn4Block);
                 }
             }
         }

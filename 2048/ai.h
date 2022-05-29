@@ -16,7 +16,7 @@ public:
 private:
     int gameStateScore(const std::vector<std::vector<int>>& map, const int& sumMerges);
     void getHighestScore(int& highScore, int depth);
-    void getSpawnStateHighestScore(int& highScore, int depth, const Direction& direction, const double& spawnBlockRatio);
+    void getSpawnStateMoveHighestScore(int& highScore, int depth, const Direction& direction, const double& spawnBlockRatio);
 
     ///Reuseable memory for depth search
     std::vector<std::vector<std::vector<int>>> m_mapsAtDepths;
