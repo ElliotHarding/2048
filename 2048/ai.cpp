@@ -378,7 +378,7 @@ void AI::getSpawnStateHighestScore(int& highScore, int depth, const Direction& d
         highScore += gameStateScore(m_mapsAtDepths[depth], sumMerges) * spawnBlockRatio;
 #endif
 
-        if(depth > 1)
+        if(depth > 0)
         {
             getHighestScore(highScore, depth);
         }
