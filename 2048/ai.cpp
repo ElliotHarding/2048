@@ -389,7 +389,14 @@ void AI::getSpawnStateHighestScore(int& highScore, int depth, const Direction& d
 void AI::getHighestScore(int& highScore, int depth)
 {
     static const double ratioSpawn2Block = Constants::RatioSpawn2Block;
-    static const double ratioSpawn4Block = Constants::RatioSpawn4Block;
+
+    static const double ratioSpawn4Block =
+    #ifdef AI_NO_SUM_WINNER_1
+            Constants::RatioSpawn2Block;
+    #else
+            Constants::RatioSpawn4Block;
+    #endif
+
     static const std::vector<Direction> possbileDirections = Constants::PossibleMoveDirections;
 
     //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
