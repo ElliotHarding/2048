@@ -356,6 +356,8 @@ std::vector<std::vector<double>> log2Map(const std::vector<std::vector<int>>& ma
 
 void AI::getSpawnStateMoveHighestScore(int& highScore, int depth, const Direction& direction, const double& spawnBlockRatio)
 {
+    //Get score of spawn state after its been moved.
+
     int sumMerges = 0;
 #ifdef AI_NO_SUM_SCORES
     int score;
@@ -364,12 +366,7 @@ void AI::getSpawnStateMoveHighestScore(int& highScore, int depth, const Directio
     if(mapMove(m_mapsAtDepths[depth], direction, sumMerges, m_width, m_height))
     {
 #ifdef AI_NO_SUM_SCORES
-#ifdef AI_NO_SUM_WINNER_1
-        //Strange method of dividing by depth (which decrements) but got to 2048...
-        score = gameStateScore(m_mapsAtDepths[depth], sumMerges) * spawnBlockRatio / (depth * Constants::DepthMultiplier);
-#else
         score = gameStateScore(m_mapsAtDepths[depth], sumMerges) * spawnBlockRatio;
-#endif
         if(score > highScore)
         {
             highScore = score;
@@ -388,26 +385,18 @@ void AI::getSpawnStateMoveHighestScore(int& highScore, int depth, const Directio
 void AI::getHighestScore(int& highScore, int depth)
 {
     static const double ratioSpawn2Block = Constants::RatioSpawn2Block;
-    static const double ratioSpawn4Block =
-    #ifdef AI_NO_SUM_WINNER_1
-            Constants::RatioSpawn2Block;
-    #else
-            Constants::RatioSpawn4Block;
-    #endif
-
+    static const double ratioSpawn4Block = Constants::RatioSpawn4Block;
     static const std::vector<Direction> possbileDirections = Constants::PossibleMoveDirections;
 
-    //Loop through map, if find an empty spot add a 2 & 4 to that spot (spawnState)
-    // then evaluate spawnState (to a set depth of moves)
+    //Loop through map, check spawn of 4 and 2 at empty spot.
+    // Do moves in each direction for these spawn states
+    // Finding or adding to high score (to a set depth of moves)
     for(int x = 0; x < m_width; x++)
     {
         for(int y = 0; y < m_height; y++)
         {
             if(m_mapsAtDepths[depth][x][y] == 0)
             {
-                //Add 2 to empty spot to simulate spawn
-                //For each direction, add its score to current score (to a set depth of moves)
-                //Then add 4 and do the same
                 for(const Direction& direction : possbileDirections)
                 {
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];

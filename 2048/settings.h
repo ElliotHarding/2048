@@ -90,12 +90,6 @@ const std::vector<Direction> PossibleMoveDirections = {Direction::UP, Direction:
 /// - Just find highest scoring move, dont sum move scores with depth
 #define AI_NO_SUM_SCORES
 
-///Sum method
-/// - A messed up method, but got to 2048
-#ifdef AI_NO_SUM_SCORES
-//#define AI_NO_SUM_WINNER_1
-#endif
-
 ///AI Algorithm method
 //#define AI_CACHE
 
