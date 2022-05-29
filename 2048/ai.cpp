@@ -379,8 +379,8 @@ void AI::getHighestScore(int& highScore, int depth)
                 //Then add 4 and do the same
                 for(const Direction& direction : possbileDirections)
                 {
-                    m_mapsAtDepths[depth][x][y] = 2;
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
+                    m_mapsAtDepths[depth-1][x][y] = 2;
                     sumMerges = 0;
                     if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
                     {
@@ -405,8 +405,8 @@ void AI::getHighestScore(int& highScore, int depth)
                         }
                     }
 
-                    m_mapsAtDepths[depth][x][y] = 4;
                     m_mapsAtDepths[depth-1] = m_mapsAtDepths[depth];
+                    m_mapsAtDepths[depth-1][x][y] = 4;
                     sumMerges = 0;
                     if(mapMove(m_mapsAtDepths[depth-1], direction, sumMerges, m_width, m_height))
                     {
@@ -429,10 +429,7 @@ void AI::getHighestScore(int& highScore, int depth)
                             getHighestScore(highScore, depth - 1);
                         }
                     }
-
                 }
-
-                m_mapsAtDepths[depth][x][y] = 0;
             }
         }
     }
