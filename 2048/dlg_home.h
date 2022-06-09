@@ -32,7 +32,6 @@ protected:
 private slots:
 
     ///Ai
-    void onAiThink();
     void onAiMove(int direction);
 
     ///UI slots
@@ -56,7 +55,7 @@ private:
     bool trySpawnNewBlock();
 
     ///User input
-    bool m_bAcceptInput = true;
+    bool m_bAcceptUserInput = true;
 
     ///Block info
     QVector<QVector<Block*>> m_blocksGrid;
@@ -71,6 +70,7 @@ private:
     bool m_bGameOver = false;
 
     ///AI
+    void requestAiThink();
     AiThread* m_pAiThread;
 };
 

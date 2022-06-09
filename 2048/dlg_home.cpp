@@ -86,7 +86,7 @@ void DLG_Home::reset()
     //Initial game board contains one block
     m_blocksGrid[0][0] = new Block(this, 2, Constants::BoardStart);
 
-    m_bAcceptInput = true;
+    m_bAcceptUserInput = true;
     m_bGameOver = false;
 
     m_currentScore = 0;
@@ -158,7 +158,7 @@ void DLG_Home::resetUiLinesAndGeometry()
 
 void DLG_Home::keyPressEvent(QKeyEvent *event)
 {
-    if(m_bAcceptInput)
+    if(m_bAcceptUserInput)
     {
         if(event->key() == Qt::Key_Up)
         {
@@ -204,7 +204,7 @@ Vector2 directionToVector(Direction direction)
 void DLG_Home::move(Direction dir)
 {
     //Block input until things have moved where they need to go
-    m_bAcceptInput = false;
+    m_bAcceptUserInput = false;
 
     bool anyMoved = false;
 
@@ -259,7 +259,7 @@ void DLG_Home::move(Direction dir)
     }
     else
     {
-        m_bAcceptInput = true;
+        m_bAcceptUserInput = true;
     }
 }
 
@@ -269,6 +269,7 @@ void DLG_Home::onBlockAnimationsFinished()
     if(!trySpawnNewBlock())
     {
         m_bGameOver = true;
+        return;
     }
     else
     {
@@ -276,19 +277,16 @@ void DLG_Home::onBlockAnimationsFinished()
         updateScores();
     }
 
-    m_bAcceptInput = true;
+    m_bAcceptUserInput = true;
+
+    if(ui->cb_useAi->isChecked())
+    {
+        requestAiThink();
+    }
 }
 
-void DLG_Home::onAiThink()
+void DLG_Home::requestAiThink()
 {
-    if(!m_bAcceptInput)
-    {
-        return;
-    }
-
-    //Block input until things have moved where they need to go
-    m_bAcceptInput = false;
-
     //Turn m_blocksGrid into something AI can understand
     std::vector<std::vector<int>> map(ui->sb_cols->value(), std::vector<int>(ui->sb_rows->value(), 0));
     for(int x = 0; x < ui->sb_cols->value(); x++)
