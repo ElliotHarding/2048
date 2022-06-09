@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMutex>
 #include <QFrame>
+#include <QThread>
 
 #include "ai.h"
 #include "block.h"
@@ -75,7 +76,6 @@ private:
     AiThread* m_pAiThread;
 };
 
-#include <QThread>
 class AiThread : public QThread
 {
         Q_OBJECT
@@ -84,7 +84,7 @@ public:
 
     void setMap(const std::vector<std::vector<int>>& map);
     void setStop();
-    bool isSetStop();
+    bool isWorking();
 
     void run();
 
@@ -92,11 +92,14 @@ signals:
     void foundBestDirection(int direction);
 
 private:
-    QMutex m_mutex;
-    std::vector<std::vector<int>> m_map;
+
+    ///Atomic flags
     bool m_bStop;
-    bool m_bWorkOnMap;
-    AI m_ai;//Probably could make a static function for AI
+    bool m_bWorking;
+
+    ///Memory for working
+    AI m_ai;
+    std::vector<std::vector<int>> m_map;
 };
 
 class TestThread : public QThread

@@ -41,22 +41,23 @@ DLG_Home::~DLG_Home()
 {
     m_blocksMutex.lock();
 
-    m_pAiTimer->stop();
-    delete m_pAiTimer;
-
+    //Stop and delete animation timer
     m_pFinishAnimationTimer->stop();
     delete m_pFinishAnimationTimer;
 
-    m_pAiThread->setStop();
+    //Stop and delete AI timer
+    m_pAiTimer->stop();
+    delete m_pAiTimer;
 
+    //Stop and delete AI thread
     //Terrible code
-    while(!m_pAiThread->isSetStop())
-    {
+    m_pAiThread->setStop();
+    while(m_pAiThread->isWorking())
+    {       
         m_blocksMutex.unlock();
-        QThread::sleep(100);
+        QThread::sleep(10);
         m_blocksMutex.lock();
     }
-
     m_pAiThread->terminate();
     delete m_pAiThread;
 
@@ -440,53 +441,45 @@ void DLG_Home::onAiMove(int direction)
 AiThread::AiThread() :
     QThread(),
     m_bStop(false),
-    m_bWorkOnMap(false)
+    m_bWorking(false)
 {
 }
 
 void AiThread::setMap(const std::vector<std::vector<int>>& map)
 {
-    m_mutex.lock();
-    m_map = map;
-    m_bWorkOnMap = true;
-    m_mutex.unlock();
+    if(!m_bWorking)
+    {
+        m_map = map;
+        m_bWorking = true;
+    }
 }
 
 void AiThread::setStop()
 {
-    m_mutex.lock();
     m_bStop = true;
-    m_mutex.unlock();
 }
 
-bool AiThread::isSetStop()
+bool AiThread::isWorking()
 {
-    return m_bStop;
+    return m_bWorking;
 }
 
 void AiThread::run()
 {
     while(true)
     {
-        m_mutex.lock();
         if(m_bStop)
         {
-            m_mutex.unlock();
             return;
         }
 
-        if(m_bWorkOnMap)
+        if(m_bWorking)
         {
 #ifdef AI_DEBUG
     clock_t start = clock();
 #endif
-            m_bWorkOnMap = false;
-            const std::vector<std::vector<int>> map = m_map;
-
-            m_mutex.unlock();
-
-            //Probably could make a static function for AI
-            const Direction bestDirection = m_ai.getBestDirection(map);
+            //Could make a static function for AI...
+            const Direction bestDirection = m_ai.getBestDirection(m_map);
             emit foundBestDirection(bestDirection);
 
 #ifdef AI_DEBUG
@@ -494,9 +487,8 @@ void AiThread::run()
     qDebug() << "DLG_Home::onAiThink: Think time: " << end - start;
 #endif
 
-            m_mutex.lock();
+            m_bWorking = false;
         }
-        m_mutex.unlock();
     }
 }
 
