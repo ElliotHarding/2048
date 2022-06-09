@@ -92,6 +92,11 @@ void DLG_Home::reset()
 
     m_currentScore = 0;
     updateScores();
+
+    if(ui->cb_useAi->isChecked())
+    {
+        requestAiThink();
+    }
 }
 
 //Creates grid for UI
