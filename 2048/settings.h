@@ -124,4 +124,14 @@ const std::vector<Direction> PossibleMoveDirections = {Direction::UP, Direction:
 ///AI Algorithm method
 //#define AI_SMOOTH_2
 
+
+/*  Comments:
+A non existing bug description:
+-set move done, board positions updated
+-values to be merged not updated
+-board is read and created for next ai move
+-values are merged
+-board in ai and actual board are out of sync
+*/
+
 #endif // SETTINGS_H
