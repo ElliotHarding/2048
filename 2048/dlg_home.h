@@ -41,7 +41,6 @@ private slots:
     void on_btn_restart_clicked();
     void on_cb_useAi_toggled(bool checked);
 
-
 private:
     ///UI
     Ui::DLG_Home *ui;
@@ -63,7 +62,6 @@ private:
 
     ///Block info
     QVector<QVector<Block*>> m_blocksGrid;
-    QMutex m_blocksMutex;
 
     ///Score and highscore
     int m_currentScore;
@@ -102,7 +100,6 @@ signals:
     void foundBestDirection(int direction);
 
 private:
-
     ///Atomic flags
     std::atomic<bool> m_bStop;
     std::atomic<bool> m_bWorking;
@@ -112,6 +109,9 @@ private:
     std::vector<std::vector<int>> m_map;
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///TestThread
+///
 class TestThread : public QThread
 {
     Q_OBJECT

@@ -39,8 +39,6 @@ DLG_Home::DLG_Home(QWidget *parent)
 
 DLG_Home::~DLG_Home()
 {
-    m_blocksMutex.lock();
-
     //Stop and delete animation timer
     m_pFinishAnimationTimer->stop();
     delete m_pFinishAnimationTimer;
@@ -54,13 +52,12 @@ DLG_Home::~DLG_Home()
     m_pAiThread->setStop();
     while(m_pAiThread->isWorking())
     {       
-        m_blocksMutex.unlock();
         QThread::sleep(10);
-        m_blocksMutex.lock();
     }
     m_pAiThread->terminate();
     delete m_pAiThread;
 
+    //Delete blocks
     for(QVector<Block*> blockCol : m_blocksGrid)
     {
         for(Block* block : blockCol)
@@ -71,7 +68,6 @@ DLG_Home::~DLG_Home()
     }
     m_blocksGrid.clear();
 
-    m_blocksMutex.unlock();
     delete ui;
 }
 
@@ -79,8 +75,6 @@ DLG_Home::~DLG_Home()
 void DLG_Home::reset()
 {
     resetUiLinesAndGeometry();
-
-    m_blocksMutex.lock();
 
     //Remove previous blocks
     // todo : object recycle system to stop creating new memory each time
@@ -108,8 +102,6 @@ void DLG_Home::reset()
     {
         m_pAiTimer->start(Constants::AiThinkFrequency);
     }
-
-    m_blocksMutex.unlock();
 
     m_currentScore = 0;
     updateScores();
@@ -225,8 +217,6 @@ Vector2 directionToVector(Direction direction)
 
 void DLG_Home::move(Direction dir)
 {
-    m_blocksMutex.lock();
-
     //Block input until things have moved where they need to go
     m_bAcceptInput = false;
 
@@ -285,15 +275,11 @@ void DLG_Home::move(Direction dir)
     {
         m_bAcceptInput = true;
     }
-
-    m_blocksMutex.unlock();
 }
 
 //Called once blocks move animations are finished
 void DLG_Home::onUpdate()
 {
-    m_blocksMutex.lock();
-
     if(!trySpawnNewBlock())
     {
         m_bGameOver = true;
@@ -306,16 +292,12 @@ void DLG_Home::onUpdate()
     }
 
     m_bAcceptInput = true;
-
-    m_blocksMutex.unlock();
 }
 
 void DLG_Home::onAiThink()
 {
-    m_blocksMutex.lock();
     if(!m_bAcceptInput)
     {
-        m_blocksMutex.unlock();
         return;
     }
 
@@ -356,8 +338,6 @@ void DLG_Home::onAiThink()
 #endif
 
     m_pAiThread->setMap(map);
-
-    m_blocksMutex.unlock();
 }
 
 bool DLG_Home::trySpawnNewBlock()
