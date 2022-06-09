@@ -36,6 +36,7 @@ private slots:
 
     ///UI slots
     void on_btn_restart_clicked();
+    void on_cb_useAi_toggled(bool checked);
     void onBlockAnimationsFinished();
 
 private:
@@ -65,7 +66,6 @@ private:
 
     ///Block animations
     QTimer* m_pFinishAnimationTimer; //Calls onBlockAnimationsFinished() once move animations have finished
-
 
     ///AI
     void requestAiThink();

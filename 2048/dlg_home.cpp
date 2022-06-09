@@ -381,6 +381,14 @@ void DLG_Home::on_btn_restart_clicked()
     reset();
 }
 
+void DLG_Home::on_cb_useAi_toggled(bool checked)
+{
+    if(checked)
+    {
+        requestAiThink();
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///AiThread
 ///
