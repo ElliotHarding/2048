@@ -258,6 +258,7 @@ void DLG_Home::move(Direction dir)
 
     if(anyMoved)
     {
+        //Trigger any move animations
         for(int x = 0; x < m_blocksGrid.size(); x++)
         {
             for(int y = 0; y < m_blocksGrid[0].size(); y++)
