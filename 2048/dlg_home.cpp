@@ -266,6 +266,11 @@ void DLG_Home::move(Direction dir)
     else
     {
         m_bAcceptUserInput = true;
+
+        if(ui->cb_useAi->isChecked())
+        {
+            requestAiThink();
+        }
     }
 }
 
