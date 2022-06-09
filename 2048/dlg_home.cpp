@@ -231,8 +231,7 @@ void DLG_Home::move(Direction dir)
                 {
                     if(m_blocksGrid[x+direction.x()][y+direction.y()] == 0)
                     {
-                        m_blocksGrid[x+direction.x()][y+direction.y()] = m_blocksGrid[x][y];
-                        m_blocksGrid[x+direction.x()][y+direction.y()]->startMoveAnimation(Constants::BoardStart.x() + (Constants::BlockSize * (x+direction.x())), Constants::BoardStart.y() + (Constants::BlockSize * (y+direction.y())));
+                        m_blocksGrid[x+direction.x()][y+direction.y()] = m_blocksGrid[x][y];                        
                         m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
@@ -259,6 +258,19 @@ void DLG_Home::move(Direction dir)
 
     if(anyMoved)
     {
+        for(int x = 0; x < m_blocksGrid.size(); x++)
+        {
+            for(int y = 0; y < m_blocksGrid[0].size(); y++)
+            {
+                if(m_blocksGrid[x][y])
+                {
+                    const int xPos = Constants::BoardStart.x() + (Constants::BlockSize * (x));
+                    const int yPos = Constants::BoardStart.y() + (Constants::BlockSize * (y));
+                    m_blocksGrid[x][y]->startMoveAnimation(xPos, yPos);
+                }
+            }
+        }
+
         //Spawn timer to handle stuff once move animations are finished (calls onBlockAnimationsFinished())
         m_pFinishAnimationTimer->start(Constants::MoveAnimationMs);
     }
