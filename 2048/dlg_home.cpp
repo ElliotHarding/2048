@@ -21,7 +21,7 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     //AI thread - always running
     m_pAiThread = new AiThread();
-    connect(m_pAiThread, SIGNAL(foundBestDirection(int)), this, SLOT(onAiMove(int)));
+    connect(m_pAiThread, SIGNAL(foundBestDirection(int)), this, SLOT(move(int)));
     m_pAiThread->start();
 
     //Calls onBlockAnimationsFinished() once move animations have finished
@@ -379,11 +379,6 @@ void DLG_Home::on_btn_restart_clicked()
 #endif
 
     reset();
-}
-
-void DLG_Home::onAiMove(int direction)
-{
-    move((Direction)direction);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -31,8 +31,8 @@ protected:
 
 private slots:
 
-    ///Ai
-    void onAiMove(int direction);
+    ///Make a move human + AI
+    void move(Direction direction);
 
     ///UI slots
     void on_btn_restart_clicked();
@@ -47,15 +47,13 @@ private:
     void reset();
     void resetUiLinesAndGeometry();//Creates grid for UI
 
-    ///Make a move human + AI
-    void move(Direction direction);
-
     ///Block generation
     /// - returns true if succeeded in generating block (board could be full)
     bool trySpawnNewBlock();
 
-    ///User input
+    ///User input & game states
     bool m_bAcceptUserInput = true;
+    bool m_bGameOver = false;
 
     ///Block info
     QVector<QVector<Block*>> m_blocksGrid;
@@ -65,9 +63,9 @@ private:
     int m_highScore = 0;
     void updateScores();
 
-    ///Game loop timer
+    ///Block animations
     QTimer* m_pFinishAnimationTimer; //Calls onBlockAnimationsFinished() once move animations have finished
-    bool m_bGameOver = false;
+
 
     ///AI
     void requestAiThink();
