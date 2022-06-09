@@ -28,11 +28,11 @@ DLG_Home::DLG_Home(QWidget *parent)
     m_pAiTimer->setTimerType(Qt::PreciseTimer);
     connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));    
 
-    //Calls onUpdate() once move animations have finished
+    //Calls onBlockAnimationsFinished() once move animations have finished
     m_pFinishAnimationTimer = new QTimer(this);
     m_pFinishAnimationTimer->setTimerType(Qt::PreciseTimer);
     m_pFinishAnimationTimer->setSingleShot(true);
-    connect(m_pFinishAnimationTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
+    connect(m_pFinishAnimationTimer, SIGNAL(timeout()), this, SLOT(onBlockAnimationsFinished()));
 
     reset();
 }
@@ -268,7 +268,7 @@ void DLG_Home::move(Direction dir)
 
     if(anyMoved)
     {
-        //Spawn timer to handle stuff once move animations are finished (calls onUpdate())
+        //Spawn timer to handle stuff once move animations are finished (calls onBlockAnimationsFinished())
         m_pFinishAnimationTimer->start(Constants::MoveAnimationMs);
     }
     else
@@ -278,7 +278,7 @@ void DLG_Home::move(Direction dir)
 }
 
 //Called once blocks move animations are finished
-void DLG_Home::onUpdate()
+void DLG_Home::onBlockAnimationsFinished()
 {
     if(!trySpawnNewBlock())
     {

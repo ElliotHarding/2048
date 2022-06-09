@@ -30,8 +30,6 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
-    ///Game loop function
-    void onUpdate();//Called once blocks move animations are finished
 
     ///Ai
     void onAiThink();
@@ -40,6 +38,7 @@ private slots:
     ///UI slots
     void on_btn_restart_clicked();
     void on_cb_useAi_toggled(bool checked);
+    void onBlockAnimationsFinished();
 
 private:
     ///UI
@@ -70,7 +69,7 @@ private:
 
     ///Game loop timer
     QTimer* m_pAiTimer; //Calls AI movement decision slot every Constants::AiThinkFrequency ms
-    QTimer* m_pFinishAnimationTimer; //Calls onUpdate() once move animations have finished
+    QTimer* m_pFinishAnimationTimer; //Calls onBlockAnimationsFinished() once move animations have finished
     bool m_bGameOver = false;
 
     ///AI
