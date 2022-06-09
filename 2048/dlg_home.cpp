@@ -21,6 +21,7 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     //AI thread - always running
     m_pAiThread = new AiThread();
+    qRegisterMetaType<Direction>("Direction");
     connect(m_pAiThread, SIGNAL(foundBestDirection(Direction)), this, SLOT(move(Direction)));
     m_pAiThread->start();
 
