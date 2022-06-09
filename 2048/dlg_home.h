@@ -92,7 +92,7 @@ public:
 
 signals:
     ///Communication with UI thread
-    void foundBestDirection(int direction);
+    void foundBestDirection(Direction direction);
 
 private:
     ///Atomic flags

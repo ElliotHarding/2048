@@ -21,7 +21,7 @@ DLG_Home::DLG_Home(QWidget *parent)
 
     //AI thread - always running
     m_pAiThread = new AiThread();
-    connect(m_pAiThread, SIGNAL(foundBestDirection(int)), this, SLOT(move(int)));
+    connect(m_pAiThread, SIGNAL(foundBestDirection(Direction)), this, SLOT(move(Direction)));
     m_pAiThread->start();
 
     //Calls onBlockAnimationsFinished() once move animations have finished
@@ -432,7 +432,7 @@ void AiThread::run()
 #ifdef AI_DEBUG
     clock_t start = clock();
 #endif
-            QThread::sleep(Constants::AiThinkFrequency);
+            QThread::msleep(Constants::AiThinkFrequency);
 
             //Could make a static function for AI...
             const Direction bestDirection = m_ai.getBestDirection(m_map);
