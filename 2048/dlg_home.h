@@ -94,8 +94,8 @@ signals:
 private:
 
     ///Atomic flags
-    bool m_bStop;
-    bool m_bWorking;
+    std::atomic<bool> m_bStop;
+    std::atomic<bool> m_bWorking;
 
     ///Memory for working
     AI m_ai;
