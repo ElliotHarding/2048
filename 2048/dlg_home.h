@@ -37,7 +37,6 @@ private slots:
 
     ///UI slots
     void on_btn_restart_clicked();
-    void on_cb_useAi_toggled(bool checked);
     void onBlockAnimationsFinished();
 
 private:
@@ -68,7 +67,6 @@ private:
     void updateScores();
 
     ///Game loop timer
-    QTimer* m_pAiTimer; //Calls AI movement decision slot every Constants::AiThinkFrequency ms
     QTimer* m_pFinishAnimationTimer; //Calls onBlockAnimationsFinished() once move animations have finished
     bool m_bGameOver = false;
 
@@ -85,7 +83,7 @@ class AiThread : public QThread
 public:
     AiThread();
 
-    void setMap(const std::vector<std::vector<int>>& map);
+    void requestMove(const std::vector<std::vector<int>>& map);
 
     ///Flags
     void setStop();

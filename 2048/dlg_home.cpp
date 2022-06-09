@@ -19,14 +19,10 @@ DLG_Home::DLG_Home(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //AI thread - always running
     m_pAiThread = new AiThread();
     connect(m_pAiThread, SIGNAL(foundBestDirection(int)), this, SLOT(onAiMove(int)));
     m_pAiThread->start();
-
-    //Calls AI movement decision slot every Constants::AiThinkFrequency ms
-    m_pAiTimer = new QTimer(this);
-    m_pAiTimer->setTimerType(Qt::PreciseTimer);
-    connect(m_pAiTimer, SIGNAL(timeout()), this, SLOT(onAiThink()));    
 
     //Calls onBlockAnimationsFinished() once move animations have finished
     m_pFinishAnimationTimer = new QTimer(this);
@@ -42,10 +38,6 @@ DLG_Home::~DLG_Home()
     //Stop and delete animation timer
     m_pFinishAnimationTimer->stop();
     delete m_pFinishAnimationTimer;
-
-    //Stop and delete AI timer
-    m_pAiTimer->stop();
-    delete m_pAiTimer;
 
     //Stop and delete AI thread
     //Terrible code
@@ -96,12 +88,6 @@ void DLG_Home::reset()
 
     m_bAcceptInput = true;
     m_bGameOver = false;
-
-    //Start game loop - runs forever
-    if(ui->cb_useAi->isChecked())
-    {
-        m_pAiTimer->start(Constants::AiThinkFrequency);
-    }
 
     m_currentScore = 0;
     updateScores();
@@ -283,7 +269,6 @@ void DLG_Home::onBlockAnimationsFinished()
     if(!trySpawnNewBlock())
     {
         m_bGameOver = true;
-        m_pAiTimer->stop();
     }
     else
     {
@@ -337,7 +322,7 @@ void DLG_Home::onAiThink()
     map[3][3] = 0;
 #endif
 
-    m_pAiThread->setMap(map);
+    m_pAiThread->requestMove(map);
 }
 
 bool DLG_Home::trySpawnNewBlock()
@@ -398,18 +383,6 @@ void DLG_Home::on_btn_restart_clicked()
     reset();
 }
 
-void DLG_Home::on_cb_useAi_toggled(bool checked)
-{
-    if(checked)
-    {
-        m_pAiTimer->start(Constants::AiThinkFrequency);
-    }
-    else
-    {
-        m_pAiTimer->stop();
-    }
-}
-
 void DLG_Home::onAiMove(int direction)
 {
     move((Direction)direction);
@@ -425,7 +398,7 @@ AiThread::AiThread() :
 {
 }
 
-void AiThread::setMap(const std::vector<std::vector<int>>& map)
+void AiThread::requestMove(const std::vector<std::vector<int>>& map)
 {
     if(!m_bWorking)
     {
@@ -458,6 +431,8 @@ void AiThread::run()
 #ifdef AI_DEBUG
     clock_t start = clock();
 #endif
+            QThread::sleep(Constants::AiThinkFrequency);
+
             //Could make a static function for AI...
             const Direction bestDirection = m_ai.getBestDirection(m_map);
             emit foundBestDirection(bestDirection);
