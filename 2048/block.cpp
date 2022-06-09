@@ -82,7 +82,7 @@ void Block::setToMerge(int x, int y, Block *pMergingBlock)
 {
     startMoveAnimation(x, y);
     m_pMergingBlock = pMergingBlock;
-    m_pMergeTimer->start(Constants::MoveAnimationMs);
+    m_pMergeTimer->start(Constants::MergeBlockValueMs);
 }
 
 int Block::popValue()

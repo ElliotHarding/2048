@@ -41,7 +41,7 @@ private:
 
     ///Merging with block
     Block* m_pMergingBlock = nullptr;
-    QTimer* m_pMergeTimer = nullptr;
+    QTimer* m_pMergeTimer = nullptr; //Triggers block value doubling after merge after some time (to give UI movement times long enough)
 
     ///Animations
     QPropertyAnimation* m_pMoveAnimation = nullptr;

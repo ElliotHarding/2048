@@ -22,6 +22,20 @@ namespace Constants
 const int AiThinkFrequency = 100;
 const int MoveAnimationMs = 150; //Must be bigger than BlockPopTimeMs (below)
 
+//      Info about MergeBlockValueMs
+//***Must be smaller than MoveAnimationMs (by at least 50ms)***
+//   this is because after the move animations the board is evaluated by the AI (if AI is turned on)
+//   and the values evaluated must be merged values
+//***Alternative
+//   Could loop at the end of move animations and update merge values before AI evaluation
+//   But timer is cooler
+
+//      Description of MergeBlockValueMs
+//MergeBlockValueMs is time after a calculated merge that the block value is doubled
+// there is a time gap because it takes some time for blocks to merge in terms of UI
+const int MergeBlockValueMs = 80;
+
+
 ///Spawn block settings
 const int PercentageSpawn2block = 80;
 const int PercentageSpawn4block = 20;

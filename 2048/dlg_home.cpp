@@ -263,8 +263,13 @@ void DLG_Home::move(Direction dir)
         //Spawn timer to handle stuff once move animations are finished (calls onBlockAnimationsFinished())
         m_pFinishAnimationTimer->start(Constants::MoveAnimationMs);
     }
-    else
+    else if(!m_bGameOver)
     {
+        //Have to check for m_bGameOver in case rouge AI thread is late in
+        // deciding a move and the game is already over.
+        // dont want a request for the ai to think again if the game is over.
+
+
         m_bAcceptUserInput = true;
 
         if(ui->cb_useAi->isChecked())
