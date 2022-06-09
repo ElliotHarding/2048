@@ -15,6 +15,9 @@ QT_END_NAMESPACE
 
 class AiThread;
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///DLG_Home
+///
 class DLG_Home : public QMainWindow
 {
     Q_OBJECT
@@ -76,6 +79,9 @@ private:
     AiThread* m_pAiThread;
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///AiThread
+///
 class AiThread : public QThread
 {
         Q_OBJECT
@@ -83,12 +89,16 @@ public:
     AiThread();
 
     void setMap(const std::vector<std::vector<int>>& map);
+
+    ///Flags
     void setStop();
     bool isWorking();
 
+    ///Actual thread function
     void run();
 
 signals:
+    ///Communication with UI thread
     void foundBestDirection(int direction);
 
 private:
