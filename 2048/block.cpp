@@ -57,8 +57,6 @@ Block::~Block()
 
     m_pMergeTimer->stop();
     delete m_pMergeTimer;
-
-    m_pMergingBlock = nullptr;
 }
 
 void Block::startMoveAnimation(int x, int y)
@@ -78,11 +76,11 @@ void Block::startMoveAnimation(int x, int y)
     m_pMoveAnimation->start();
 }
 
-void Block::setToMerge(int x, int y, Block *pMergingBlock)
+void Block::setToMerge(int x, int y, Block* pMergingBlock)
 {
     startMoveAnimation(x, y);
-    m_pMergingBlock = pMergingBlock;
-    m_pMergeTimer->start(Constants::MergeBlockValueMs);
+    pMergingBlock->setValue(m_value + m_value);
+    m_pMergeTimer->start(Constants::MoveAnimationMs);
 }
 
 int Block::popValue()
@@ -118,7 +116,6 @@ void Block::paintEvent(QPaintEvent*)
 
 void Block::onMerge()
 {
-    m_pMergingBlock->setValue(m_value*2);
     delete this;
 }
 

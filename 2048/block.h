@@ -40,8 +40,7 @@ private:
     QColor m_col;
 
     ///Merging with block
-    Block* m_pMergingBlock = nullptr;
-    QTimer* m_pMergeTimer = nullptr; //Triggers block value doubling after merge after some time (to give UI movement times long enough)
+    QTimer* m_pMergeTimer = nullptr; //Deletes a block after MoveAnimationMs due to it being merged
 
     ///Animations
     QPropertyAnimation* m_pMoveAnimation = nullptr;

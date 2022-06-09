@@ -241,7 +241,6 @@ void DLG_Home::move(Direction dir)
                         const int xPos = Constants::BoardStart.x() + (Constants::BlockSize * (x+direction.x()));
                         const int yPos = Constants::BoardStart.y() + (Constants::BlockSize * (y+direction.y()));
                         m_blocksGrid[x][y]->setToMerge(xPos, yPos, m_blocksGrid[x+direction.x()][y+direction.y()]);
-                        m_blocksGrid[x][y]->startMoveAnimation(xPos, yPos);
                         m_blocksGrid[x][y] = nullptr;
                         moved = true;
                     }
